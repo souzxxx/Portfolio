@@ -1,6 +1,18 @@
 node_modules
 .next
 .vercel
-.env*.local
 .DS_Store
 *.log
+
+# Secrets / env — never commit (defensive layered globs)
+.env
+.env.*
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# Local screenshot script artifacts that may contain personal data
+public/projects/financehub/private/

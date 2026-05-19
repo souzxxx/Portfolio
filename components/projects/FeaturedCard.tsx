@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, Github, ExternalLink, CheckCircle2 } from "lucide-react";
 import clsx from "clsx";
 import { Reveal } from "../ui/Reveal";
@@ -18,6 +19,10 @@ export function FeaturedCard({
   index: number;
 }) {
   const reversed = index % 2 === 1;
+  const gallery = project.gallery && project.gallery.length > 0 ? project.gallery : null;
+  const [activeIdx, setActiveIdx] = useState(0);
+  const active = gallery ? gallery[activeIdx] : null;
+
   return (
     <Reveal delay={index * 0.06}>
       <article
@@ -27,15 +32,38 @@ export function FeaturedCard({
           "md:grid-cols-2 md:gap-12 md:p-10",
         )}
       >
-        {/* corner number */}
         <span className="absolute right-6 top-6 font-mono text-xs uppercase tracking-widest text-muted">
           0{index + 1} / featured
         </span>
 
-        {/* Image */}
         <div className={clsx("relative", reversed && "md:order-2")}>
           <div className="relative overflow-hidden rounded-2xl border border-border/80 shadow-2xl shadow-indigo-950/40">
-            {project.cover ? (
+            {gallery && active ? (
+              <div className="relative aspect-[16/10] w-full bg-surface">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={active.src}
+                    initial={{ opacity: 0, scale: 1.02 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.35 }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={active.src}
+                      alt={`${project.name} — ${active.label}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover object-top"
+                      priority={index < 2 && activeIdx === 0}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 pt-10">
+                  <p className="text-xs font-medium text-white/90">{active.label}</p>
+                </div>
+              </div>
+            ) : project.cover ? (
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -54,12 +82,39 @@ export function FeaturedCard({
               <ProjectCover slug={project.slug} name={project.name} language={project.stack[0]} />
             )}
 
-            {/* gradient hover overlay */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
+
+          {gallery && (
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {gallery.map((shot, i) => (
+                <button
+                  key={shot.src}
+                  type="button"
+                  onMouseEnter={() => setActiveIdx(i)}
+                  onFocus={() => setActiveIdx(i)}
+                  onClick={() => setActiveIdx(i)}
+                  className={clsx(
+                    "relative aspect-[16/10] overflow-hidden rounded-lg border transition",
+                    activeIdx === i
+                      ? "border-indigo-400 ring-2 ring-indigo-500/50"
+                      : "border-border/60 opacity-70 hover:opacity-100",
+                  )}
+                  aria-label={shot.label}
+                >
+                  <Image
+                    src={shot.src}
+                    alt={shot.label}
+                    fill
+                    sizes="120px"
+                    className="object-cover object-top"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Content */}
         <div className={clsx("flex flex-col gap-5", reversed && "md:order-1")}>
           <div className="flex items-center gap-3">
             <StatusPill status={project.status} isPrivate={project.isPrivate} />

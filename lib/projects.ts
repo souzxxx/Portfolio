@@ -13,6 +13,7 @@ export interface Project {
   github?: string;
   demo?: string;
   cover?: string;
+  gallery?: { src: string; label: string }[];
   video?: string;
   highlights?: string[];
   year: string;
@@ -20,6 +21,43 @@ export interface Project {
 
 export const projects: Project[] = [
   // ─── FEATURED ───────────────────────────────────────────────
+  {
+    slug: "financehub",
+    name: "FinanceHub",
+    tagline: "Plataforma financeira pessoal end-to-end com IA — produto real em produção",
+    description:
+      "Aplicação financeira completa com autenticação Supabase, dashboard de saldo/projeção, gestão de transações, orçamento por categoria, recorrências, importação/exportação e assistente IA conversacional (Luna). Monorepo Turbo com backend Python e frontend Next.js, deploy contínuo na Vercel. Os screenshots ao lado são da plataforma autenticada em produção.",
+    category: "featured",
+    status: "deployed",
+    isPrivate: true,
+    stack: [
+      "Next.js",
+      "TypeScript",
+      "Python",
+      "Turbo",
+      "Supabase",
+      "PostgreSQL",
+      "OpenAI",
+      "Vercel",
+    ],
+    github: "https://github.com/souzxxx/financehub",
+    demo: "https://financehub-web-ecru.vercel.app",
+    cover: "/projects/financehub/dashboard.png",
+    gallery: [
+      { src: "/projects/financehub/dashboard.png", label: "Dashboard — saldo, projeção e resumo da semana" },
+      { src: "/projects/financehub/luna-ai.png", label: "Luna — assistente IA financeira conversacional" },
+      { src: "/projects/financehub/investments.png", label: "Investimentos — patrimônio total e metas" },
+      { src: "/projects/financehub/mobile.png", label: "Experiência mobile responsiva" },
+    ],
+    highlights: [
+      "Produto financeiro real com auth Supabase + RLS",
+      "Assistente IA (Luna) para análise de gastos via LLM",
+      "Dashboard com projeção de saldo, orçamento e recorrências",
+      "Monorepo Turbo: backend Python + frontend Next.js",
+      "Deploy contínuo Vercel + Edge Functions",
+    ],
+    year: "2026",
+  },
   {
     slug: "sentinel",
     name: "Sentinel",
@@ -46,26 +84,6 @@ export const projects: Project[] = [
       "Camera fly-to with GSAP, bloom + chromatic aberration",
       "Real-time WebSocket streaming with auto-reconnect",
       "Inspired by Iron Man / Minority Report interfaces",
-    ],
-    year: "2026",
-  },
-  {
-    slug: "financehub",
-    name: "FinanceHub",
-    tagline: "Turbo monorepo platform for financial workflows",
-    description:
-      "Monorepo plataforma financeira (Turbo + apps/packages) com backend Python e frontend Web. Arquitetura modular preparada para escalar features financeiras independentes. Deploy contínuo na Vercel.",
-    category: "featured",
-    status: "deployed",
-    isPrivate: true,
-    stack: ["Turbo", "Python", "Next.js", "TypeScript", "Vercel"],
-    github: "https://github.com/souzxxx/financehub",
-    demo: "https://financehub-web-ecru.vercel.app",
-    cover: "/projects/financehub/cover.png",
-    highlights: [
-      "Monorepo Turbo com workspaces independentes",
-      "Documentação técnica: planning, deploy, features, análise crítica",
-      "Backend Python + frontend Web full-stack",
     ],
     year: "2026",
   },
@@ -151,7 +169,7 @@ export const projects: Project[] = [
       "Vercel",
     ],
     github: "https://github.com/souzxxx/projeto-software-gateway",
-    demo: "https://projeto-sofware-2026-1-front.vercel.app",
+    demo: "https://projeto-sofware-2026-1-front-lyart.vercel.app",
     cover: "/projects/projeto-software/cover.svg",
     highlights: [
       "4 serviços independentes deployados",
@@ -198,20 +216,6 @@ export const projects: Project[] = [
     stack: ["React", "TypeScript", "Vite", "PokéAPI"],
     github: "https://github.com/souzxxx/pokedex",
     year: "2026",
-  },
-  {
-    slug: "ascii-video-player",
-    name: "ASCII Video Player",
-    tagline: "Reprodutor de vídeo em ASCII no terminal",
-    description:
-      "Player Python que converte vídeos em tempo real para ASCII art e reproduz direto no terminal. Frame interpolation para playback suave, suporte cross-platform.",
-    category: "more",
-    status: "shipped",
-    stack: ["Python", "OpenCV", "Pillow"],
-    github: "https://github.com/souzxxx/ascii-video-player",
-    cover: "/projects/ascii-video-player/shot.png",
-    video: "/projects/ascii-video-player/video.mp4",
-    year: "2025",
   },
   {
     slug: "rfq-automation",

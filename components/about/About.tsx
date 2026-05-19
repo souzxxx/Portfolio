@@ -30,11 +30,10 @@ export function About() {
         <Reveal delay={0.1}>
           <p className="mt-8 max-w-3xl text-balance text-lg leading-relaxed text-muted md:text-xl">
             Sou <span className="text-fg font-medium">Leonardo Souza</span>,
-            estudante de Ciência da Computação no{" "}
-            <span className="text-fg">Insper</span> (4º semestre, com transferência da
-            engenharia da computação). Construo full-stack — do shader GLSL ao
-            microsserviço Java, do modelo XGBoost à animação 3D — escolhendo a
-            ferramenta certa para cada problema. Movido por{" "}
+            estudante no <span className="text-fg">Insper</span> (4º semestre).
+            Construo full-stack — do shader GLSL ao microsserviço Java, do
+            modelo XGBoost à animação 3D — escolhendo a ferramenta certa para
+            cada problema. Movido por{" "}
             <span className="text-fg">qualidade, velocidade e impacto real</span>.
           </p>
         </Reveal>
