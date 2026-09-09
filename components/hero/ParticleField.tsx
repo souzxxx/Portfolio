@@ -2,7 +2,8 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
 function StarField({ count = 4000 }: { count?: number }) {
@@ -61,18 +62,53 @@ function GlowOrb() {
   );
 }
 
+/**
+ * Fundo 3D do hero. Só monta em telas >= 768px e sem prefers-reduced-motion:
+ * abaixo disso o gradiente radial de app/globals.css já cobre o fundo, então
+ * não vale gastar GPU de celular com WebGL. Quando o hero sai da viewport o
+ * render loop para (frameloop="never") em vez de continuar rodando escondido.
+ */
 export function ParticleField() {
+  const reduced = useReducedMotion();
+  const [wide, setWide] = useState(false);
+  const [inView, setInView] = useState(true);
+  const holderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px)");
+    const sync = () => setWide(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const el = holderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [wide, reduced]);
+
+  if (reduced || !wide) return null;
+
   return (
-    <Canvas
-      camera={{ position: [0, 0, 1], fov: 75 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: true, alpha: true }}
-      className="absolute inset-0"
-    >
-      <Suspense fallback={null}>
-        <StarField count={3500} />
-        <GlowOrb />
-      </Suspense>
-    </Canvas>
+    <div ref={holderRef} className="absolute inset-0">
+      <Canvas
+        camera={{ position: [0, 0, 1], fov: 75 }}
+        dpr={[1, 1.5]}
+        frameloop={inView ? "always" : "never"}
+        gl={{ antialias: true, alpha: true }}
+        className="absolute inset-0"
+      >
+        <Suspense fallback={null}>
+          <StarField count={1400} />
+          <GlowOrb />
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }
