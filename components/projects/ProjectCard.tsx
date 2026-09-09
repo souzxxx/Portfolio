@@ -24,7 +24,9 @@ export function ProjectCard({
         whileHover={{ y: -6 }}
         transition={{ type: "spring", stiffness: 240, damping: 22 }}
         className={clsx(
-          "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-surface/40 backdrop-blur-xl",
+          // backdrop-blur-md: ver nota em FeaturedCard. Aqui são até 6 cards
+          // simultâneos na viewport, cada um com seu buffer de backdrop.
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-surface/40 backdrop-blur-md",
           "transition-colors hover:border-indigo-500/50",
         )}
       >

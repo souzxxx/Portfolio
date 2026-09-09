@@ -27,7 +27,10 @@ export function FeaturedCard({
     <Reveal delay={index * 0.06}>
       <article
         className={clsx(
-          "group relative grid items-center gap-8 rounded-3xl border border-border/60 bg-surface/40 p-6 backdrop-blur-xl",
+          // backdrop-blur-md (12px) em vez de -xl (24px): o custo do
+          // backdrop-filter cresce com a área do elemento, e este card ocupa
+          // meia tela. O -xl fica reservado para superfícies pequenas (nav, botões).
+          "group relative grid items-center gap-8 rounded-3xl border border-border/60 bg-surface/40 p-6 backdrop-blur-md",
           "transition-all duration-500 hover:border-indigo-500/40",
           "md:grid-cols-2 md:gap-12 md:p-10",
         )}
@@ -53,7 +56,7 @@ export function FeaturedCard({
                       src={active.src}
                       alt={`${project.name} — ${active.label}`}
                       fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
                       className="object-cover object-top"
                       priority={index < 2 && activeIdx === 0}
                     />
@@ -73,7 +76,7 @@ export function FeaturedCard({
                   src={project.cover}
                   alt={`${project.name} screenshot`}
                   fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
                   className="object-cover"
                   priority={index < 2}
                 />

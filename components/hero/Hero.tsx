@@ -25,9 +25,12 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-radial-glow" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-grid-pattern bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]" />
 
-      {/* corner indigo glow */}
-      <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 h-96 w-96 rounded-full bg-indigo-600/20 blur-[120px]" />
-      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 h-96 w-96 rounded-full bg-purple-600/20 blur-[120px]" />
+      {/* Glows de canto. Gradiente radial em vez de `filter: blur()`: um blur
+          de 120px sobre um div de 384px obriga o compositor a manter um buffer
+          offscreen grande e refiltrá-lo a cada frame. O gradiente pinta direto,
+          sem buffer intermediário. Mesma cor, mesma opacidade, mesma posição. */}
+      <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.20),transparent_70%)]" />
+      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(147,51,234,0.20),transparent_70%)]" />
 
       <div className="mx-auto w-full max-w-7xl px-6 md:px-12">
         <div className="flex flex-col gap-12">

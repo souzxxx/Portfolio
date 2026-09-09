@@ -22,7 +22,8 @@ export function AcademicTimeline() {
               <motion.div
                 whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 240, damping: 20 }}
-                className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-surface/40 p-7 backdrop-blur-xl transition-colors hover:border-indigo-500/40"
+                /* backdrop-blur-md: card grande, mesmo motivo dos cards de projeto. */
+                className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-surface/40 p-7 backdrop-blur-md transition-colors hover:border-indigo-500/40"
               >
                 {/* corner ornament */}
                 <div className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-indigo-300">

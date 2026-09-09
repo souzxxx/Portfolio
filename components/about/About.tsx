@@ -9,8 +9,10 @@ import { Magnetic } from "../ui/Magnetic";
 export function About() {
   return (
     <section id="about" className="relative overflow-clip py-32 md:py-40">
-      {/* decorative glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-[140px]" />
+      {/* Glow decorativo — gradiente radial, sem `filter: blur()`. Continua
+          preso pelo `overflow-clip` da section, então não estoura o scroll
+          horizontal no celular. */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.10),transparent_70%)]" />
 
       <div className="mx-auto max-w-5xl px-6 md:px-12">
         <Reveal>
