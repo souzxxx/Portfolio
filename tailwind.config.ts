@@ -10,7 +10,10 @@ const config: Config = {
         elevated: "#16162a",
         border: "#262640",
         fg: "#e4e4e7",
-        muted: "#71717a",
+        // Texto secundario: 7.71:1 sobre base (#0a0a0f), 6.93:1 sobre elevated. Passa AA.
+        muted: "#a1a1aa",
+        // Labels mono em caixa alta (>= 12px): 5.86:1 sobre base, 5.27:1 sobre elevated.
+        subtle: "#8b8b96",
         indigo: { 500: "#6366f1", 400: "#818cf8", 600: "#4f46e5" },
         purple: { 500: "#a855f7", 400: "#c084fc" },
         cyan: { 400: "#22d3ee", 300: "#67e8f9" },
