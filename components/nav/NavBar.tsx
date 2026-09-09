@@ -5,10 +5,10 @@ import { Github, Mail } from "lucide-react";
 import clsx from "clsx";
 
 const links = [
-  { href: "#projects", label: "Work" },
-  { href: "#academic", label: "Academic" },
+  { href: "#projects", label: "Projetos" },
+  { href: "#academic", label: "Formação" },
   { href: "#stack", label: "Stack" },
-  { href: "#about", label: "Contact" },
+  { href: "#about", label: "Contato" },
 ];
 
 export function NavBar() {
@@ -26,6 +26,7 @@ export function NavBar() {
       className={clsx(
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
         scrolled ? "py-3" : "py-5",
+        scrolled && "border-b border-border/40 bg-base/80 backdrop-blur-md",
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 md:px-12">
@@ -70,13 +71,16 @@ export function NavBar() {
           >
             <Github className="h-4 w-4" />
           </a>
+          {/* TODO(linkedin): adicionar o ícone de LinkedIn aqui, com o mesmo
+              tratamento visual do GitHub, quando a URL real do perfil for
+              confirmada. Enquanto isso, nada é renderizado. */}
           <a
             href="mailto:leonardosouzasilva9@gmail.com"
             aria-label="Email"
             className="hidden h-9 items-center justify-center gap-2 rounded-full border border-indigo-500/40 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-4 text-sm font-medium text-fg backdrop-blur-xl transition hover:from-indigo-500/30 hover:to-purple-500/30 sm:inline-flex"
           >
             <Mail className="h-4 w-4" />
-            Contact
+            Contato
           </a>
         </div>
       </div>

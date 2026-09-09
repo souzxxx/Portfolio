@@ -28,10 +28,13 @@ export function Footer() {
             <Mail className="h-4 w-4" />
             Email
           </a>
+          {/* TODO(linkedin): adicionar o link de LinkedIn aqui quando a URL real
+              do perfil for confirmada. Não inventar slug. */}
         </div>
 
         <div className="font-mono text-xs text-muted">
-          Crafted in Next.js · Three.js · ☕ · São Paulo
+          Next.js 14 (App Router) · conteúdo tipado em lib/ · deploy na Vercel ·
+          São Paulo
         </div>
       </div>
     </footer>
