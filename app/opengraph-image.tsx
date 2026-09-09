@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "Leonardo Souza — Backend & AI Engineer";
+export const alt = "Leonardo Souza — Backend, Web & IA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -54,7 +54,7 @@ export default function OpengraphImage() {
             marginTop: 18,
           }}
         >
-          Backend &amp; AI Engineer
+          Backend, Web &amp; IA
         </div>
         <div
           style={{
@@ -65,7 +65,8 @@ export default function OpengraphImage() {
             marginTop: 40,
           }}
         >
-          Java · Spring Boot · Python · TypeScript · LLM em produção · São Paulo
+          Java · Spring Boot · Python · TypeScript · Next.js · IA em produção ·
+          São Paulo
         </div>
       </div>
     ),

@@ -58,7 +58,7 @@ export const semesters: Semester[] = [
   },
   {
     number: 4,
-    label: "4º Semestre (atual)",
+    label: "4º Semestre",
     highlights: [
       {
         name: "Projeto de Software",
@@ -80,6 +80,37 @@ export const semesters: Semester[] = [
       {
         name: "Sprint",
         description: "Projeto integrador final do semestre",
+      },
+    ],
+  },
+  {
+    number: 5,
+    label: "5º Semestre (atual)",
+    highlights: [
+      {
+        name: "Plataformas, Microsserviços e APIs",
+        description:
+          "Design de APIs, comunicação entre serviços, plataformas escaláveis",
+      },
+      {
+        name: "Startup em Inteligência Artificial",
+        description:
+          "Produto de IA do zero: validação, LLMs aplicados, go-to-market",
+      },
+      {
+        name: "Megadados",
+        description:
+          "Dados em larga escala: modelagem, pipelines e consultas distribuídas",
+      },
+      {
+        name: "Análise de Algoritmos e Entrevistas Técnicas",
+        description:
+          "Complexidade, estruturas de dados e resolução de problemas sob pressão",
+      },
+      {
+        name: "Jogos e Interação",
+        description:
+          "Loops de jogo, interação em tempo real e experiência do usuário",
       },
     ],
   },

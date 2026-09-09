@@ -4,14 +4,14 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 const SITE_URL = "https://portfolio-souzxxxs-projects.vercel.app";
-const TITLE = "Leonardo Souza — Backend & AI Engineer";
+const TITLE = "Leonardo Souza — Backend, Web & IA";
 const SHORT_DESCRIPTION =
-  "Backend e sistemas de IA em produção. Ciência da Computação no Insper, São Paulo.";
+  "Backend, web e IA aplicada em produção. Ciência da Computação no Insper, São Paulo.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description:
-    "Backend e sistemas de IA em produção: assistente LLM sobre dados do usuário, fila outbox com retry e idempotência, rate limit em Redis com circuit breaker e streaming por WebSocket. Ciência da Computação no Insper, São Paulo.",
+    "Backend, web e IA aplicada em produção: assistente LLM sobre dados do usuário, busca vetorial em Postgres com pgvector, fila outbox com retry e idempotência, rate limit em Redis com circuit breaker e front-end Next.js em sistema com usuário real. Ciência da Computação no Insper, São Paulo.",
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
@@ -43,7 +43,7 @@ const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Leonardo Souza",
-  jobTitle: "Backend & AI Engineer",
+  jobTitle: "Engenheiro de software — backend, web e IA",
   url: SITE_URL,
   alumniOf: {
     "@type": "CollegeOrUniversity",
@@ -58,7 +58,10 @@ const personJsonLd = {
     "TypeScript",
     "Python",
     "Java",
+    "Next.js",
+    "React",
     "LLM",
+    "pgvector",
     "FastAPI",
     "Spring Boot",
     "PostgreSQL",

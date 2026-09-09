@@ -50,7 +50,7 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
             </span>
-            disponível para vagas · backend &amp; IA · São Paulo, BR
+            disponível para vagas · backend, web &amp; IA · São Paulo, BR
           </motion.div>
 
           {/* Headline */}
@@ -69,7 +69,7 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 text-balance text-2xl font-medium tracking-tight text-muted sm:text-3xl md:text-4xl lg:text-5xl"
             >
-              <GradientText>Backend &amp; AI Engineer</GradientText>
+              <GradientText>Backend, Web &amp; IA</GradientText>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -77,7 +77,7 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.26 }}
               className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-muted sm:text-sm"
             >
-              Ciência da Computação · Insper · 4º semestre · São Paulo
+              Ciência da Computação · Insper · 5º semestre · São Paulo
             </motion.p>
           </div>
 
@@ -88,21 +88,21 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.32 }}
             className="max-w-2xl text-balance text-lg leading-relaxed text-muted md:text-xl"
           >
-            Construo backend e sistemas de IA que rodam em produção:{" "}
+            Construo backend, web e IA que rodam em produção:{" "}
             <span className="text-fg">
               assistente LLM sobre os dados do próprio usuário
             </span>
             ,{" "}
             <span className="text-fg">
-              outbox com retry exponencial e idempotência
-            </span>
-            ,{" "}
+              busca vetorial com pgvector
+            </span>{" "}
+            para respostas ancoradas no contexto recuperado,{" "}
             <span className="text-fg">
-              rate limit em Redis com circuit breaker
+              outbox com retry exponencial e idempotência
             </span>{" "}
             e{" "}
             <span className="text-fg">
-              streaming em tempo real por WebSocket
+              front-end Next.js em sistema com usuário real
             </span>
             . Three.js e GLSL entram quando o problema é de visualização — não
             antes.

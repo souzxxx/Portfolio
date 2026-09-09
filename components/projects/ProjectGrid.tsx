@@ -9,7 +9,7 @@ export function ProjectGrid() {
         <SectionHeader
           eyebrow="Outros projetos"
           title="Mais projetos"
-          description="Coisas que construí explorando linguagens, paradigmas e domínios — de Prolog a Python, de jogos a automação de processos."
+          description="Coisas que construí explorando linguagens, paradigmas e domínios — de Prolog a Python, de compilador a firmware embarcado, de jogos a automação de processos."
         />
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

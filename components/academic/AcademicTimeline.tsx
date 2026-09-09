@@ -13,7 +13,7 @@ export function AcademicTimeline() {
         <SectionHeader
           eyebrow="Formação"
           title="Insper · BCC"
-          description="Bacharelado em Ciência da Computação. Quatro semestres explorando da matemática discreta a sistemas distribuídos, IA e arquitetura de baixo nível."
+          description="Bacharelado em Ciência da Computação. Cinco semestres explorando da matemática discreta a sistemas distribuídos, IA aplicada, dados em larga escala e arquitetura de baixo nível."
         />
 
         <div className="mt-20 grid gap-6 md:grid-cols-2">

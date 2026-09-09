@@ -71,6 +71,54 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
+    slug: "wraeclast",
+    name: "Project Wraeclast",
+    tagline:
+      "Assistente com RAG: coleta diária em GitHub Actions, busca vetorial em Postgres com pgvector e resposta ancorada no contexto recuperado",
+    description:
+      "Assistente pessoal para um jogo cuja meta muda a cada patch. Uma rotina diária coleta economia, o personagem do dono e conteúdo da comunidade, resume cada documento em JSON estruturado com um LLM e grava o embedding num Postgres com pgvector. Na pergunta, a API FastAPI embeda o texto, recupera os trechos mais próximos por distância de cosseno e monta um bloco de contexto com preços, ranking de farms e perfil do personagem — o LLM responde só sobre esse bloco. Não há modelo treinado nem fine-tuning: a inteligência é o corpus curado que cresce todo dia. O site em Next.js tem as telas de hoje, farms, bancada de craft e um grafo do conhecimento coletado.",
+    category: "featured",
+    status: "wip",
+    isPrivate: false,
+    stack: [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "pgvector",
+      "Next.js",
+      "TypeScript",
+      "GitHub Actions",
+      "Vercel",
+    ],
+    github: "https://github.com/souzxxx/project-wraeclast",
+    // Sem `demo` e sem `cover`: os dois deploys do site respondem 503
+    // (DEPLOYMENT_PAUSED), então não há link vivo para apontar nem tela para
+    // fotografar. O card cai na capa gerada por ProjectCover — declarar um
+    // caminho de imagem inexistente derrubaria o build no check-assets.
+    highlights: [
+      "Busca vetorial em Postgres com pgvector: embeddings de 1024 dimensões (truncagem Matryoshka para caber no índice HNSW) recuperados por distância de cosseno e filtráveis por tópico",
+      "Sem fine-tuning e sem modelo próprio: o contexto do chat é montado dos trechos recuperados mais preços, farms e perfil do personagem, e o prompt manda responder só com esse contexto e avisar quando o dado faltar",
+      "Coleta pesada separada da API: o cron diário roda no GitHub Actions, sem limite de tempo de execução; só as leituras e o /chat rodam como função serverless na Vercel",
+      "350 testes passando localmente com pytest e CI de ruff + pytest a cada push; a meta de 80% de cobertura por módulo está registrada e datada no ROADMAP",
+      "O /chat é fechado por token comparado em tempo constante com hmac.compare_digest, e falha fechado quando o token não está configurado",
+    ],
+    decisions: [
+      {
+        q: "Por que RAG e não fine-tuning?",
+        a: "O conteúdo muda a cada patch do jogo. Re-treinar modelo a cada mudança custa caro e envelhece rápido; um corpus curado que ganha documentos novos todo dia fica atualizado por construção, e o LLM entra só para curar texto em JSON e responder ancorado no que foi recuperado.",
+      },
+      {
+        q: "Por que a coleta roda no GitHub Actions e não na própria API?",
+        a: "Função serverless tem teto de tempo de execução, e a coleta diária (scraping, embeddings e curadoria via LLM) não cabe nesse teto. O job de cron roda no Actions e só grava no banco; a API fica com leitura e chat, que são rápidos o bastante.",
+      },
+      {
+        q: "Por que truncar o embedding para 1024 dimensões?",
+        a: "O provedor devolve 3072 dimensões por padrão e o índice HNSW do pgvector tem limite prático abaixo disso. A truncagem Matryoshka (parâmetro dimensions na própria chamada) faz o vetor caber no índice sem trocar de provedor nem perder a busca por similaridade.",
+      },
+    ],
+    year: "2026",
+  },
+  {
     slug: "commerce-nda",
     name: "E-commerce transacional (sob NDA)",
     tagline:
@@ -115,6 +163,50 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
+    slug: "portal-construtora",
+    name: "Portal interno de construtora",
+    tagline:
+      "Módulo de manual do proprietário num portal Next.js em produção: importação auditável de PDF, exportação em PDF/Excel e três otimizações de performance",
+    description:
+      "Portal em Next.js 16 e React 19 que reúne sob um login só os sistemas internos de uma construtora — atendimento pós-obra, portal do cliente, avaliação de obras, departamento pessoal e o manual do proprietário do imóvel. É projeto de equipe em repositório privado: dos 583 commits, cerca de 150 são meus, e 108 deles estão concentrados no módulo do manual do proprietário — que é o que descrevo aqui. O documento que esse módulo gera é lido pelo comprador do imóvel como parte do contrato, então a exigência não é volume de tela: é que o dado de garantia esteja certo e que o caminho da correção seja auditável.",
+    category: "featured",
+    status: "deployed",
+    isPrivate: true,
+    stack: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Drizzle ORM",
+      "PostgreSQL",
+      "Tailwind",
+      "Vitest",
+      "Playwright",
+      "Vercel",
+    ],
+    // Sem `github`, sem `demo` e sem `cover`: repositório privado de terceiro,
+    // e o que se vê dos deploys sem login é tela de autenticação — o mesmo tipo
+    // de screenshot que já foi removido do projeto-software por ler como imagem
+    // quebrada. Cliente não identificado por contrato.
+    highlights: [
+      "Módulo do manual do proprietário: de um manual real em PDF de 197 páginas sai um catálogo estruturado com 33 fichas de sistemas construtivos, 146 garantias, 39 manutenções preventivas, 78 cuidados e 131 casos de perda de garantia",
+      "O script de importação não escreve no banco: ele gera um .sql que um humano lê em diff antes de virar migração, e confere a extração por contagem estrutural em vez de conferir texto a olho",
+      "Três otimizações de performance minhas no mesmo módulo: fim do N+1 (uma consulta por obra em vez de uma por unidade), logo do PDF embutido uma vez em vez de por página, e lista de fichas carregada sem baixar o texto de todas",
+      "Sistema de equipe em produção: as 204 rotas de API passam por uma casca única que centraliza autenticação, papel, permissão de app e capacidade, relida do banco a cada request",
+      "A suíte roda contra um Postgres real e descartável, com as migrações de verdade e uma trava explícita para nunca apontar para o banco de produção — 181 arquivos de teste em Vitest e 6 suítes de ponta a ponta em Playwright",
+    ],
+    decisions: [
+      {
+        q: "Como importar dado de garantia de um PDF sem arriscar gravar uma extração errada num documento contratual?",
+        a: "O script de importação nunca grava no banco. Ele emite um .sql revisável em diff, que só vira migração depois de alguém ler; a conferência é estrutural (quantas fichas, quantas garantias, quantas preventivas), porque conferir centenas de linhas de texto no olho não é verificação, é esperança.",
+      },
+      {
+        q: "Por que isto entra no portfólio como módulo, e não como produto inteiro?",
+        a: "É projeto de equipe: a maior parte dos commits do repositório é de outro desenvolvedor. O que reivindico é o que o histórico confirma como meu — o módulo do manual do proprietário e as otimizações dele. O resto do sistema aparece como contexto, não como autoria.",
+      },
+    ],
+    year: "2026",
+  },
+  {
     slug: "sentinel",
     name: "Sentinel",
     tagline:
@@ -144,31 +236,15 @@ export const projects: Project[] = [
     ],
     year: "2026",
   },
-  {
-    slug: "usp-fono",
-    name: "USP-Fono",
-    tagline: "Parceria com a USP — plataforma para fonoaudiologia",
-    description:
-      "Projeto desenvolvido em parceria com a Universidade de São Paulo (USP) para área de fonoaudiologia. Aplicação real entregue a um cliente acadêmico/clínico.",
-    category: "featured",
-    status: "deployed",
-    isPrivate: true,
-    stack: ["JavaScript", "React", "Vite", "Vercel"],
-    demo: "https://usp-fono.vercel.app",
-    cover: "/projects/usp-fono/cover.png",
-    highlights: [
-      "Parceria interuniversitária Insper × USP",
-      "Cliente real na área de saúde / fonoaudiologia",
-    ],
-    year: "2026",
-  },
+
+  // ─── MORE WORK ──────────────────────────────────────────────
   {
     slug: "projeto-software",
     name: "Projeto Software — Microsserviços",
     tagline: "Sistema distribuído: Gateway (Java) + User Service (Python) + Connections (Java) + Frontend",
     description:
       "Arquitetura de microsserviços de um projeto acadêmico: API Gateway em Java/Spring routeando para User Service (Python/FastAPI) e Connections Service (Java), com frontend JavaScript. Demonstra design distribuído, comunicação inter-serviços e pipeline de deploy.",
-    category: "featured",
+    category: "more",
     status: "shipped",
     stack: [
       "Java",
@@ -193,15 +269,13 @@ export const projects: Project[] = [
     ],
     year: "2026",
   },
-
-  // ─── ML & DATA ──────────────────────────────────────────────
   {
     slug: "ml-copa",
     name: "ML-Copa",
     tagline: "Predição de Copa do Mundo com XGBoost, Elo adaptativo e Dixon-Coles",
     description:
       "Sistema de predição de Copa do Mundo combinando 49 mil partidas internacionais históricas com ensemble XGBoost, ratings Elo adaptativos e modelos probabilísticos Poisson/Dixon-Coles. Pipeline CRISP-DM com feature engineering pré-match e probabilidades calibradas.",
-    category: "ml",
+    category: "more",
     status: "shipped",
     stack: [
       "Python",
@@ -221,8 +295,100 @@ export const projects: Project[] = [
     ],
     year: "2026",
   },
-
-  // ─── MORE WORK ──────────────────────────────────────────────
+  {
+    slug: "cacaos",
+    name: "CacaOS",
+    tagline:
+      "Firmware em C++ para ESP32 com tela touch: 8 mini-apps em LVGL e simulador SDL2 para desenvolver sem a placa",
+    description:
+      "Firmware de aplicação em C++ para um ESP32 com display touch de 320×240, feito como presente físico: um launcher com oito mini-apps em pixel art (galeria, contador, tamagotchi, pomodoro, mood tracker e outros). Não é sistema operacional — não tem kernel nem escalonador próprio; é um loop cooperativo sobre o framework Arduino, com LVGL desenhando a interface. O detalhe de engenharia que interessa está fora dos apps: um segundo ambiente de build compila o mesmo código de UI contra SDL2 no Mac, trocando por shims só os módulos de hardware, e uma máquina de estados de WiFi pausa e retoma o rádio para conseguir escanear redes durante uma tentativa de conexão.",
+    category: "more",
+    status: "wip",
+    isPrivate: false,
+    stack: [
+      "C++",
+      "PlatformIO",
+      "LVGL",
+      "ESP32",
+      "SDL2",
+      "GitHub Actions",
+    ],
+    github: "https://github.com/souzxxx/cacaOS",
+    // Sem `cover`: é firmware gravado em placa, não tem deploy para capturar, e
+    // os sprites disponíveis são PNGs de ~500 bytes de pixel art — inúteis como
+    // capa 16:10, além de virem de asset pack de terceiros.
+    highlights: [
+      "Ambiente de simulador nativo em SDL2 paralelo ao build de hardware: a UI inteira roda no Mac sem a placa, com shims só nos módulos de display, touch, SD, WiFi e sensores",
+      "Máquina de estados de WiFi com pause/resume do rádio, porque iniciar scan durante uma tentativa de conexão falha em silêncio no ESP-IDF; a troca de credenciais tem rollback automático quando a rede nova não conecta",
+      "Driver de touch reescrito em bit-banging para liberar o barramento SPI real ao cartão SD, que disputava os mesmos pinos",
+      "CI no GitHub Actions que compila o firmware de verdade a cada push e reporta o uso de flash e RAM",
+      "Pipeline próprio de assets: sprite sheet PNG convertido para o formato binário do LVGL, para reduzir uso de RAM e flash no dispositivo",
+    ],
+    decisions: [
+      {
+        q: "Como testar a UI antes de a placa chegar?",
+        a: "Um segundo ambiente de build compila o mesmo código de apps e UI contra SDL2 no desktop; só display, touch, SD, WiFi e sensores são substituídos por shims. O resto roda idêntico ao que roda na placa.",
+      },
+      {
+        q: "Por que bit-bang no touch em vez do driver SPI padrão?",
+        a: "O controlador de touch e o cartão SD disputam o mesmo barramento. Reescrever o touch em bit-banging manual dos pinos devolveu o SPI real ao SD, que sem isso parava de funcionar.",
+      },
+    ],
+    year: "2026",
+  },
+  {
+    slug: "lp-compiler",
+    name: "Compilador de linguagem própria",
+    tagline:
+      "Compilador em Java: lexer, parser recursivo-descendente, interpretador tree-walking e gerador de assembly NASM x86 32-bit",
+    description:
+      "Linguagem própria com sintaxe inspirada em Rust, implementada em Java: análise léxica, parser recursivo-descendente, AST e dois back-ends. O interpretador tree-walking cobre a linguagem inteira — variáveis tipadas com mutabilidade, funções recursivas com escopo léxico encadeado, structs com campos aninhados e if como expressão. O gerador de código emite NASM x86 de 32 bits, montado e executado dentro de um container, e cobre só o subconjunto inteiro: cada nó sem representação em assembly cru lança erro explícito em vez de fingir suporte. A gramática está formalizada em EBNF no repositório.",
+    category: "more",
+    status: "shipped",
+    isPrivate: true,
+    stack: [
+      "Java",
+      "Assembly x86",
+      "NASM",
+      "Docker",
+      "Bash",
+    ],
+    // Sem `github` e sem `cover`: o repositório é privado (guard da wave 1 —
+    // repositório privado não vira link) e os únicos assets são diagramas
+    // sintáticos de 1056×4436, altos demais para servir de capa.
+    highlights: [
+      "Dois back-ends sobre a mesma AST: interpretador tree-walking com a linguagem completa, e gerador de NASM x86 32-bit limitado ao subconjunto inteiro, com erro explícito em cada nó não suportado",
+      "Escopo léxico por cadeia de tabelas de símbolos: bloco só cria escopo filho quando é bloco explícito, preservando o escopo do chamador no corpo direto de função",
+      "Pipeline de baixo nível automatizado: gerar o .asm, montar com nasm, linkar com gcc -m32 -nostartfiles e executar o binário ELF32 dentro de um container Linux",
+      "Gramática formalizada em EBNF com diagrama sintático, evoluída em 38 commits com versionamento semântico",
+      "Arquivos de casos cobrindo 19 cenários de erro de léxico, sintaxe e semântica — divisão por zero, reatribuição de variável imutável, tipo incompatível",
+    ],
+    decisions: [
+      {
+        q: "Por que dois back-ends em vez de um?",
+        a: "O interpretador cobre a linguagem inteira, inclusive string, ponto flutuante e struct. O gerador de assembly x86 puro não tem heap nem runtime de string, então em vez de emular o que não cabe, cada nó não suportado lança erro nomeado — o limite fica explícito no código, não escondido num comportamento errado.",
+      },
+    ],
+    year: "2026",
+  },
+  {
+    slug: "usp-fono",
+    name: "USP-Fono",
+    tagline: "Parceria com a USP — plataforma para fonoaudiologia",
+    description:
+      "Projeto desenvolvido em parceria com a Universidade de São Paulo (USP) para área de fonoaudiologia. Aplicação real entregue a um cliente acadêmico/clínico.",
+    category: "more",
+    status: "deployed",
+    isPrivate: true,
+    stack: ["JavaScript", "React", "Vite", "Vercel"],
+    demo: "https://usp-fono.vercel.app",
+    cover: "/projects/usp-fono/cover.png",
+    highlights: [
+      "Parceria interuniversitária Insper × USP",
+      "Cliente real na área de saúde / fonoaudiologia",
+    ],
+    year: "2026",
+  },
   {
     slug: "universe-project",
     name: "Universe",

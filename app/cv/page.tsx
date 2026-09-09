@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Leonardo Souza — Currículo",
   description:
-    "Currículo de uma página: backend e sistemas de IA em produção. Ciência da Computação no Insper, São Paulo.",
+    "Currículo de uma página: backend, web e IA aplicada em produção. Ciência da Computação no Insper, São Paulo.",
   robots: { index: false, follow: false },
 };
 
@@ -156,7 +156,7 @@ export default function CvPage() {
       <article className="cv">
         <header>
           <h1 className="cv-name">Leonardo Souza</h1>
-          <p className="cv-role">Backend &amp; AI Engineer</p>
+          <p className="cv-role">Backend, Web &amp; IA</p>
           <p className="cv-contact">
             <span>São Paulo, BR</span>
             <span className="cv-sep">·</span>
@@ -173,12 +173,13 @@ export default function CvPage() {
         <section className="cv-section">
           <h2 className="cv-h2">Resumo</h2>
           <p className="cv-summary">
-            Estudante de Ciência da Computação no Insper (4º semestre). Construo
-            backend e sistemas de IA em produção — assistente LLM sobre dados
-            reais de usuário, fila outbox com retry exponencial e idempotência,
-            rate limit em Redis com circuit breaker e streaming em tempo real.
-            Escrevo teste de integração contra Postgres e Redis de verdade, não
-            contra mock.
+            Estudante de Ciência da Computação no Insper (5º semestre).
+            Trabalho em backend, web e IA aplicada: assistente LLM sobre dados
+            reais de usuário, busca vetorial em Postgres com pgvector, fila
+            outbox com retry exponencial e idempotência, rate limit em Redis com
+            circuit breaker, e front-end Next.js/TypeScript em sistema com
+            usuário real. Escrevo teste de integração contra Postgres e Redis de
+            verdade, não contra mock.
           </p>
         </section>
 
@@ -198,8 +199,8 @@ export default function CvPage() {
             </p>
             <ul className="cv-bullets">
               <li>
-                Loja própria de uma marca brasileira — nome sob contrato — em
-                monolito modular de 12 domínios, com storefront Next.js.
+                Loja própria de uma marca brasileira — nome sob contrato —
+                monolito modular de 12 domínios com storefront Next.js.
               </li>
               <li>
                 Outbox transacional para e-mails: claim em transação curta,
@@ -235,22 +236,44 @@ export default function CvPage() {
             <ul className="cv-bullets">
               <li>
                 Plataforma financeira em produção com a assistente Luna:
-                contexto montado a partir das transações, categorias e
-                orçamentos do próprio usuário autenticado, por consulta
-                parametrizada filtrada por user_id.
+                contexto montado das transações, categorias e orçamentos do
+                próprio usuário autenticado, por consulta parametrizada filtrada
+                por user_id.
               </li>
               <li>
-                Teto de 500 tokens de saída e histórico truncado nas últimas 10
-                mensagens, para segurar custo por request e qualidade da
-                resposta.
-              </li>
-              <li>
-                Rate limit por rota com slowapi: 30 req/h no chat, 10/h nos
-                insights, 5/h no relatório mensal.
+                Custo por request contido: teto de 500 tokens de saída,
+                histórico truncado em 10 mensagens e rate limit por rota com
+                slowapi (30 req/h no chat, 10/h nos insights, 5/h no relatório).
               </li>
               <li>
                 Row Level Security no Postgres nas tabelas do digest; monorepo
                 Turbo (FastAPI + Next.js) com deploy contínuo na Vercel.
+              </li>
+            </ul>
+          </div>
+
+          <div className="cv-item">
+            <div className="cv-item-head">
+              <h3 className="cv-item-name">Project Wraeclast</h3>
+              <span className="cv-item-meta">
+                2026 · github.com/souzxxx/project-wraeclast
+              </span>
+            </div>
+            <p className="cv-item-stack">
+              Python · FastAPI · PostgreSQL · pgvector · Next.js · GitHub
+              Actions
+            </p>
+            <ul className="cv-bullets">
+              <li>
+                Assistente com RAG: busca vetorial em Postgres com pgvector,
+                embeddings de 1024 dimensões e índice HNSW por distância de
+                cosseno — sem fine-tuning, com a resposta do LLM restrita ao
+                contexto recuperado.
+              </li>
+              <li>
+                Coleta diária em GitHub Actions, separada da API serverless por
+                causa do teto de tempo de execução; 350 testes em pytest e CI de
+                ruff + pytest a cada push.
               </li>
             </ul>
           </div>
@@ -268,13 +291,9 @@ export default function CvPage() {
             </p>
             <ul className="cv-bullets">
               <li>
-                Dashboard 3D de monitoramento: o backend FastAPI empurra
+                Dashboard 3D de monitoramento: backend FastAPI empurra
                 métricas de CPU, RAM e disco por WebSocket, com reconexão
-                automática e limite de tentativas.
-              </li>
-              <li>
-                Shaders GLSL próprios (plasma, grid holográfico, glitch)
-                dirigidos pelas métricas que chegam em tempo real.
+                automática, mais shaders GLSL próprios dirigidos por elas.
               </li>
             </ul>
           </div>
@@ -284,12 +303,12 @@ export default function CvPage() {
           <h2 className="cv-h2">Formação</h2>
           <p className="cv-line">
             <span className="cv-label">Insper</span> — Bacharelado em Ciência da
-            Computação, 4º semestre (em curso, 2026).
+            Computação, 5º semestre (em curso, 2026).
           </p>
           <p className="cv-line cv-soft">
-            Destaques: Projeto de Software (microsserviços com Docker), Machine
-            Learning, Inteligência Artificial (Q-Learning, SARSA), Sistemas
-            Hardware/Software.
+            Destaques: Plataformas, Microsserviços e APIs; Startup em
+            Inteligência Artificial; Megadados; Análise de Algoritmos; Machine
+            Learning; Inteligência Artificial (Q-Learning, SARSA).
           </p>
         </section>
 
@@ -304,12 +323,14 @@ export default function CvPage() {
           <p className="cv-line">
             <span className="cv-label">Backend &amp; web</span>{" "}
             <span className="cv-soft">
-              Next.js, React, FastAPI, Spring Boot
+              Next.js, React, FastAPI, Spring Boot, REST
             </span>
           </p>
           <p className="cv-line">
-            <span className="cv-label">Dados</span>{" "}
-            <span className="cv-soft">PostgreSQL, Redis, Supabase</span>
+            <span className="cv-label">Dados &amp; IA</span>{" "}
+            <span className="cv-soft">
+              PostgreSQL, pgvector, Redis, Supabase, RAG e embeddings
+            </span>
           </p>
           <p className="cv-line">
             <span className="cv-label">Infra &amp; qualidade</span>{" "}

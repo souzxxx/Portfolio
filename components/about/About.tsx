@@ -33,13 +33,16 @@ export function About() {
           <p className="mt-8 max-w-3xl text-balance text-lg leading-relaxed text-muted md:text-xl">
             Sou <span className="font-medium text-fg">Leonardo Souza</span>,
             estudante de Ciência da Computação no{" "}
-            <span className="text-fg">Insper</span> (4º semestre), em São Paulo.
-            Trabalho com backend e IA aplicada: assistente LLM em cima dos dados
-            reais do usuário autenticado, fila outbox com retry exponencial e
-            chave de idempotência, rate limit em Redis com circuit breaker que
-            falha aberto, e webhooks de pagamento validados por assinatura.
-            Também construí um dashboard 3D alimentado por WebSocket e um
-            sistema de microsserviços em Java e Python. Prefiro{" "}
+            <span className="text-fg">Insper</span> (5º semestre), em São Paulo.
+            Trabalho nas três frentes: backend, web e IA aplicada. No backend,
+            fila outbox com retry exponencial e chave de idempotência, rate
+            limit em Redis com circuit breaker que falha aberto e webhooks de
+            pagamento validados por assinatura. Na web, front-end Next.js e
+            TypeScript em sistema com usuário real — inclusive um módulo que
+            gera um documento que o cliente final lê como parte do contrato. Em
+            IA, assistente LLM em cima dos dados do usuário autenticado e busca
+            vetorial em Postgres com pgvector, onde a resposta é ancorada no que
+            foi recuperado, sem fine-tuning. Prefiro{" "}
             <span className="text-fg">medir a supor</span> — e prefiro o sistema
             que se defende sozinho ao que só funciona no caminho feliz.
           </p>
