@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { ArrowDown, Github, Mail } from "lucide-react";
+import { ArrowDown, FileDown, Github, Mail } from "lucide-react";
 import { GradientText } from "../ui/GradientText";
 import { Magnetic } from "../ui/Magnetic";
 import { StatsCounter } from "./StatsCounter";
@@ -42,7 +42,7 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
             </span>
-            available for opportunities — São Paulo, BR
+            disponível para vagas · backend &amp; IA · São Paulo, BR
           </motion.div>
 
           {/* Headline */}
@@ -61,9 +61,16 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 text-balance text-2xl font-medium tracking-tight text-muted sm:text-3xl md:text-4xl lg:text-5xl"
             >
-              <GradientText>Software Engineer</GradientText>
-              <span className="text-muted"> @ Insper</span>
+              <GradientText>Backend &amp; AI Engineer</GradientText>
             </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.26 }}
+              className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-muted sm:text-sm"
+            >
+              Ciência da Computação · Insper · 4º semestre · São Paulo
+            </motion.p>
           </div>
 
           {/* Subline */}
@@ -73,11 +80,24 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.32 }}
             className="max-w-2xl text-balance text-lg leading-relaxed text-muted md:text-xl"
           >
-            Construo sistemas full-stack que vão de{" "}
-            <span className="text-fg">dashboards 3D em tempo real</span>,{" "}
-            <span className="text-fg">microsserviços distribuídos</span> a{" "}
-            <span className="text-fg">modelos preditivos de ML</span>. Foco em
-            entregar produto.
+            Construo backend e sistemas de IA que rodam em produção:{" "}
+            <span className="text-fg">
+              assistente LLM sobre os dados do próprio usuário
+            </span>
+            ,{" "}
+            <span className="text-fg">
+              outbox com retry exponencial e idempotência
+            </span>
+            ,{" "}
+            <span className="text-fg">
+              rate limit em Redis com circuit breaker
+            </span>{" "}
+            e{" "}
+            <span className="text-fg">
+              streaming em tempo real por WebSocket
+            </span>
+            . Three.js e GLSL entram quando o problema é de visualização — não
+            antes.
           </motion.p>
 
           {/* CTAs */}
@@ -116,6 +136,16 @@ export function Hero() {
                 Email
               </a>
             </Magnetic>
+            <Magnetic>
+              <a
+                href="/leonardo-souza-cv.pdf"
+                download
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+              >
+                <FileDown className="h-4 w-4" />
+                Currículo
+              </a>
+            </Magnetic>
           </motion.div>
 
           {/* Stats line */}
@@ -125,7 +155,8 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.65 }}
             className="mt-6 grid grid-cols-2 gap-y-8 border-t border-border/60 pt-10 sm:grid-cols-4"
           >
-            <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k+" />
+            {/* 49.071 linhas em ml-copa/data/raw/results.csv — arredondado, sem "+" */}
+            <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k" />
             <StatsCounter value={stats.testFiles} label="arquivos de teste" />
             <StatsCounter value={stats.domainModules} label="módulos de domínio" />
             <StatsCounter value={stats.distributedServices} label="serviços distribuídos" />
