@@ -67,7 +67,10 @@ const personJsonLd = {
     "PostgreSQL",
     "Redis",
   ],
-  sameAs: ["https://github.com/souzxxx"],
+  sameAs: [
+    "https://github.com/souzxxx",
+    "https://www.linkedin.com/in/leonardo-souzx",
+  ],
 };
 
 export default function RootLayout({

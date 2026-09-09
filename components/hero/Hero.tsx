@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { ArrowDown, FileDown, Github, Mail } from "lucide-react";
+import { ArrowDown, FileDown, Github, Linkedin, Mail } from "lucide-react";
 import { GradientText } from "../ui/GradientText";
 import { Magnetic } from "../ui/Magnetic";
 import { StatsCounter } from "./StatsCounter";
@@ -133,6 +133,17 @@ export function Hero() {
               >
                 <Github className="h-4 w-4" />
                 GitHub
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href="https://www.linkedin.com/in/leonardo-souzx"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+              >
+                <Linkedin className="h-4 w-4" />
+                LinkedIn
               </a>
             </Magnetic>
             <Magnetic>

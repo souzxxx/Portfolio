@@ -160,6 +160,10 @@ export default function CvPage() {
         <header>
           <h1 className="cv-name">Leonardo Souza</h1>
           <p className="cv-role">Backend, Web &amp; IA</p>
+          {/* Uma linha só: com o LinkedIn, os quatro itens mais o endereço do
+              site quebravam para uma segunda linha, e a folga vertical do A4
+              não paga essa linha (guard em scripts/build-cv.ts). O site saiu
+              daqui porque já aparece, igual, no rodapé deste mesmo documento. */}
           <p className="cv-contact">
             <span>São Paulo, BR</span>
             <span className="cv-sep">·</span>
@@ -169,7 +173,9 @@ export default function CvPage() {
             <span className="cv-sep">·</span>
             <a href="https://github.com/souzxxx">github.com/souzxxx</a>
             <span className="cv-sep">·</span>
-            <a href={`https://${SITE}`}>{SITE}</a>
+            <a href="https://www.linkedin.com/in/leonardo-souzx">
+              linkedin.com/in/leonardo-souzx
+            </a>
           </p>
         </header>
 

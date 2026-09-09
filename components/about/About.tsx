@@ -1,7 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Mail, MapPin, ArrowUpRight, FileDown } from "lucide-react";
+import {
+  Github,
+  Linkedin,
+  Mail,
+  MapPin,
+  ArrowUpRight,
+  FileDown,
+} from "lucide-react";
 import { Reveal } from "../ui/Reveal";
 import { GradientText } from "../ui/GradientText";
 import { Magnetic } from "../ui/Magnetic";
@@ -81,9 +88,20 @@ export function About() {
                 <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </Magnetic>
-            {/* TODO(linkedin): renderizar o botão de LinkedIn assim que a URL
-                real do perfil for confirmada. Não inventar slug — link morto é
-                exatamente o problema que esta rodada conserta. */}
+            <Magnetic className="max-w-full">
+              <a
+                href="https://www.linkedin.com/in/leonardo-souzx"
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
+              >
+                <Linkedin className="h-5 w-5 flex-shrink-0" />
+                <span className="break-all text-left">
+                  linkedin.com/in/leonardo-souzx
+                </span>
+                <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </Magnetic>
             <Magnetic className="max-w-full">
               <a
                 href="/leonardo-souza-cv.pdf"

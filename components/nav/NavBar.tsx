@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Github, Mail } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 import clsx from "clsx";
 
 const links = [
@@ -71,9 +71,15 @@ export function NavBar() {
           >
             <Github className="h-4 w-4" />
           </a>
-          {/* TODO(linkedin): adicionar o ícone de LinkedIn aqui, com o mesmo
-              tratamento visual do GitHub, quando a URL real do perfil for
-              confirmada. Enquanto isso, nada é renderizado. */}
+          <a
+            href="https://www.linkedin.com/in/leonardo-souzx"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="LinkedIn"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-surface/60 text-fg backdrop-blur-xl transition hover:border-indigo-500/50 hover:bg-surface"
+          >
+            <Linkedin className="h-4 w-4" />
+          </a>
           <a
             href="mailto:leonardosouzasilva9@gmail.com"
             aria-label="Email"

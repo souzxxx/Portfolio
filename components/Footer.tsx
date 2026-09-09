@@ -1,4 +1,4 @@
-import { Github, Mail } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -22,14 +22,21 @@ export function Footer() {
             github.com/souzxxx
           </a>
           <a
+            href="https://www.linkedin.com/in/leonardo-souzx"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 transition hover:text-fg"
+          >
+            <Linkedin className="h-4 w-4" />
+            LinkedIn
+          </a>
+          <a
             href="mailto:leonardosouzasilva9@gmail.com"
             className="inline-flex items-center gap-2 transition hover:text-fg"
           >
             <Mail className="h-4 w-4" />
             Email
           </a>
-          {/* TODO(linkedin): adicionar o link de LinkedIn aqui quando a URL real
-              do perfil for confirmada. Não inventar slug. */}
         </div>
 
         <div className="font-mono text-xs text-muted">
