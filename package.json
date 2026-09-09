@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "capture": "tsx scripts/capture.ts"
+    "capture": "tsx scripts/capture.ts",
+    "check:assets": "tsx scripts/check-assets.ts",
+    "check:links": "tsx scripts/check-links.ts",
+    "cv": "tsx scripts/build-cv.ts",
+    "prebuild": "tsx scripts/check-assets.ts"
   },
   "dependencies": {
     "next": "14.2.18",

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Github, ExternalLink, CheckCircle2 } from "lucide-react";
+import { ArrowUpRight, Github, ExternalLink, CheckCircle2, Lock, FileText } from "lucide-react";
 import clsx from "clsx";
 import { Reveal } from "../ui/Reveal";
 import { StackChips } from "./StackChips";
@@ -148,6 +148,19 @@ export function FeaturedCard({
             </ul>
           )}
 
+          {project.decisions && (
+            <div className="grid gap-3 rounded-2xl border border-border/50 bg-base/40 p-4">
+              {project.decisions.map((d) => (
+                <div key={d.q}>
+                  <p className="font-mono text-xs uppercase tracking-widest text-indigo-300">
+                    {d.q}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-fg/80">{d.a}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           <StackChips stack={project.stack} />
 
           <div className="mt-2 flex flex-wrap gap-3">
@@ -163,7 +176,7 @@ export function FeaturedCard({
                 <ArrowUpRight className="h-3.5 w-3.5 transition group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5" />
               </a>
             )}
-            {project.github && (
+            {project.github && !project.isPrivate && (
               <a
                 href={project.github}
                 target="_blank"
@@ -172,6 +185,23 @@ export function FeaturedCard({
               >
                 <Github className="h-3.5 w-3.5" />
                 Source
+              </a>
+            )}
+            {project.isPrivate && (
+              <span className="inline-flex cursor-default items-center gap-2 rounded-full border border-border/60 bg-surface/30 px-5 py-2.5 text-sm font-medium text-muted">
+                <Lock className="h-3.5 w-3.5" />
+                Repositório privado
+              </span>
+            )}
+            {project.writeup && (
+              <a
+                href={project.writeup}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-5 py-2.5 text-sm font-medium text-fg transition hover:border-indigo-400 hover:bg-indigo-500/20"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                Arquitetura &amp; decisões
               </a>
             )}
           </div>

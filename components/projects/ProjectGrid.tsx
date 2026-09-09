@@ -7,7 +7,7 @@ export function ProjectGrid() {
     <section id="more" className="relative py-32 md:py-40">
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         <SectionHeader
-          eyebrow="More work"
+          eyebrow="Outros projetos"
           title="Mais projetos"
           description="Coisas que construí explorando linguagens, paradigmas e domínios — de Prolog a Python, de jogos a automação de processos."
         />

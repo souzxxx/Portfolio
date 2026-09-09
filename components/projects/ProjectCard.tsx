@@ -106,7 +106,7 @@ export function ProjectCard({
                   Demo
                 </a>
               )}
-              {project.github && (
+              {project.github && !project.isPrivate && (
                 <a
                   href={project.github}
                   target="_blank"
@@ -116,6 +116,12 @@ export function ProjectCard({
                   <Github className="h-3 w-3" />
                   Code
                 </a>
+              )}
+              {project.isPrivate && (
+                <span className="inline-flex cursor-default items-center gap-1.5 rounded-full border border-border/60 bg-surface/30 px-3 py-1 text-xs font-medium text-muted">
+                  <Lock className="h-3 w-3" />
+                  Repositório privado
+                </span>
               )}
             </div>
           </div>
