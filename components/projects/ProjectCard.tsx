@@ -89,6 +89,25 @@ export function ProjectCard({
             </p>
           )}
 
+          {/* Dois primeiros highlights: os cards do grid são a única superfície
+              onde esses projetos aparecem (FeaturedCard só renderiza os slugs de
+              ORDER), então sem isto a prosa técnica de highlights ficaria escrita
+              e nunca lida. Corta em 2 itens e 2 linhas cada para não desalinhar
+              a altura das linhas do grid. */}
+          {variant !== "compact" && project.highlights && (
+            <ul className="grid gap-1.5">
+              {project.highlights.slice(0, 2).map((h) => (
+                <li
+                  key={h}
+                  className="flex items-start gap-2 text-xs leading-relaxed text-muted"
+                >
+                  <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-indigo-400/70" />
+                  <span className="line-clamp-2">{h}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="mt-auto flex flex-col gap-3 pt-2">
             <StackChips stack={project.stack.slice(0, 5)} />
             <div className="flex flex-wrap gap-2">

@@ -1,5 +1,16 @@
 export type ProjectStatus = "deployed" | "shipped" | "wip";
-export type ProjectCategory = "featured" | "ml" | "systems" | "more" | "academic";
+
+/**
+ * As duas — e únicas — superfícies que renderizam projeto:
+ *   "featured" → FeaturedShowcase, e SÓ se o slug estiver na constante ORDER de
+ *                components/projects/FeaturedShowcase.tsx;
+ *   "more"     → ProjectGrid, todos.
+ *
+ * O tipo é estreito de propósito: categoria que nenhum componente consome
+ * (havia "ml", "systems" e "academic") faz o projeto sumir do site em silêncio,
+ * sem erro de compilação. Antes de adicionar valor aqui, adicione quem renderiza.
+ */
+export type ProjectCategory = "featured" | "more";
 
 export interface Project {
   slug: string;
@@ -15,7 +26,9 @@ export interface Project {
   cover?: string;
   gallery?: { src: string; label: string }[];
   video?: string;
+  /** FeaturedCard mostra todos; ProjectCard, os dois primeiros. */
   highlights?: string[];
+  /** Só FeaturedCard renderiza — no card do grid não cabe pergunta + resposta. */
   decisions?: { q: string; a: string }[];
   writeup?: string;
   year: string;
@@ -499,9 +512,8 @@ export const projects: Project[] = [
   },
 ];
 
-export const featuredProjects = projects.filter((p) => p.category === "featured");
-export const mlProjects = projects.filter((p) => p.category === "ml");
-export const systemsProjects = projects.filter((p) => p.category === "systems");
+// Único derivado exportado: quem consome "featured" é a ORDER curada de
+// FeaturedShowcase.tsx, não um filtro.
 export const moreProjects = projects.filter((p) => p.category === "more");
 
 export const stats = {

@@ -64,7 +64,10 @@ html, body {
 .cv-sep { color: var(--ink-faint); padding: 0 5px; }
 
 /* ─── seções ────────────────────────────────────────────── */
-.cv-section { margin-top: 15px; }
+/* Ritmo vertical apertado de propósito: o CV tem que caber em UMA página A4
+   (guard em scripts/build-cv.ts). Ao mexer nestes espaçamentos, rode
+   "npm run cv" — ele reprova se o PDF sair com duas páginas. */
+.cv-section { margin-top: 13px; }
 .cv-h2 {
   font-size: 8.5pt;
   font-weight: 700;
@@ -119,12 +122,12 @@ html, body {
 
 /* ─── formação e stack ──────────────────────────────────── */
 .cv-line { margin: 0; }
-.cv-line + .cv-line { margin-top: 3px; }
+.cv-line + .cv-line { margin-top: 2px; }
 .cv-label { font-weight: 600; color: var(--ink); }
 .cv-soft { color: var(--ink-soft); }
 
 .cv-foot {
-  margin-top: 16px;
+  margin-top: 12px;
   padding-top: 6px;
   border-top: 1px solid var(--rule);
   font-size: 7.5pt;
@@ -305,10 +308,19 @@ export default function CvPage() {
             <span className="cv-label">Insper</span> — Bacharelado em Ciência da
             Computação, 5º semestre (em curso, 2026).
           </p>
+          {/* Nomes de disciplina saem exatos como constam em lib/academic.ts —
+              abreviar "Análise de Algoritmos e Entrevistas Técnicas" corta
+              justamente a metade que interessa. Semestre atual e histórico em
+              linhas separadas: coladas, liam como se tudo fosse o 5º semestre. */}
           <p className="cv-line cv-soft">
-            Destaques: Plataformas, Microsserviços e APIs; Startup em
-            Inteligência Artificial; Megadados; Análise de Algoritmos; Machine
-            Learning; Inteligência Artificial (Q-Learning, SARSA).
+            <span className="cv-label">Semestre atual:</span> Plataformas,
+            Microsserviços e APIs; Startup em Inteligência Artificial;
+            Megadados; Análise de Algoritmos e Entrevistas Técnicas; Jogos e
+            Interação.
+          </p>
+          <p className="cv-line cv-soft">
+            <span className="cv-label">Anteriores:</span> Projeto de Software;
+            Machine Learning; Inteligência Artificial (Q-Learning, SARSA).
           </p>
         </section>
 

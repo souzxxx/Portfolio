@@ -4,6 +4,11 @@ import { projects, type Project } from "@/lib/projects";
 
 // Ordem curada e explícita: o que abre a conversa técnica vem primeiro.
 // Slug ausente em lib/projects.ts é ignorado em vez de quebrar a página.
+//
+// ATENÇÃO: esta lista é a única porta de entrada da seção. Projeto com
+// category: "featured" fora de ORDER não renderiza em lugar nenhum — nem aqui,
+// nem no ProjectGrid, que lê só "more" — e nada disso falha o build. Ao promover
+// um projeto para destaque, troque a categoria E acrescente o slug aqui.
 const ORDER = [
   "financehub",
   "wraeclast",
