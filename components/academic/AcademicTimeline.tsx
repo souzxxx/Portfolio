@@ -11,7 +11,7 @@ export function AcademicTimeline() {
     <section id="academic" className="relative py-32 md:py-40">
       <div className="mx-auto max-w-7xl px-6 md:px-12">
         <SectionHeader
-          eyebrow="Academic"
+          eyebrow="Formação"
           title="Insper · BCC"
           description="Bacharelado em Ciência da Computação. Quatro semestres explorando da matemática discreta a sistemas distribuídos, IA e arquitetura de baixo nível."
         />
