@@ -26,6 +26,37 @@ Todo o conteúdo é dado tipado em `lib/`: `projects.ts`, `stack.ts`, `academic.
 - **O PDF do currículo é gerado da rota `/cv`, não mantido à parte.** `scripts/build-cv.ts` imprime a página com o Chromium e falha se o resultado passar de uma página A4 — assim o HTML e o PDF não divergem, e o limite de tamanho é verificado por script em vez de no olho.
 - **Sem analytics de terceiros.** Nenhum script externo carrega no site; a única tag injetada em `app/layout.tsx` é o JSON-LD de `Person`.
 
+## Performance
+
+Medido com Lighthouse 12 em Chrome headless contra `npm run build && npm start` local,
+categorias `performance,accessibility`, 3 execuções por configuração, **mediana** abaixo.
+"Antes" é `main` (`0b16993`); "depois" é esta branch. Máquina local — os números valem
+como comparação entre os dois builds, não como nota absoluta de campo.
+
+| Preset | Métrica | Antes | Depois |
+| --- | --- | --- | --- |
+| Mobile (padrão) | Performance | 85 | **86** |
+| Mobile (padrão) | Acessibilidade | 100 | 100 |
+| Mobile (padrão) | LCP | 4,45 s | **4,29 s** |
+| Mobile (padrão) | TBT | 15 ms | **4 ms** |
+| Mobile (padrão) | CLS | 0,000 | 0,000 |
+| Desktop | Performance | 99 | 99 |
+| Desktop | Acessibilidade | 100 | 100 |
+| Desktop | LCP | 0,88 s | **0,85 s** |
+
+Leitura honesta: o ganho é pequeno. As três mudanças de performance desta rodada
+(blur trocado por gradiente no hero e no sobre, `backdrop-blur-xl` → `md` em três
+componentes, `deviceSizes` enxuto) aparecem no TBT, que cai de 15 ms para 4 ms, e num
+LCP ~0,16 s menor no mobile; o score arredondado sobe um ponto. No desktop o build já
+estava no teto e não havia o que ganhar. O First Load JS de `/` sobe de 148 kB para
+150 kB no período — a branch acrescentou conteúdo à página (decisões, highlights,
+galeria) e as rotas `/cv`, `/opengraph-image`, `robots.txt` e `sitemap.xml`.
+
+Os 100 de acessibilidade nos dois lados não cobrem tudo: o audit de contraste do
+Lighthouse não compõe alpha ao longo da pilha de ancestrais, então o contraste de texto
+sobre fundos translúcidos foi conferido à mão (compondo a cor do texto com o fundo
+acumulado até a raiz e exigindo ≥ 4,5:1 abaixo de 18,66 px).
+
 ## Rodando localmente
 
 ```bash

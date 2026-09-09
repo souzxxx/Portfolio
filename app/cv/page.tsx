@@ -215,8 +215,8 @@ export default function CvPage() {
                 aberto e tem circuit breaker com sonda em half-open.
               </li>
               <li>
-                Migrações Flyway e 218 arquivos de teste, com Testcontainers
-                subindo Postgres e Redis reais.
+                Migrações Flyway e 218 arquivos de teste — 139 no backend, com
+                Testcontainers subindo Postgres e Redis reais, e 79 no frontend.
               </li>
             </ul>
           </div>

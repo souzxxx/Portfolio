@@ -32,6 +32,10 @@ jobs:
       - name: Verificar links externos dos projetos
         id: check
         continue-on-error: true
+        # `shell: bash` troca o shell padrão (`bash -e`) por `bash -eo pipefail`.
+        # Sem pipefail o exit code do pipe é o do `tee` (sempre 0), o outcome
+        # nunca vira 'failure' e a issue nunca abre.
+        shell: bash
         run: npm run check:links 2>&1 | tee link-report.txt
 
       - name: Abrir issue quando algum link estiver fora do ar

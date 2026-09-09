@@ -160,7 +160,7 @@ export function FeaturedCard({
                   {/* Caixa alta em frase inteira apaga a forma da palavra e
                       custa legibilidade; o acento mono/uppercase fica no
                       eyebrow curto, e a pergunta vai em caixa normal. */}
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-indigo-400/70">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-indigo-300">
                     Decisão
                   </p>
                   <p className="mt-1 text-sm font-medium text-indigo-300">

@@ -95,7 +95,7 @@ export const projects: Project[] = [
       "Outbox transacional: claim em transação curta, envio sem segurar lock, backoff exponencial de 30s dobrando até o teto de 1h com jitter",
       "Idempotência ponta a ponta: webhook processado uma única vez, Idempotency-Key no provedor de e-mail",
       "Rate limit por chave em Redis com script Lua atômico, que falha aberto e tem circuit breaker com sonda em half-open",
-      "Webhooks de pagamento e de NF-e validados por assinatura",
+      "Webhook de pagamento validado por assinatura HMAC; webhook de NF-e por token secreto próprio em comparação constant-time — ambos fail-closed",
       "12 módulos de domínio, Flyway e testes de integração com Testcontainers (Postgres + Redis reais)",
     ],
     decisions: [
@@ -181,7 +181,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/souzxxx/projeto-software-gateway",
     // Sem `cover` até existir um screenshot que mostre o sistema rodando.
-    // O antigo /projects/projeto-software/cover.png é a tela de login vazia
+    // O screenshot antigo (já removido do repo) era a tela de login vazia
     // (retângulo escuro com um botão "Log In"), que num card de destaque lê
     // como imagem quebrada. Até lá o card usa a capa gerada por ProjectCover,
     // que ao menos é claramente intencional.
