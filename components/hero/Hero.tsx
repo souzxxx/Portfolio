@@ -15,7 +15,12 @@ const ParticleField = dynamic(
 
 export function Hero() {
   return (
-    <section className="relative isolate flex min-h-screen items-center overflow-hidden pt-24">
+    // pb-20 reserva a faixa do indicador de scroll (`absolute bottom-8`, ~45px
+    // do fundo da section). Sem isso o conteúdo centralizado encosta no
+    // indicador e ele sobrepõe a última linha de stats — em 1440×900, 1280×800
+    // e 390×844. O padding é do fluxo; o `absolute` não o enxerga, então a
+    // folga sobra inteira para o indicador.
+    <section className="relative isolate flex min-h-screen items-center overflow-hidden pb-20 pt-24">
       {/* 3D particle layer */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <ParticleField />
@@ -174,7 +179,7 @@ export function Hero() {
         transition={{ delay: 1.4, duration: 0.8 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted"
       >
-        <span className="animate-pulse">↓ scroll</span>
+        <span className="animate-pulse">↓ role</span>
       </motion.div>
     </section>
   );

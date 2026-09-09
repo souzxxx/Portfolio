@@ -180,7 +180,11 @@ export const projects: Project[] = [
       "Vercel",
     ],
     github: "https://github.com/souzxxx/projeto-software-gateway",
-    cover: "/projects/projeto-software/cover.png",
+    // Sem `cover` até existir um screenshot que mostre o sistema rodando.
+    // O antigo /projects/projeto-software/cover.png é a tela de login vazia
+    // (retângulo escuro com um botão "Log In"), que num card de destaque lê
+    // como imagem quebrada. Até lá o card usa a capa gerada por ProjectCover,
+    // que ao menos é claramente intencional.
     highlights: [
       "4 serviços independentes: gateway, user service, connections e frontend",
       "Gateway pattern com Java/Spring",
@@ -196,7 +200,7 @@ export const projects: Project[] = [
     name: "ML-Copa",
     tagline: "Predição de Copa do Mundo com XGBoost, Elo adaptativo e Dixon-Coles",
     description:
-      "Sistema de predição de Copa do Mundo combinando +50.000 partidas internacionais históricas com ensemble XGBoost, ratings Elo adaptativos e modelos probabilísticos Poisson/Dixon-Coles. Pipeline CRISP-DM com feature engineering pré-match e probabilidades calibradas.",
+      "Sistema de predição de Copa do Mundo combinando 49 mil partidas internacionais históricas com ensemble XGBoost, ratings Elo adaptativos e modelos probabilísticos Poisson/Dixon-Coles. Pipeline CRISP-DM com feature engineering pré-match e probabilidades calibradas.",
     category: "ml",
     status: "shipped",
     stack: [
@@ -210,7 +214,7 @@ export const projects: Project[] = [
     github: "https://github.com/souzxxx/ml-copa",
     cover: "/projects/ml-copa/feature_importance.png",
     highlights: [
-      "+50.000 partidas internacionais (1872–2024)",
+      "49.071 partidas internacionais (1872–2024)",
       "Elo rating adaptativo + Dixon-Coles",
       "Pipeline CRISP-DM completo",
       "Validação com log-loss e calibração de probabilidades",
@@ -335,7 +339,9 @@ export const systemsProjects = projects.filter((p) => p.category === "systems");
 export const moreProjects = projects.filter((p) => p.category === "more");
 
 export const stats = {
-  matchesProcessed: 50,
+  // 49.071 partidas em ml-copa/data/raw/results.csv (49.072 linhas − cabeçalho).
+  // Arredondado para baixo: o hero mostra "49k", nunca um número acima do real.
+  matchesProcessed: 49,
   testFiles: 218,
   domainModules: 12,
   distributedServices: 4,

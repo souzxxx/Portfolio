@@ -21,7 +21,7 @@ Todo o conteúdo é dado tipado em `lib/`: `projects.ts`, `stack.ts`, `academic.
 
 - **Conteúdo tipado em `lib/`, não em CMS.** O site tem um autor e nenhuma necessidade de editar sem deploy. Em troca de perder a edição fora do código, o conteúdo passa pelo compilador e pelos scripts de checagem: uma capa declarada com caminho errado quebra o build, não a página.
 - **O canvas 3D do hero só monta acima de 768px e com `prefers-reduced-motion` desligado.** No build atual o chunk do `three` sai com ~670 KB minificados (~165 KB gzip), carregado à parte dos 150 KB de JS da página. Um fundo decorativo não justifica esse download no celular. Fora da viewport o `frameloop` do Canvas vira `"never"`, em vez de continuar renderizando escondido (`components/hero/ParticleField.tsx`).
-- **`prebuild` roda `scripts/check-assets.ts` e falha o build** se algum `cover`, `gallery` ou `video` declarado em `lib/projects.ts` não existir em `public/`. É checagem de disco, determinística — pode travar deploy. A checagem de rede (`github` e `demo`) mora em `scripts/check-links.ts`, fora do build: roda semanalmente no workflow `.github/workflows/links.yml` e abre issue quando algo cai, porque link fora do ar não é motivo para impedir uma publicação.
+- **`prebuild` roda `scripts/check-assets.ts` e falha o build** se algum `cover`, `gallery` ou `video` declarado em `lib/projects.ts` — ou o PDF do currículo, alvo de dois CTAs — não existir em `public/`. É checagem de disco, determinística — pode travar deploy. A checagem de rede (`github` e `demo`) mora em `scripts/check-links.ts`, fora do build: roda semanalmente no workflow `.github/workflows/links.yml` e abre issue quando algo cai, porque link fora do ar não é motivo para impedir uma publicação.
 - **Projeto privado não ganha botão de código.** Os cards só renderizam o link quando existe `github` e o projeto não está marcado como `isPrivate`; caso contrário aparece o rótulo "Repositório privado", sem link — em vez de um botão que leva a uma tela de login do GitHub.
 - **O PDF do currículo é gerado da rota `/cv`, não mantido à parte.** `scripts/build-cv.ts` imprime a página com o Chromium e falha se o resultado passar de uma página A4 — assim o HTML e o PDF não divergem, e o limite de tamanho é verificado por script em vez de no olho.
 - **Sem analytics de terceiros.** Nenhum script externo carrega no site; a única tag injetada em `app/layout.tsx` é o JSON-LD de `Person`.
@@ -35,7 +35,7 @@ npm run build          # dispara prebuild (check:assets) antes do next build
 npm run check:assets   # confere em disco os assets declarados em lib/projects.ts
 npm run cv             # gera public/leonardo-souza-cv.pdf a partir de /cv
 npm start              # serve o build de produção
-npm run lint           # next lint
+npm run lint           # next lint (config em .eslintrc.json: next/core-web-vitals)
 ```
 
 `npm run cv` e os scripts de screenshot usam Playwright: rode `npx playwright install chromium` uma vez.
@@ -45,7 +45,7 @@ npm run lint           # next lint
 
 | Arquivo | Como roda | O que faz |
 | --- | --- | --- |
-| `check-assets.ts` | `npm run check:assets`, e no `prebuild` | Confere que todo `cover`, `gallery` e `video` de `lib/projects.ts` existe em `public/`. Sai com erro se faltar; a ausência do PDF do currículo é só aviso. |
+| `check-assets.ts` | `npm run check:assets`, e no `prebuild` | Confere que todo `cover`, `gallery` e `video` de `lib/projects.ts` existe em `public/`, mais o PDF do currículo. Sai com erro se faltar qualquer um. |
 | `check-links.ts` | `npm run check:links` e workflow semanal | Faz GET nos links externos dos projetos (`github`, `demo`, `writeup`) e lista o status de cada um. Não entra no build. |
 | `build-cv.ts` | `npm run cv` | Abre `/cv` no Chromium e imprime `public/leonardo-souza-cv.pdf` em A4; falha se o PDF sair com mais de uma página. |
 | `capture.ts` | `npm run capture` | Screenshot desktop (1920×1200) e mobile (390×844) dos deploys dos projetos em `public/projects/<slug>/`. |

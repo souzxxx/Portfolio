@@ -56,13 +56,8 @@ export function ProjectCard({
           {/* hover gradient */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-base/90 via-base/20 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-60" />
 
-          {/* private badge */}
-          {project.isPrivate && (
-            <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-zinc-300 backdrop-blur">
-              <Lock className="h-3 w-3" />
-              Private
-            </div>
-          )}
+          {/* Sem badge de privado sobre a capa: o chip "Repositório privado"
+              no rodapé do card já diz isso, e em português. */}
 
           {project.status === "deployed" && (
             <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-300 backdrop-blur">
@@ -116,7 +111,7 @@ export function ProjectCard({
                   className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/40 px-3 py-1 text-xs text-fg/80 transition hover:border-indigo-500/40 hover:text-fg"
                 >
                   <Github className="h-3 w-3" />
-                  Code
+                  Código
                 </a>
               )}
               {project.isPrivate && (

@@ -19,10 +19,11 @@ type Check = {
   obrigatorio: boolean;
 };
 
-// O PDF do currículo é gerado por `npm run cv` (scripts/build-cv.ts) e ainda não
-// está versionado. Enquanto isso a ausência é AVISO, não falha de build. Quando
-// o arquivo entrar no repositório, basta virar esta constante para true.
-const CV_OBRIGATORIO = false;
+// O PDF do currículo é gerado por `npm run cv` (scripts/build-cv.ts) e está
+// versionado em public/. Dois CTAs dependem dele (hero e sobre), então a
+// ausência é falha de build, não aviso: apagá-lo por acidente tem que derrubar
+// o deploy em vez de publicar dois links quebrados.
+const CV_OBRIGATORIO = true;
 const CV_PATH = "/leonardo-souza-cv.pdf";
 
 const publicDir = path.join(process.cwd(), "public");

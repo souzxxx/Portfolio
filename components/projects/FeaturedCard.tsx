@@ -36,7 +36,7 @@ export function FeaturedCard({
         )}
       >
         <span className="absolute right-6 top-6 font-mono text-xs uppercase tracking-widest text-muted">
-          0{index + 1} / featured
+          0{index + 1} / destaque
         </span>
 
         <div className={clsx("relative", reversed && "md:order-2")}>
@@ -120,7 +120,9 @@ export function FeaturedCard({
 
         <div className={clsx("flex flex-col gap-5", reversed && "md:order-1")}>
           <div className="flex items-center gap-3">
-            <StatusPill status={project.status} isPrivate={project.isPrivate} />
+            {/* Sem `isPrivate` aqui: o chip "Repositório privado" logo abaixo
+                já dá esse aviso. Duas pílulas diziam a mesma coisa no card. */}
+            <StatusPill status={project.status} />
             <span className="font-mono text-xs text-muted">{project.year}</span>
           </div>
 
@@ -155,7 +157,13 @@ export function FeaturedCard({
             <div className="grid gap-3 rounded-2xl border border-border/50 bg-base/40 p-4">
               {project.decisions.map((d) => (
                 <div key={d.q}>
-                  <p className="font-mono text-xs uppercase tracking-widest text-indigo-300">
+                  {/* Caixa alta em frase inteira apaga a forma da palavra e
+                      custa legibilidade; o acento mono/uppercase fica no
+                      eyebrow curto, e a pergunta vai em caixa normal. */}
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-indigo-400/70">
+                    Decisão
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-indigo-300">
                     {d.q}
                   </p>
                   <p className="mt-1.5 text-sm leading-relaxed text-fg/80">{d.a}</p>
@@ -175,7 +183,7 @@ export function FeaturedCard({
                 className="group/btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_25px_rgba(99,102,241,0.35)] transition hover:shadow-[0_12px_35px_rgba(99,102,241,0.55)]"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                Live Demo
+                Ver no ar
                 <ArrowUpRight className="h-3.5 w-3.5 transition group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5" />
               </a>
             )}
@@ -187,7 +195,7 @@ export function FeaturedCard({
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-5 py-2.5 text-sm font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface"
               >
                 <Github className="h-3.5 w-3.5" />
-                Source
+                Código
               </a>
             )}
             {project.isPrivate && (
