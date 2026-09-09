@@ -16,6 +16,8 @@ export interface Project {
   gallery?: { src: string; label: string }[];
   video?: string;
   highlights?: string[];
+  decisions?: { q: string; a: string }[];
+  writeup?: string;
   year: string;
 }
 
@@ -37,10 +39,10 @@ export const projects: Project[] = [
       "Turbo",
       "Supabase",
       "PostgreSQL",
-      "OpenAI",
+      "Groq",
+      "Llama 3.3",
       "Vercel",
     ],
-    github: "https://github.com/souzxxx/financehub",
     demo: "https://financehub-web-ecru.vercel.app",
     cover: "/projects/financehub/dashboard.png",
     gallery: [
@@ -50,20 +52,75 @@ export const projects: Project[] = [
       { src: "/projects/financehub/mobile.png", label: "Experiência mobile responsiva" },
     ],
     highlights: [
-      "Produto financeiro real com auth Supabase + RLS",
-      "Assistente IA (Luna) para análise de gastos via LLM",
-      "Dashboard com projeção de saldo, orçamento e recorrências",
-      "Monorepo Turbo: backend Python + frontend Next.js",
-      "Deploy contínuo Vercel + Edge Functions",
+      "Luna: contexto montado a partir das transações, categorias e orçamentos do próprio usuário autenticado, por consulta parametrizada filtrada por user_id",
+      "LLM via SDK da OpenAI apontado para a Groq (Llama 3.3 70B), teto de 500 tokens de saída e histórico truncado nas últimas 10 mensagens",
+      "Rate limit por rota com slowapi: 30 req/h no chat, 10/h nos insights, 5/h no relatório mensal",
+      "Row Level Security no Postgres nas tabelas do digest da Luna, sobre auth Supabase",
+      "Monorepo Turbo: API FastAPI + front Next.js, deploy contínuo na Vercel",
+    ],
+    decisions: [
+      {
+        q: "Por que Groq e não OpenAI direto?",
+        a: "O SDK é o mesmo; só muda a base_url. Llama 3.3 70B na Groq entrega latência muito menor por um custo que cabe num projeto pessoal, e a troca de provedor é uma linha de configuração se o trade-off mudar.",
+      },
+      {
+        q: "Por que truncar o histórico em 10 mensagens?",
+        a: "O contexto financeiro do mês já ocupa o system prompt. Sem teto, uma conversa longa empurra o custo por request para cima e derruba a qualidade da resposta — 10 mensagens cobre a continuidade real de um chat de finanças.",
+      },
+    ],
+    year: "2026",
+  },
+  {
+    slug: "commerce-nda",
+    name: "E-commerce transacional (sob NDA)",
+    tagline:
+      "E-commerce transacional em Spring Boot: outbox com retry exponencial, idempotência de webhook e rate limit em Redis com circuit breaker",
+    description:
+      "Loja própria de uma marca brasileira — nome sob contrato — em monolito modular Java 21 / Spring Boot 4.1 com storefront Next.js. O sistema move dinheiro de verdade, então a engenharia é quase toda sobre o caminho infeliz: webhook de pagamento validado por assinatura e deduplicado por tabela de webhooks processados; e-mails transacionais em outbox, com claim numa transação curta e envio fora de lock; retentativa com backoff exponencial e chave de idempotência no provedor; rate limit por chave em Redis via script Lua atômico que falha aberto quando o Redis cai. 12 módulos de domínio, migrações Flyway e testes de integração com Testcontainers em Postgres e Redis reais.",
+    category: "featured",
+    status: "wip",
+    isPrivate: true,
+    stack: [
+      "Java 21",
+      "Spring Boot",
+      "PostgreSQL",
+      "Redis",
+      "Next.js",
+      "TypeScript",
+      "Testcontainers",
+      "Flyway",
+      "Docker",
+    ],
+    highlights: [
+      "Outbox transacional: claim em transação curta, envio sem segurar lock, backoff exponencial de 30s dobrando até o teto de 1h com jitter",
+      "Idempotência ponta a ponta: webhook processado uma única vez, Idempotency-Key no provedor de e-mail",
+      "Rate limit por chave em Redis com script Lua atômico, que falha aberto e tem circuit breaker com sonda em half-open",
+      "Webhooks de pagamento e de NF-e validados por assinatura",
+      "12 módulos de domínio, Flyway e testes de integração com Testcontainers (Postgres + Redis reais)",
+    ],
+    decisions: [
+      {
+        q: "Por que outbox e não chamar o provedor de e-mail dentro da transação?",
+        a: "Chamada HTTP dentro de transação segura conexão do pool enquanto espera a rede. O outbox quebra em três passos: transação curta que faz o claim, envio sem lock nenhum, transação curta que grava o resultado. A Idempotency-Key é o id da linha, então reenvio depois de crash é no-op.",
+      },
+      {
+        q: "Por que o rate limiter falha ABERTO?",
+        a: "Se o Redis cair, bloquear todo mundo derruba o checkout — o custo de deixar passar tráfego por alguns minutos é menor que o de parar de vender. Ele loga ERROR para alertar, e o circuit breaker evita que cada request pague o timeout de conexão enquanto o Redis está fora.",
+      },
+      {
+        q: "Por que monolito modular e não microsserviços?",
+        a: "Build solo, ~100 pedidos/mês. Microsserviço aqui compraria latência de rede e complexidade de deploy sem resolver nenhum problema que eu tenha. Os módulos têm fronteira clara para o dia em que valer a pena separar.",
+      },
     ],
     year: "2026",
   },
   {
     slug: "sentinel",
     name: "Sentinel",
-    tagline: "Real-time 3D monitoring dashboard with sci-fi aesthetics",
+    tagline:
+      "Monitoramento em tempo real: métricas do backend FastAPI transmitidas por WebSocket e renderizadas em 3D",
     description:
-      "Full-stack 3D dashboard where my GitHub repositories orbit a reactive core as satellites. Repo size maps to stars + forks, color to language, orbit speed to push recency. Custom GLSL shaders create plasma effects, holographic grids, and glitch overlays. WebSocket streams CPU/RAM/disk metrics that drive the core's pulse and color.",
+      "Dashboard 3D full-stack em que os repositórios do meu GitHub orbitam um núcleo reativo como satélites. O tamanho do repositório mapeia stars + forks, a cor mapeia a linguagem e a velocidade da órbita mapeia o push mais recente. Shaders GLSL próprios desenham plasma, grids holográficos e camadas de glitch. O backend FastAPI transmite métricas de CPU, RAM e disco por WebSocket, e são elas que dirigem o pulso e a cor do núcleo.",
     category: "featured",
     status: "deployed",
     stack: [
@@ -80,26 +137,11 @@ export const projects: Project[] = [
     demo: "https://sentinel-mu-navy.vercel.app",
     cover: "/projects/sentinel/cover.png",
     highlights: [
-      "Custom GLSL shaders (plasma, holographic grid, glitch)",
-      "Camera fly-to with GSAP, bloom + chromatic aberration",
-      "Real-time WebSocket streaming with auto-reconnect",
-      "Inspired by Iron Man / Minority Report interfaces",
+      "Streaming de métricas por WebSocket com reconexão automática e limite de tentativas",
+      "Shaders GLSL próprios (plasma, grid holográfico, glitch)",
+      "Câmera fly-to com GSAP, bloom e aberração cromática",
+      "Backend FastAPI empurra métricas de CPU/RAM/disco que dirigem a cena",
     ],
-    year: "2026",
-  },
-  {
-    slug: "universe-project",
-    name: "Universe",
-    tagline: "Full-stack Next.js TypeScript application",
-    description:
-      "Aplicação full-stack TypeScript em Next.js privada e deployada em produção. Stack moderna com App Router, otimizações de performance e tipagem estrita end-to-end.",
-    category: "featured",
-    status: "deployed",
-    isPrivate: true,
-    stack: ["Next.js", "TypeScript", "React", "Vercel"],
-    github: "https://github.com/souzxxx/universe-project",
-    demo: "https://universe-project-navy.vercel.app",
-    cover: "/projects/universe-project/cover.png",
     year: "2026",
   },
   {
@@ -112,7 +154,6 @@ export const projects: Project[] = [
     status: "deployed",
     isPrivate: true,
     stack: ["JavaScript", "React", "Vite", "Vercel"],
-    github: "https://github.com/souzxxx/usp-fono-isa",
     demo: "https://usp-fono.vercel.app",
     cover: "/projects/usp-fono/cover.png",
     highlights: [
@@ -121,12 +162,39 @@ export const projects: Project[] = [
     ],
     year: "2026",
   },
+  {
+    slug: "projeto-software",
+    name: "Projeto Software — Microsserviços",
+    tagline: "Sistema distribuído: Gateway (Java) + User Service (Python) + Connections (Java) + Frontend",
+    description:
+      "Arquitetura de microsserviços de um projeto acadêmico: API Gateway em Java/Spring routeando para User Service (Python/FastAPI) e Connections Service (Java), com frontend JavaScript. Demonstra design distribuído, comunicação inter-serviços e pipeline de deploy.",
+    category: "featured",
+    status: "shipped",
+    stack: [
+      "Java",
+      "Spring",
+      "Python",
+      "FastAPI",
+      "JavaScript",
+      "Docker",
+      "Vercel",
+    ],
+    github: "https://github.com/souzxxx/projeto-software-gateway",
+    cover: "/projects/projeto-software/cover.png",
+    highlights: [
+      "4 serviços independentes: gateway, user service, connections e frontend",
+      "Gateway pattern com Java/Spring",
+      "Python FastAPI + Java backends",
+      "Comunicação inter-serviços via HTTP",
+    ],
+    year: "2026",
+  },
 
   // ─── ML & DATA ──────────────────────────────────────────────
   {
     slug: "ml-copa",
     name: "ML-Copa",
-    tagline: "FIFA World Cup prediction with XGBoost + adaptive Elo + Dixon-Coles",
+    tagline: "Predição de Copa do Mundo com XGBoost, Elo adaptativo e Dixon-Coles",
     description:
       "Sistema de predição de Copa do Mundo combinando +50.000 partidas internacionais históricas com ensemble XGBoost, ratings Elo adaptativos e modelos probabilísticos Poisson/Dixon-Coles. Pipeline CRISP-DM com feature engineering pré-match e probabilidades calibradas.",
     category: "ml",
@@ -150,41 +218,24 @@ export const projects: Project[] = [
     year: "2026",
   },
 
-  // ─── SYSTEMS & ARCHITECTURE ─────────────────────────────────
+  // ─── MORE WORK ──────────────────────────────────────────────
   {
-    slug: "projeto-software",
-    name: "Projeto Software — Microsserviços",
-    tagline: "Sistema distribuído: Gateway (Java) + User Service (Python) + Connections (Java) + Frontend",
+    slug: "universe-project",
+    name: "Universe",
+    tagline: "Aplicação full-stack Next.js + TypeScript (privada)",
     description:
-      "Arquitetura de microsserviços em produção acadêmica: API Gateway em Java/Spring routeando para User Service (Python/FastAPI) e Connections Service (Java). Frontend JavaScript deployado na Vercel. Demonstra design distribuído, comunicação inter-serviços e deploy contínuo.",
-    category: "systems",
-    status: "deployed",
-    stack: [
-      "Java",
-      "Spring",
-      "Python",
-      "FastAPI",
-      "JavaScript",
-      "Docker",
-      "Vercel",
-    ],
-    github: "https://github.com/souzxxx/projeto-software-gateway",
-    demo: "https://projeto-sofware-2026-1-front-lyart.vercel.app",
-    cover: "/projects/projeto-software/cover.svg",
-    highlights: [
-      "4 serviços independentes deployados",
-      "Gateway pattern com Java/Spring",
-      "Python FastAPI + Java backends",
-      "Frontend JS deployado na Vercel",
-    ],
+      "Aplicação full-stack TypeScript em Next.js, de repositório privado. Stack moderna com App Router, otimizações de performance e tipagem estrita end-to-end.",
+    category: "more",
+    status: "shipped",
+    isPrivate: true,
+    stack: ["Next.js", "TypeScript", "React", "Vercel"],
+    cover: "/projects/universe-project/cover.png",
     year: "2026",
   },
-
-  // ─── MORE WORK ──────────────────────────────────────────────
   {
     slug: "soli",
     name: "Soli",
-    tagline: "Full-stack social/community application",
+    tagline: "Aplicação social full-stack (JS + Python)",
     description:
       "Aplicação full-stack com frontend e backend separados (JS + Python). Implementação completa com arquitetura cliente-servidor.",
     category: "more",
@@ -208,7 +259,7 @@ export const projects: Project[] = [
   {
     slug: "pokedex",
     name: "Pokédex",
-    tagline: "React + TypeScript + Vite Pokédex",
+    tagline: "Pokédex em React + TypeScript + Vite",
     description:
       "Pokédex completa em React 18 + TypeScript com Vite, consumindo PokéAPI. Foco em type safety, performance de bundle e UX responsivo.",
     category: "more",
@@ -284,8 +335,8 @@ export const systemsProjects = projects.filter((p) => p.category === "systems");
 export const moreProjects = projects.filter((p) => p.category === "more");
 
 export const stats = {
-  totalRepos: 22,
-  liveDeployments: 5,
-  semesters: 4,
-  yearsBuilding: 3,
+  matchesProcessed: 50,
+  testFiles: 218,
+  domainModules: 12,
+  distributedServices: 4,
 };

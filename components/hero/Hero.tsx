@@ -125,10 +125,10 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.65 }}
             className="mt-6 grid grid-cols-2 gap-y-8 border-t border-border/60 pt-10 sm:grid-cols-4"
           >
-            <StatsCounter value={stats.totalRepos} label="GitHub Repos" suffix="+" />
-            <StatsCounter value={stats.liveDeployments} label="Live Deploys" />
-            <StatsCounter value={stats.semesters} label="Semestres BCC" />
-            <StatsCounter value={stats.yearsBuilding} label="Anos buildando" suffix="+" />
+            <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k+" />
+            <StatsCounter value={stats.testFiles} label="arquivos de teste" />
+            <StatsCounter value={stats.domainModules} label="módulos de domínio" />
+            <StatsCounter value={stats.distributedServices} label="serviços distribuídos" />
           </motion.div>
         </div>
       </div>
