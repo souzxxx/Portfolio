@@ -82,10 +82,30 @@ export function TerminalLine({ className }: { className?: string }) {
         {COMANDO}
       </code>
 
+      {/* A REGRA SISTEMATICA do anel (About.tsx, Footer.tsx, NavBar.tsx,
+          ProjectGrid.tsx) vale aqui numa geometria invertida — e por isso o
+          remedio NAO e `focus-visible:outline-cream`. Este botao encosta nas
+          bordas da caixa creme, que por sua vez esta sobre o carvao do hero:
+          com offset +2px o anel e desenhado FORA da caixa em tres lados e
+          DENTRO dela no quarto, ou seja, atravessa dois fundos. Nenhuma cor
+          chapada resolve os quatro. MEDIDO (diff de pixel focado/nao focado,
+          tab real nº 6): `currentColor` carvao dava topo/base/direita 1.00:1;
+          trocar por creme conserta esses tres e mata a esquerda, tambem 1.00:1.
+
+          Entao o conserto tem duas metades. (1) INVERTER o campo no foco, que
+          ja e o idioma de feedback do site — e aqui `currentColor` vira creme
+          sozinho, sem precisar de `outline-cream`, porque esta inversao anda no
+          sentido contrario a dos outros quatro (parte do claro, nao do escuro).
+          (2) Puxar o anel para DENTRO, o que restaura a premissa do anel global
+          em globals.css: `currentColor` so e AA por construcao quando o anel cai
+          sobre o fundo contra o qual aquela cor foi medida.
+          MEDIDO depois: 15.66:1 nos quatro lados em 1440 e 390, e tambem em
+          hover+foco — estado em que a inversao sozinha ainda reprovava, porque
+          o preenchimento ja vinha invertido pelo hover e so restava o anel. */}
       <button
         type="button"
         onClick={copiar}
-        className="min-h-[2.75rem] shrink-0 border-l border-dashed border-carvao/30 px-3 font-mono text-tag uppercase text-carvao motion-safe:transition-colors motion-safe:duration-150 hover:bg-carvao hover:text-cream"
+        className="min-h-[2.75rem] shrink-0 border-l border-dashed border-carvao/30 px-3 font-mono text-tag uppercase text-carvao motion-safe:transition-colors motion-safe:duration-150 hover:bg-carvao hover:text-cream focus-visible:bg-carvao focus-visible:text-cream focus-visible:[outline-offset:-2px]"
       >
         {/* Unico feedback animado da secao — e e troca de TEXTO, nao de layout:
             nada desliza, nada pulsa. `aria-live` para o leitor de tela receber
