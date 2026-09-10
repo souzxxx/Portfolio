@@ -4,36 +4,128 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
+    /* Gutter lateral unico do site: 20px @390 · 48px @1200+. */
+    --gutter: clamp(1.25rem, 4vw, 3rem);
+    /* Padding vertical de bloco — o ritmo entre campos de cor. */
+    --block: clamp(4.5rem, 9vw, 8.5rem);
+    /* Coluna do numero nos projetos; colapsa a 0 no mobile. */
+    --rail: clamp(0px, 7vw, 6rem);
   }
+
   html {
     scroll-behavior: smooth;
     /* Rede de seguranca contra overflow horizontal. `clip` (e nao `hidden`)
        preserva position: sticky da navbar e nao cria contexto de scroll. */
     overflow-x: clip;
   }
+
   body {
-    @apply bg-base text-fg antialiased;
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.15), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 30%, rgba(168, 85, 247, 0.08), transparent),
-      radial-gradient(ellipse 50% 30% at 0% 70%, rgba(34, 211, 238, 0.05), transparent);
-    font-feature-settings: "ss01", "cv11";
+    @apply bg-cream text-ink font-sans antialiased;
+    /* Zero gradiente em qualquer lugar do site, inclusive no body: os campos
+       de cor sao chapados e trocam por secao. */
+    background-image: none;
   }
 
-  /* Foco visivel global. `:where()` tem especificidade 0, entao qualquer
-     componente pode sobrescrever sem !important, e links, botoes e os
-     thumbnails da galeria ganham anel de foco sem tocar em cada arquivo.
-     #818cf8 sobre #0a0a0f = 6.62:1, acima do minimo 3:1 para nao-texto. */
+  /* Os tres campos de cor do site. O fundo fica SEMPRE na <section> e NUNCA
+     num wrapper interno — e isso que evita a costura de 1px entre blocos em
+     DPR fracionario (1.25x, 1.5x), onde dois retangulos empilhados nao caem
+     no mesmo pixel fisico. */
+  .block-blue {
+    @apply bg-blue text-cream;
+  }
+  .block-paper {
+    @apply bg-cream text-ink;
+  }
+  .block-ink {
+    @apply bg-ink text-cream;
+  }
+
+  /* Ritmo de bloco: um unico par de paddings para o site inteiro. */
+  .bloco {
+    padding-block: var(--block);
+    padding-inline: var(--gutter);
+  }
+
+  /* Medida de leitura confortavel para prosa. */
+  .medida {
+    max-width: 68ch;
+  }
+
+  /* Divisor UNICO do site. `currentColor` resolve os tres fundos com uma
+     classe so: sobre azul sai creme, sobre papel sai breu, sobre breu sai
+     creme — sem variante por secao. */
+  .rule {
+    border: 0;
+    border-top: 1px dashed currentColor;
+    opacity: 0.35;
+  }
+
+  /* Cianotipia autoral, 100% CSS, sobre os screenshots reais do repo:
+     azul embaixo → imagem dessaturada em `screen` → creme em `multiply` →
+     hachura diagonal por cima. `isolation: isolate` cria o contexto de
+     mesclagem aqui dentro e impede o blend de vazar para a pagina inteira. */
+  .duotone {
+    position: relative;
+    isolation: isolate;
+    background: #1620dc;
+    --duo-contrast: 1.28;
+    --duo-bright: 1.06;
+  }
+  .duotone > img {
+    filter: grayscale(1) contrast(var(--duo-contrast)) brightness(var(--duo-bright));
+    mix-blend-mode: screen;
+    opacity: 0.92;
+  }
+  /* A camada de multiply e CREME, nao azul — e ela que abre a segunda cor da
+     cianotipia. MEDIDO nos screenshots reais do repo: com #1620DC aqui, o
+     multiply zera os canais R e G do que o `screen` acabou de abrir (o azul
+     tem R .086 / G .125) e a imagem inteira vira uma chapa azul sem detalhe;
+     com #F5F3EE (.96/.95/.93) as altas-luzes viram creme, as sombras ficam
+     azuis e o desenho da UI continua legivel. */
+  .duotone::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    mix-blend-mode: multiply;
+    background: #f5f3ee;
+  }
+  .duotone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    mix-blend-mode: multiply;
+    opacity: 0.16;
+    background: repeating-linear-gradient(35deg, #0d1596 0 1.4px, transparent 1.4px 6px);
+  }
+  /* Volta a cor real: hover do desktop e botao [ COR ] do mobile. */
+  .duotone[data-color="on"] > img {
+    filter: none;
+    mix-blend-mode: normal;
+    opacity: 1;
+  }
+  .duotone[data-color="on"]::after,
+  .duotone[data-color="on"]::before {
+    display: none;
+  }
+
+  /* Foco AA POR CONSTRUCAO nos tres fundos: o anel usa `currentColor`, e a
+     cor de texto de cada bloco JA foi medida contra aquele fundo na matriz do
+     tailwind.config.ts. Logo o anel herda a razao do texto (8.33:1 no azul,
+     16.61:1 no papel e no breu) sem precisar de uma cor de foco por secao.
+     `:where()` tem especificidade 0, entao qualquer componente sobrescreve
+     sem !important. */
   :where(a, button, [tabindex]:not([tabindex="-1"])):focus-visible {
-    outline: 2px solid #818cf8;
-    outline-offset: 3px;
-    border-radius: 4px;
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 0;
   }
 
   ::selection {
-    background: rgba(99, 102, 241, 0.4);
-    color: #fff;
+    background: #1620dc;
+    color: #f5f3ee;
   }
 
   ::-webkit-scrollbar {
@@ -41,15 +133,12 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #0a0a0f;
+    background: #f5f3ee;
   }
   ::-webkit-scrollbar-thumb {
-    background: #262640;
-    border-radius: 6px;
-    border: 2px solid #0a0a0f;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #3a3a5e;
+    background: #141414;
+    border-radius: 0;
+    border: 0;
   }
 }
 
