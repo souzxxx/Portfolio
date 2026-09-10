@@ -23,6 +23,15 @@ import { Meta } from "../ui/Meta";
  * A malha (numero de raios, abertura do leque, deslocamento do foco e
  * comprimento de cada raio) muda de projeto para projeto, entao duas capas
  * vizinhas no indice nunca saem iguais — mas cada uma e estavel entre builds.
+ *
+ * DUAS ESCALAS, `size`. A capa nasceu para a chapa de 22rem da fita editorial,
+ * onde as iniciais em `clamp(2.5rem, 9vw, 4.5rem)` ocupam o quadro. MEDIDO: na
+ * miniatura de 56x42 do indice esse mesmo clamp trava em 72px, porque `vw` le a
+ * VIEWPORT e nao o container — o glifo nasce maior que a caixa e o
+ * `overflow-hidden` corta um fragmento ilegivel. `size="thumb"` troca o clamp
+ * por um tamanho fixo de 1.05rem e cala o rotulo de linguagem, que a 11px numa
+ * caixa de 42px era ruido. A geometria do leque nao muda: e ela que carrega a
+ * identidade nessa escala.
  */
 
 function hash(s: string) {
@@ -40,11 +49,13 @@ export function ProjectCover({
   slug,
   name,
   language,
+  size = "full",
   className,
 }: {
   slug: string;
   name: string;
   language?: string;
+  size?: "full" | "thumb";
   className?: string;
 }) {
   const h = hash(slug);
@@ -106,10 +117,17 @@ export function ProjectCover({
         })}
       </svg>
 
-      <span className="relative font-display text-[clamp(2.5rem,9vw,4.5rem)] uppercase leading-none text-cream">
+      <span
+        className={clsx(
+          "relative font-display uppercase leading-none text-cream",
+          size === "thumb"
+            ? "text-[1.05rem] tracking-alta"
+            : "text-[clamp(2.5rem,9vw,4.5rem)]",
+        )}
+      >
         {initials}
       </span>
-      {language && (
+      {language && size === "full" && (
         <Meta items={[language]} className="relative mt-2 text-cream-600" />
       )}
     </div>

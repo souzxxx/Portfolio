@@ -100,7 +100,13 @@ export function FeaturedCard({
                       alt={`${project.name} — ${active.label}`}
                       ratio="var(--capa)"
                       sizes={CAPA_SIZES}
-                      priority={index === 0 && activeIdx === 0}
+                      // SEM `priority`, nem no primeiro card. MEDIDO em
+                      // 1440x900: esta chapa nasce em y = 2239px, duas telas e
+                      // meia abaixo da dobra — e `priority` emitiria no <head>
+                      // um `<link rel="preload" as="image" fetchpriority="high">`
+                      // com srcset ate 1920w, roubando banda e prioridade de
+                      // rede da Instrument Serif do <h1>, que e o LCP. O
+                      // DuotoneImage ja cai em `loading="lazy"` sem a prop.
                       // UI clara: com o preset padrao a imagem estoura no
                       // `screen` e a chapa sai lavada.
                       preset="light"
@@ -156,7 +162,6 @@ export function FeaturedCard({
               alt={`${project.name} — captura de tela`}
               ratio="var(--capa)"
               sizes={CAPA_SIZES}
-              priority={index === 0}
               preset="dark"
               className={CAPA_SANGRIA}
             />
@@ -190,7 +195,13 @@ export function FeaturedCard({
             {project.name}
           </h3>
 
-          <p className="mt-3 font-mono text-tag uppercase text-blue">
+          {/* MEDIDA PROPRIA, mais apertada que a `medida` de 68ch da prosa: em
+              `text-tag` (11px, tracking 0.18em, caixa alta) a linha corria os
+              ~940px da coluna inteira, ou seja ~150 caracteres na tipografia
+              menos legivel do sistema. 52ch da mono param a linha antes disso, e
+              `text-balance` reparte as duas linhas em vez de deixar a segunda
+              orfa — era o caso do commerce-nda ("REDIS COM CIRCUIT BREAKER"). */}
+          <p className="mt-3 max-w-[52ch] text-balance font-mono text-tag uppercase text-blue">
             {project.tagline}
           </p>
 

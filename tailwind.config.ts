@@ -79,13 +79,18 @@ const config: Config = {
       // DECISAO DE SISTEMA: `font-mono` passa a ser Courier Prime (maquina de
       // escrever), o que converte as 23 ocorrencias de `font-mono` ja
       // existentes no repo numa unica edicao, sem re-classar arquivo por
-      // arquivo. Geist Mono continua instalada e disponivel como `font-code`
-      // para codigo real. NAO existe token `font-type`.
+      // arquivo. NAO existe token `font-type`.
+      //
+      // `font-code` continua sendo o slot de CODIGO REAL, mas hoje resolve na
+      // mono do sistema: enquanto ele nao tiver call site, carregar 71 kB de
+      // Geist Mono no preload do documento e pagar por um glifo que nunca e
+      // pintado (ver a nota em app/layout.tsx). O dia em que existir um bloco
+      // de codigo, `--font-geist-mono` volta para a frente desta lista.
       fontFamily: {
         display: ["var(--font-display)", "Times New Roman", "Times", "serif"],
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-typewriter)", "Courier New", "monospace"],
-        code: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        code: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
         bitmap: ["var(--font-bitmap)", "Courier New", "monospace"],
       },
       // Escala fluida. Pares [size, { lineHeight, letterSpacing }] para que o
@@ -96,8 +101,15 @@ const config: Config = {
       // que nao tem acento. Qualquer titulo que possa carregar C/A/O com til ou
       // cedilha (FORMACAO, DECISOES, SAO PAULO) usa `d2` ou `d3`, cujo leading
       // minimo e 0.95 — assim o til nao encosta na linha de cima.
+      //
+      // O TETO DE `d1` CAIU DE 8.5rem PARA 7rem. MEDIDO em 1440x900: com 136px
+      // as duas linhas do nome comiam 239px e empurravam CTAs e numeros para
+      // fora da primeira dobra. Com 112px o nome continua sendo o maior
+      // elemento da pagina por larga margem (o proximo, `d2`, e 72px) e a
+      // coluna esquerda devolve 42px. `d1` so tem UM call site — o <h1> do
+      // hero —, entao o ajuste nao vaza para nenhum outro titulo.
       fontSize: {
-        d1: ["clamp(3.5rem, 12vw, 8.5rem)", { lineHeight: "0.88", letterSpacing: "0.02em" }],
+        d1: ["clamp(3.5rem, 12vw, 7rem)", { lineHeight: "0.88", letterSpacing: "0.02em" }],
         d2: ["clamp(2.25rem, 6vw, 4.5rem)", { lineHeight: "0.95", letterSpacing: "0.03em" }],
         d3: ["clamp(1.5rem, 3.4vw, 2.375rem)", { lineHeight: "1.02", letterSpacing: "0.03em" }],
         wm: ["clamp(5rem, 27vw, 22rem)", { lineHeight: "0.74", letterSpacing: "-0.01em" }],

@@ -13,6 +13,17 @@ import { useEffect, useRef, useState } from "react";
  * `scripts/check-assets.ts` derruba o build se ele sumir. Nenhum `npx` de
  * pacote nao publicado, nenhum `curl | bash` de instalador que nao existe: a
  * unica coisa que um portfolio nao pode fazer e blefar um comando.
+ *
+ * E POR ISSO O COMANDO QUEBRA LINHA EM VEZ DE ROLAR. MEDIDO: com
+ * `white-space: pre` o <code> tinha 452px de caixa para 578px de texto em 1440
+ * (126px escondidos) e 272px para os mesmos 578 em 390 — menos de metade
+ * visivel —, com a barra de rolagem deliberadamente suprimida. O resultado lia
+ * como texto CORTADO, nao como regiao rolavel: terminava em "…vercel.app/leona"
+ * colado no filete. Um comando so e verificavel se for legivel inteiro, entao
+ * ele passa a se comportar como num terminal de verdade, que reflui em vez de
+ * rolar na horizontal. `break-all` porque o que quebra e uma URL: cortar no
+ * meio do caminho e o comportamento nativo do emulador de terminal, e o texto
+ * que o botao copia continua vindo da constante, nunca do DOM.
  */
 const COMANDO =
   "curl -sO https://portfolio-souzxxxs-projects.vercel.app/leonardo-souza-cv.pdf";
@@ -61,11 +72,12 @@ export function TerminalLine({ className }: { className?: string }) {
         CV
       </span>
 
-      {/* O comando rola DENTRO do proprio container. Em 390px o texto tem ~76
-          caracteres e nao cabe — mas quem rola e este <code>, nunca o body. */}
+      {/* `pre-wrap` e nao `pre`: preserva os espacos do comando (e o que separa
+          a flag `-sO` da URL) e ainda assim deixa a linha refluir. Duas linhas
+          no desktop, tres em 390px — a caixa tem `min-h`, nao altura fixa. */}
       <code
         ref={codigo}
-        className="min-w-0 flex-1 overflow-x-auto whitespace-pre px-3 py-2.5 font-mono text-cmd text-ink [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="min-w-0 flex-1 whitespace-pre-wrap break-all px-3 py-2.5 font-mono text-cmd text-ink"
       >
         {COMANDO}
       </code>

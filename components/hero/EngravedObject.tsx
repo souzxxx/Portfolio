@@ -14,14 +14,28 @@
  * sozinho paga o custo das tres fontes novas. A dependencia continua no
  * package.json, como pedido.
  *
- * ── PLANO B (documentado, ainda nao acionado) ─────────────────────────────
- * Se a hachura apresentar moire em telas 2x e nao for possivel limpar pelo
- * shader (primeiro caminho: subir o passo de 5.0px/6.5px, depois travar o dpr
- * em 1), substitua a coluna direita por um SVG procedural de raios — linhas
- * retas de 1px em creme irradiando de um foco, determinístico, sem
- * `Math.random`, na mesma familia da capa procedural dos projetos — e MANTENHA
- * a dependencia instalada. O hero continua sendo bloco azul + serifa, que e o
- * que faz a identidade; o objeto e ornamento, nunca informacao.
+ * ── PLANO B (primeiro caminho ACIONADO) ───────────────────────────────────
+ * A trama saia como retícula de pontos na metade em sombra. O primeiro caminho
+ * do plano — limpar pelo shader — resolveu: as duas familias de linha estavam a
+ * exatamente 90 graus uma da outra, o que produz malha quadrada e nao
+ * contra-hachura (a analise completa esta em `hatch.glsl.ts`). Nao foi preciso
+ * travar o dpr nem trocar a coluna por SVG.
+ *
+ * O SOLIDO PASSOU A SER FACETADO no mesmo ajuste. `icosahedronGeometry` com
+ * detalhe 4 e uma esfera para todos os efeitos: normal continua, tom continuo,
+ * e com a hachura ancorada na tela (nao no objeto) a rotacao nao entrega
+ * volume nenhum — a figura lia como um DISCO texturizado. Com detalhe 0 o
+ * three devolve normais planas (`computeVertexNormals`, 20 faces): cada face
+ * ganha um tom chapado proprio e o degrau de densidade de uma face para a
+ * vizinha e a propria leitura de volume, que e exatamente como uma gravura
+ * descreve um solido. Detalhe >= 1 volta a normalizar as normais e desfaz isto.
+ *
+ * SE PRECISAR DO PLANO B COMPLETO: substitua a coluna direita por um SVG
+ * procedural de raios — linhas retas de 1px em creme irradiando de um foco,
+ * determinístico, sem `Math.random`, na mesma familia da capa procedural dos
+ * projetos — e MANTENHA a dependencia instalada. O hero continua sendo bloco
+ * azul + serifa, que e o que faz a identidade; o objeto e ornamento, nunca
+ * informacao.
  */
 
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -65,7 +79,10 @@ function EngravedIcosahedron() {
     // 4.13, e a figura ocupa 75% do quadro com folga em volta — que e a
     // proporcao de uma estampa, nao de um zoom.
     <mesh ref={mesh} position={[0, 0, -2]}>
-      <icosahedronGeometry args={[1.55, 4]} />
+      {/* Detalhe 0 = 20 faces com normal plana. Ver a nota de faceteamento no
+          cabecalho: e o que troca a leitura de "disco texturizado" por
+          "solido gravado". */}
+      <icosahedronGeometry args={[1.55, 0]} />
       <shaderMaterial
         vertexShader={vertex}
         fragmentShader={fragment}

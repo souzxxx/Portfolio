@@ -44,13 +44,14 @@ export function Hero() {
       <div className="mx-auto grid w-full max-w-[96rem] items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)] lg:gap-x-12">
         {/* COLUNA ESQUERDA — sempre alinhada a esquerda, nunca centralizada.
             `min-w-0` nao e decoracao: item de grade nasce com `min-width: auto`,
-            ou seja, nunca encolhe abaixo do proprio conteudo minimo. O <code> do
-            terminal e `white-space: pre` e mede 573px, entao SEM esta classe a
-            coluna inteira estica para 573px em 390px de tela — e como o `html`
-            tem `overflow-x: clip`, o navegador nao mostra barra: so diminui o
-            zoom da pagina inteira e o hero aparece pequeno, sem nenhum sintoma
-            obvio de que ha overflow. Com `min-w-0` a coluna cai para a largura
-            da faixa e quem rola e o <code>, dentro da propria barra. */}
+            ou seja, nunca encolhe abaixo do proprio conteudo minimo. Enquanto o
+            <code> do terminal era `white-space: pre` ele media 573px e, SEM
+            esta classe, esticava a coluna inteira para 573px em 390px de tela —
+            e como o `html` tem `overflow-x: clip`, o navegador nao mostrava
+            barra: so diminuia o zoom da pagina e o hero saia pequeno, sem
+            sintoma obvio. O comando passou a quebrar linha (ver TerminalLine),
+            entao o caso agudo morreu; `min-w-0` fica como rede para o proximo
+            filho de conteudo minimo largo que entrar nesta coluna. */}
         <div className="min-w-0 max-w-[54ch]">
           {/* Selo de capa: os mesmos fatos da antiga linha de status, sem
               pilula, sem borda e sem o ponto verde pulsando. Nenhum ponto pulsa
@@ -90,7 +91,7 @@ export function Hero() {
             {/* Copy inalterada. Sobre azul existe UMA cor de texto aprovada para
                 prosa, entao a enfase deixa de ser cor e vira traco: sublinhado
                 de 1px com offset de 6px. */}
-            <p className="mt-10 medida font-sans text-lead text-cream">
+            <p className="mt-8 medida font-sans text-lead text-cream">
               Construo backend, web e IA que rodam em produção:{" "}
               <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
                 assistente LLM sobre os dados do próprio usuário
@@ -111,14 +112,14 @@ export function Hero() {
               antes.
             </p>
 
-            <TerminalLine className="mt-10" />
+            <TerminalLine className="mt-8" />
 
             {/* CTAs. No mobile os retangulos encostam: `gap-px` sobre um fundo
                 `bg-cream/30` do container preenche a fresta entre as bordas
                 cremes de dois botoes vizinhos, entao a costura le como UM filete
                 continuo em vez de duas linhas com azul no meio — truque de
                 prancha. Vira fila com folga a partir de `sm`. */}
-            <div className="mt-10 grid grid-cols-2 gap-px bg-cream/30 sm:flex sm:flex-wrap sm:gap-3 sm:bg-transparent">
+            <div className="mt-8 grid grid-cols-2 gap-px bg-cream/30 sm:flex sm:flex-wrap sm:gap-3 sm:bg-transparent">
               <div className={clsx(cta, "col-span-2")}>
                 <Botao href="#projects" variant="solid" className={clsx(ctaLabel, "text-blue")}>
                   Ver projetos ↓
@@ -161,7 +162,7 @@ export function Hero() {
               </div>
             </div>
 
-            <div className="mt-12 grid grid-cols-2 border-t border-dashed border-cream/35 sm:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 border-t border-dashed border-cream/35 sm:grid-cols-4">
               {/* 49.071 linhas em ml-copa/data/raw/results.csv — arredondado, sem "+" */}
               <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k" />
               <StatsCounter value={stats.testFiles} label="arquivos de teste" />
@@ -169,12 +170,15 @@ export function Hero() {
               <StatsCounter value={stats.distributedServices} label="serviços distribuídos" />
             </div>
 
-            {/* Indicador de scroll ESTATICO. A pulsacao some: um traco e
-                uma palavra bastam, e nada pisca no site depois desta wave. */}
-            <div className="mt-14 flex items-center gap-3 text-cream-600">
-              <span className="h-px w-6 bg-current" />
-              <span className="font-mono text-tag uppercase">role</span>
-            </div>
+            {/* O INDICADOR "ROLE" SAIU. MEDIDO em 1440x900: ele terminava em
+                y = 1229 numa viewport de 900 — uma affordance de rolagem que so
+                aparece DEPOIS de rolar e contraditoria por construcao, e ainda
+                custava 70px de altura ao bloco, empurrando os numeros para
+                ainda mais longe da dobra. Ancorar em `absolute bottom` nao
+                resolve: o hero mede ~1150px, entao o rodape do bloco tambem
+                esta abaixo da primeira tela. A referencia desta identidade nao
+                tem indicador de rolagem nenhum — o corte do bloco azul na borda
+                inferior ja e o convite. */}
           </Reveal>
         </div>
 

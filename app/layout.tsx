@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import { Instrument_Serif, Courier_Prime, Silkscreen } from "next/font/google";
 import "./globals.css";
 
@@ -20,7 +19,16 @@ const display = Instrument_Serif({
 });
 
 // Mono de maquina de escrever: e o `font-mono` do site inteiro (dado real,
-// comandos, rotulos de metadado). Geist Mono segue disponivel como `font-code`.
+// comandos, rotulos de metadado).
+//
+// GEIST MONO SAIU DO <html>. MEDIDO no HTML de producao: ela entrava como o
+// segundo dos tres `<link rel="preload" as="font">` — 71 kB no caminho critico,
+// com prioridade alta, disputando banda com a Instrument Serif (15 kB) que e a
+// fonte do LCP — para nao pintar UM glifo: `font-code` (o unico token que
+// apontava para `--font-geist-mono`) tem zero call site em app/ e components/.
+// O token `font-code` continua declarado no tailwind.config.ts, agora sobre a
+// mono do sistema. Quando existir um bloco de codigo REAL, o caminho e trazer
+// Geist Mono de volta aqui com `preload: false` e re-apontar o token.
 const typewriter = Courier_Prime({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -120,7 +128,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${display.variable} ${typewriter.variable} ${bitmap.variable}`}
+      className={`${GeistSans.variable} ${display.variable} ${typewriter.variable} ${bitmap.variable}`}
     >
       <body>
         <script

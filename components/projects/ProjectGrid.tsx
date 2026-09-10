@@ -79,7 +79,15 @@ const ROW =
   "block motion-safe:transition-colors motion-safe:duration-150 " +
   "active:bg-cream active:text-ink " +
   "group-focus-within:bg-cream group-focus-within:text-ink " +
-  "md:group-hover:bg-cream md:group-hover:text-ink";
+  "md:group-hover:bg-cream md:group-hover:text-ink " +
+  // REGRA SISTEMATICA: todo elemento que INVERTE o fundo no foco precisa fixar
+  // a cor do anel na cor do BLOCO, nunca deixa-la em `currentColor`. O anel
+  // global (globals.css) e `2px solid currentColor` com offset de 2px, ou seja,
+  // ele e desenhado FORA da caixa invertida — sobre o breu da secao. Como a
+  // linha focada vira `text-ink` #141414, `currentColor` daria 1:1 contra o
+  // fundo breu e o anel simplesmente nao existiria. Em creme sao 16.61:1.
+  // Mesmo ajuste ja aplicado em About.tsx, Footer.tsx e NavBar.tsx.
+  "focus-visible:outline-cream";
 const INV_600 =
   "text-cream-600 motion-safe:transition-colors motion-safe:duration-150 " +
   "group-active:text-ink-600 group-focus-within:text-ink-600 md:group-hover:text-ink-600";
@@ -159,7 +167,7 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
             <ProjectCover
               slug={project.slug}
               name={project.name}
-              language={project.stack[0]}
+              size="thumb"
               className="aspect-[4/3] h-full w-full"
             />
           </div>
