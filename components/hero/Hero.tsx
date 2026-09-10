@@ -1,186 +1,191 @@
 "use client";
 
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { ArrowDown, FileDown, Github, Linkedin, Mail } from "lucide-react";
-import { SerifDisplay } from "../ui/SerifDisplay";
+import clsx from "clsx";
+import { Botao } from "../ui/Botao";
+import { DashedRule } from "../ui/DashedRule";
+import { Meta } from "../ui/Meta";
+import { Reveal } from "../ui/Reveal";
 import { StatsCounter } from "./StatsCounter";
+import { TerminalLine } from "./TerminalLine";
 import { stats } from "@/lib/projects";
 
-const ParticleField = dynamic(
-  () => import("./ParticleField").then((m) => m.ParticleField),
+/**
+ * A gravura da direita entra por `next/dynamic` com `ssr: false`: o chunk do
+ * three nao existe no HTML, nao existe no bundle inicial e so e buscado depois,
+ * ja dentro do proprio componente, em `requestIdleCallback`. `loading: () =>
+ * null` porque nao ha o que mostrar enquanto carrega — o lugar dele ja e azul.
+ */
+const EngravedObject = dynamic(
+  () => import("./EngravedObject").then((m) => m.EngravedObject),
   { ssr: false, loading: () => null },
 );
 
+/**
+ * Cada CTA vive dentro de um wrapper de layout, e nao com classes de layout no
+ * proprio <Botao>: o `className` do primitivo pinta o <span> do rotulo (e a
+ * cor de inversao), enquanto largura, altura minima e posicao na grade sao
+ * responsabilidade do call site. `[&>a]:flex` troca o `inline-flex` do <a> por
+ * flex de nivel de bloco, o que faz `w-full` valer; `min-h-[2.75rem]` garante
+ * 44px de alvo de toque no mobile (o padding do primitivo sozinho da 42px).
+ */
+const cta = "bg-blue [&>a]:flex [&>a]:min-h-[2.75rem] [&>a]:w-full sm:[&>a]:w-auto";
+const ctaLabel = "w-full justify-center sm:w-auto sm:justify-start";
+
 export function Hero() {
   return (
-    // pb-20 reserva a faixa do indicador de scroll (`absolute bottom-8`, ~45px
-    // do fundo da section). Sem isso o conteúdo centralizado encosta no
-    // indicador e ele sobrepõe a última linha de stats — em 1440×900, 1280×800
-    // e 390×844. O padding é do fluxo; o `absolute` não o enxerga, então a
-    // folga sobra inteira para o indicador.
-    <section className="relative isolate flex min-h-screen items-center overflow-hidden pb-20 pt-24">
-      {/* 3D particle layer */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <ParticleField />
-      </div>
+    // `100svh` e nao `100vh`: no iOS a barra de endereco entra e sai da conta do
+    // `vh` e o bloco inteiro pula durante o primeiro scroll. `svh` mede a
+    // viewport pequena e fica parado.
+    //
+    // O bloco azul chapado E o fundo: nao ha mais glow radial, grade com mask
+    // nem os dois orbes de canto. Sete camadas viraram uma cor.
+    <section className="block-blue relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-[var(--gutter)] pb-[var(--block)] pt-[clamp(2rem,4vw,4rem)]">
+      <div className="mx-auto grid w-full max-w-[96rem] items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)] lg:gap-x-12">
+        {/* COLUNA ESQUERDA — sempre alinhada a esquerda, nunca centralizada.
+            `min-w-0` nao e decoracao: item de grade nasce com `min-width: auto`,
+            ou seja, nunca encolhe abaixo do proprio conteudo minimo. O <code> do
+            terminal e `white-space: pre` e mede 573px, entao SEM esta classe a
+            coluna inteira estica para 573px em 390px de tela — e como o `html`
+            tem `overflow-x: clip`, o navegador nao mostra barra: so diminui o
+            zoom da pagina inteira e o hero aparece pequeno, sem nenhum sintoma
+            obvio de que ha overflow. Com `min-w-0` a coluna cai para a largura
+            da faixa e quem rola e o <code>, dentro da propria barra. */}
+        <div className="min-w-0 max-w-[54ch]">
+          {/* Selo de capa: os mesmos fatos da antiga linha de status, sem
+              pilula, sem borda e sem o ponto verde pulsando. Nenhum ponto pulsa
+              em lugar nenhum do site depois desta wave. */}
+          <Meta
+            items={["SÃO PAULO, BR", "DISPONÍVEL PARA VAGAS", "BACKEND, WEB & IA"]}
+            className="text-cream-600"
+          />
 
-      {/* radial glow + grid overlay */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-radial-glow" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-grid-pattern bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]" />
+          {/* LCP. Fica FORA do <Reveal> de proposito: framer-motion serializa
+              `opacity: 0` no HTML do servidor, e esconder o maior elemento de
+              texto da pagina ate a hidratacao adiaria o LCP sem nenhum ganho
+              visual. O nome esta la no primeiro paint, com a display em
+              preload; o resto da coluna e que entra.
+              As duas linhas sao <span class="block"> — quebra decidida, nunca
+              herdada do wrap. Em 390px `d1` trava em 56px e "LEONARDO" ocupa
+              ~278px dos 350px uteis. */}
+          <h1 className="mt-8 font-display text-d1 uppercase text-cream">
+            <span className="block">Leonardo</span>
+            <span className="block">Souza</span>
+          </h1>
 
-      {/* Glows de canto. Gradiente radial em vez de `filter: blur()`: um blur
-          de 120px sobre um div de 384px obriga o compositor a manter um buffer
-          offscreen grande e refiltrá-lo a cada frame. O gradiente pinta direto,
-          sem buffer intermediário. Mesma cor, mesma opacidade, mesma posição. */}
-      <div className="pointer-events-none absolute -left-32 top-1/3 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.20),transparent_70%)]" />
-      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(147,51,234,0.20),transparent_70%)]" />
+          {/* A UNICA animacao da secao (fade + 10px, 0.45s). Eram oito. */}
+          <Reveal>
+            {/* O que era titulo em gradiente animado vira subtitulo de capa em
+                maquina de escrever, com tracking de 0.32em. */}
+            <p className="mt-6 font-mono text-selo uppercase text-cream">
+              Backend, Web &amp; IA
+            </p>
 
-      <div className="mx-auto w-full max-w-7xl px-6 md:px-12">
-        <div className="flex flex-col gap-12">
-          {/* Status line */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-muted"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-            disponível para vagas · backend, web &amp; IA · São Paulo, BR
-          </motion.div>
+            <DashedRule className="mt-6 border-cream" />
+            <Meta
+              items={["CIÊNCIA DA COMPUTAÇÃO", "INSPER", "5º SEMESTRE", "SÃO PAULO"]}
+              className="mt-4 text-cream-600"
+            />
 
-          {/* Headline */}
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="text-balance text-6xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-7xl md:text-8xl lg:text-[120px]"
-            >
-              Leonardo Souza
-            </motion.h1>
-            <motion.h2
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-4 text-balance text-2xl font-medium tracking-tight text-muted sm:text-3xl md:text-4xl lg:text-5xl"
-            >
-              <SerifDisplay>Backend, Web &amp; IA</SerifDisplay>
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.26 }}
-              className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-muted sm:text-sm"
-            >
-              Ciência da Computação · Insper · 5º semestre · São Paulo
-            </motion.p>
-          </div>
+            {/* Copy inalterada. Sobre azul existe UMA cor de texto aprovada para
+                prosa, entao a enfase deixa de ser cor e vira traco: sublinhado
+                de 1px com offset de 6px. */}
+            <p className="mt-10 medida font-sans text-lead text-cream">
+              Construo backend, web e IA que rodam em produção:{" "}
+              <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
+                assistente LLM sobre os dados do próprio usuário
+              </span>
+              ,{" "}
+              <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
+                busca vetorial com pgvector
+              </span>{" "}
+              para respostas ancoradas no contexto recuperado,{" "}
+              <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
+                outbox com retry exponencial e idempotência
+              </span>{" "}
+              e{" "}
+              <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
+                front-end Next.js em sistema com usuário real
+              </span>
+              . Three.js e GLSL entram quando o problema é de visualização — não
+              antes.
+            </p>
 
-          {/* Subline */}
-          <motion.p
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.32 }}
-            className="max-w-2xl text-balance text-lg leading-relaxed text-muted md:text-xl"
-          >
-            Construo backend, web e IA que rodam em produção:{" "}
-            <span className="text-fg">
-              assistente LLM sobre os dados do próprio usuário
-            </span>
-            ,{" "}
-            <span className="text-fg">
-              busca vetorial com pgvector
-            </span>{" "}
-            para respostas ancoradas no contexto recuperado,{" "}
-            <span className="text-fg">
-              outbox com retry exponencial e idempotência
-            </span>{" "}
-            e{" "}
-            <span className="text-fg">
-              front-end Next.js em sistema com usuário real
-            </span>
-            . Three.js e GLSL entram quando o problema é de visualização — não
-            antes.
-          </motion.p>
+            <TerminalLine className="mt-10" />
 
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.45 }}
-            className="flex flex-wrap items-center gap-4"
-          >
-            <a
-              href="#projects"
-              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-3 font-medium text-white shadow-[0_8px_30px_rgba(99,102,241,0.4)] transition hover:shadow-[0_12px_40px_rgba(99,102,241,0.6)]"
-            >
-              Ver projetos
-              <ArrowDown className="h-4 w-4 transition group-hover:translate-y-0.5" />
-            </a>
-            <a
-              href="https://github.com/souzxxx"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </a>
-            <a
-              href="https://www.linkedin.com/in/leonardo-souzx"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-            >
-              <Linkedin className="h-4 w-4" />
-              LinkedIn
-            </a>
-            <a
-              href="mailto:leonardosouzasilva9@gmail.com"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-            >
-              <Mail className="h-4 w-4" />
-              Email
-            </a>
-            <a
-              href="/leonardo-souza-cv.pdf"
-              download
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-            >
-              <FileDown className="h-4 w-4" />
-              Currículo
-            </a>
-          </motion.div>
+            {/* CTAs. No mobile os retangulos encostam: `gap-px` sobre um fundo
+                `bg-cream/30` do container preenche a fresta entre as bordas
+                cremes de dois botoes vizinhos, entao a costura le como UM filete
+                continuo em vez de duas linhas com azul no meio — truque de
+                prancha. Vira fila com folga a partir de `sm`. */}
+            <div className="mt-10 grid grid-cols-2 gap-px bg-cream/30 sm:flex sm:flex-wrap sm:gap-3 sm:bg-transparent">
+              <div className={clsx(cta, "col-span-2")}>
+                <Botao href="#projects" variant="solid" className={clsx(ctaLabel, "text-blue")}>
+                  Ver projetos ↓
+                </Botao>
+              </div>
+              <div className={cta}>
+                <Botao
+                  href="https://github.com/souzxxx"
+                  external
+                  className={clsx(ctaLabel, "hover:text-blue")}
+                >
+                  GitHub ↗
+                </Botao>
+              </div>
+              <div className={cta}>
+                <Botao
+                  href="https://www.linkedin.com/in/leonardo-souzx"
+                  external
+                  className={clsx(ctaLabel, "hover:text-blue")}
+                >
+                  LinkedIn ↗
+                </Botao>
+              </div>
+              <div className={cta}>
+                <Botao
+                  href="mailto:leonardosouzasilva9@gmail.com"
+                  className={clsx(ctaLabel, "hover:text-blue")}
+                >
+                  Email ↗
+                </Botao>
+              </div>
+              <div className={cta}>
+                <Botao
+                  href="/leonardo-souza-cv.pdf"
+                  download
+                  className={clsx(ctaLabel, "hover:text-blue")}
+                >
+                  Currículo ↓
+                </Botao>
+              </div>
+            </div>
 
-          {/* Stats line */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.65 }}
-            className="mt-6 grid grid-cols-2 gap-y-8 border-t border-border/60 pt-10 sm:grid-cols-4"
-          >
-            {/* 49.071 linhas em ml-copa/data/raw/results.csv — arredondado, sem "+" */}
-            <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k" />
-            <StatsCounter value={stats.testFiles} label="arquivos de teste" />
-            <StatsCounter value={stats.domainModules} label="módulos de domínio" />
-            <StatsCounter value={stats.distributedServices} label="serviços distribuídos" />
-          </motion.div>
+            <div className="mt-12 grid grid-cols-2 border-t border-dashed border-cream/35 sm:grid-cols-4">
+              {/* 49.071 linhas em ml-copa/data/raw/results.csv — arredondado, sem "+" */}
+              <StatsCounter value={stats.matchesProcessed} label="partidas no pipeline de ML" suffix="k" />
+              <StatsCounter value={stats.testFiles} label="arquivos de teste" />
+              <StatsCounter value={stats.domainModules} label="módulos de domínio" />
+              <StatsCounter value={stats.distributedServices} label="serviços distribuídos" />
+            </div>
+
+            {/* Indicador de scroll ESTATICO. A pulsacao some: um traco e
+                uma palavra bastam, e nada pisca no site depois desta wave. */}
+            <div className="mt-14 flex items-center gap-3 text-cream-600">
+              <span className="h-px w-6 bg-current" />
+              <span className="font-mono text-tag uppercase">role</span>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* COLUNA DIREITA — `aspect-square` reserva a altura ANTES de qualquer
+            mount, entao o canvas nasce sem CLS. Abaixo de 1024px o componente
+            devolve null e o bloco azul fica sozinho: isso e o DESENHO do mobile,
+            nao o desktop encolhido. */}
+        <div aria-hidden className="pointer-events-none relative hidden aspect-square w-full lg:block">
+          <EngravedObject />
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.3em] text-muted"
-      >
-        <span className="animate-pulse">↓ role</span>
-      </motion.div>
     </section>
   );
 }
