@@ -2,14 +2,60 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Github, ExternalLink, CheckCircle2, Lock, FileText } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import { Reveal } from "../ui/Reveal";
-import { StackChips } from "./StackChips";
+import { Meta } from "../ui/Meta";
+import { Label } from "../ui/Label";
+import { DashedRule } from "../ui/DashedRule";
+import { Botao } from "../ui/Botao";
 import { StatusPill } from "../ui/StatusPill";
+import { DuotoneImage } from "../ui/DuotoneImage";
 import { ProjectCover } from "./ProjectCover";
 import type { Project } from "@/lib/projects";
+
+/**
+ * FeaturedCard — uma faixa da fita editorial dos projetos em destaque.
+ *
+ * Saiu o card de vidro inteiro: canto de 24px, borda tenue, fundo translucido,
+ * desfoque de fundo, sombra difusa colorida, 40px de padding, hover que acende
+ * a borda, `whileHover` de escala e os seis icones de biblioteca. Entrou papel:
+ * filete tracejado no topo, chapa a esquerda, texto a direita, e nada mais — a
+ * separacao entre projetos e o filete, nao uma caixa.
+ *
+ * A ALTERNANCIA PAR/IMPAR MORREU. Nao existe mais `index % 2` nem
+ * `md:order-1`/`md:order-2`: a capa fica SEMPRE a esquerda e o texto SEMPRE a
+ * direita, nos cinco. Alternar lado e o gesto que faz uma pagina ler como
+ * landing page; repeticao rigida e o que faz ler como fita/relatorio, que e a
+ * tese desta identidade.
+ *
+ * ── MOBILE 390px, DESENHADO E NAO HERDADO ─────────────────────────────────
+ * Uma coluna, e a capa em SANGRIA TOTAL: `-mx-[var(--gutter)] w-screen` cancela
+ * o gutter do <Bloco> e leva a chapa de borda a borda da viewport, em 4:5
+ * (retrato) para ela dominar a primeira tela de cada projeto. No desktop a
+ * mesma capa volta para dentro da coluna de 22rem, quadrada. A troca de
+ * proporcao viaja numa custom property (`--capa`, um numero puro: 0.8 no
+ * celular, 1 a partir de md) porque `ratio` e uma prop unica de string — assim
+ * uma imagem so atende as duas telas, sem segunda instancia do next/image.
+ *
+ * A SANGRIA VAI NO `className` DA FIGURA, nao num wrapper: o DuotoneImage
+ * devolve um fragmento (figura + botao `[ COR ]`), e o botao precisa continuar
+ * dentro do gutter, alinhado com o texto — se a sangria estivesse no wrapper,
+ * ele iria parar colado na borda esquerda da tela.
+ */
+
+// Sangria de mobile aplicada a chapa (figura ou capa procedural).
+const CAPA_SANGRIA = "-mx-[var(--gutter)] w-screen md:mx-0 md:w-full";
+// 100vw enquanto sangra; 22rem quando volta para a coluna do desktop.
+const CAPA_SIZES = "(max-width: 768px) 100vw, 22rem";
+// A miniatura nao passa pelo <DuotoneImage> — um <figure> dentro de um <button>
+// nao e HTML valido —, entao ela usa a classe `.duotone` crua e nao tem a prop
+// `preset`. A calibracao clara chega pelas mesmas duas custom properties que o
+// preset "light" escreve (1.05 / 0.86): sem isto, os quatro screenshots de UI
+// clara do FinanceHub estouram no `screen` e a folha de contato sai em branco.
+// A utility ganha da classe `.duotone` por ordem de camada — `.duotone` mora em
+// `@layer base`, e as utilities do Tailwind saem depois.
+const THUMB_CLARO = "[--duo-contrast:1.05] [--duo-bright:0.86]";
 
 export function FeaturedCard({
   project,
@@ -18,202 +64,216 @@ export function FeaturedCard({
   project: Project;
   index: number;
 }) {
-  const reversed = index % 2 === 1;
   const gallery = project.gallery && project.gallery.length > 0 ? project.gallery : null;
+  // O crossfade e animacao de JS: o bloco global de `prefers-reduced-motion`
+  // do globals.css zera transicao e animacao de CSS, mas nao alcanca o framer.
+  // Com a preferencia ligada, a troca de chapa e instantanea.
+  const semMovimento = useReducedMotion();
   const [activeIdx, setActiveIdx] = useState(0);
   const active = gallery ? gallery[activeIdx] : null;
 
   return (
-    <Reveal delay={index * 0.06}>
-      <article
-        className={clsx(
-          // backdrop-blur-md (12px) em vez de -xl (24px): o custo do
-          // backdrop-filter cresce com a área do elemento, e este card ocupa
-          // meia tela. O -xl fica reservado para superfícies pequenas (nav, botões).
-          "group relative grid items-center gap-8 rounded-3xl border border-border/60 bg-surface/40 p-6 backdrop-blur-md",
-          "transition-all duration-500 hover:border-indigo-500/40",
-          "md:grid-cols-2 md:gap-12 md:p-10",
-        )}
-      >
-        <span className="absolute right-6 top-6 font-mono text-xs uppercase tracking-widest text-muted">
-          0{index + 1} / destaque
-        </span>
-
-        <div className={clsx("relative", reversed && "md:order-2")}>
-          <div className="relative overflow-hidden rounded-2xl border border-border/80 shadow-2xl shadow-indigo-950/40">
-            {gallery && active ? (
-              <div className="relative aspect-[16/10] w-full bg-surface">
-                <AnimatePresence mode="wait">
+    <Reveal delay={index * 0.04}>
+      <article className="grid border-t border-dashed border-ink/30 py-[clamp(2.5rem,5vw,4.5rem)] md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:gap-x-12">
+        {/* ── ESQUERDA: a chapa ───────────────────────────────────────────── */}
+        <div className="[--capa:0.8] md:[--capa:1]">
+          {gallery && active ? (
+            <>
+              {/* Empilhamento por grid (as duas camadas na mesma celula) em vez
+                  de `absolute inset-0`: mantem a figura no fluxo, entao a altura
+                  da celula continua vindo da propria proporcao da chapa e o
+                  botao `[ COR ]` continua caindo logo abaixo dela. */}
+              <div className="grid [&>*]:col-start-1 [&>*]:row-start-1">
+                <AnimatePresence initial={false}>
+                  {/* O UNICO crossfade do site. Ele nao esta aqui para enfeitar:
+                      a legenda troca junto com a chapa, e os 0.35s sao o tempo
+                      de perceber que a legenda mudou. */}
                   <motion.div
                     key={active.src}
-                    initial={{ opacity: 0, scale: 1.02 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.35 }}
-                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: semMovimento ? 0 : 0.35, ease: "linear" }}
                   >
-                    <Image
+                    <DuotoneImage
                       src={active.src}
                       alt={`${project.name} — ${active.label}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
-                      className="object-cover object-top"
-                      priority={index < 2 && activeIdx === 0}
+                      ratio="var(--capa)"
+                      sizes={CAPA_SIZES}
+                      priority={index === 0 && activeIdx === 0}
+                      // UI clara: com o preset padrao a imagem estoura no
+                      // `screen` e a chapa sai lavada.
+                      preset="light"
+                      className={CAPA_SANGRIA}
                     />
                   </motion.div>
                 </AnimatePresence>
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 pt-10">
-                  <p className="text-xs font-medium text-white/90">{active.label}</p>
-                </div>
               </div>
-            ) : project.cover ? (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="relative aspect-[16/10] w-full"
-              >
-                <Image
-                  src={project.cover}
-                  alt={`${project.name} screenshot`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px"
-                  className="object-cover"
-                  priority={index < 2}
-                />
-              </motion.div>
-            ) : (
-              <ProjectCover slug={project.slug} name={project.name} language={project.stack[0]} />
-            )}
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          </div>
+              <Meta items={[active.label]} className="mt-2 text-ink-700" />
 
-          {gallery && (
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {gallery.map((shot, i) => (
-                <button
-                  key={shot.src}
-                  type="button"
-                  onMouseEnter={() => setActiveIdx(i)}
-                  onFocus={() => setActiveIdx(i)}
-                  onClick={() => setActiveIdx(i)}
-                  className={clsx(
-                    "relative aspect-[16/10] overflow-hidden rounded-lg border transition",
-                    activeIdx === i
-                      ? "border-indigo-400 ring-2 ring-indigo-500/50"
-                      : "border-border/60 opacity-70 hover:opacity-100",
-                  )}
-                  aria-label={shot.label}
-                >
-                  <Image
-                    src={shot.src}
-                    alt={shot.label}
-                    fill
-                    sizes="120px"
-                    className="object-cover object-top"
-                  />
-                </button>
-              ))}
-            </div>
+              {/* Folha de contato: a fresta de 1px entre as miniaturas E o
+                  divisor — o fundo escuro do container aparece pelo `gap-px`,
+                  sem borda em nenhuma delas. */}
+              <div className="mt-3 grid grid-cols-4 gap-px bg-ink/25">
+                {gallery.map((shot, i) => (
+                  <button
+                    key={shot.src}
+                    type="button"
+                    aria-label={shot.label}
+                    aria-pressed={activeIdx === i}
+                    // Hover NAO e o unico caminho: clique e foco fazem o mesmo,
+                    // entao teclado e toque chegam a qualquer chapa.
+                    onMouseEnter={() => setActiveIdx(i)}
+                    onFocus={() => setActiveIdx(i)}
+                    onClick={() => setActiveIdx(i)}
+                    className={clsx(
+                      // A miniatura tambem e cianotipia: `.duotone` pede so um
+                      // <img> como filho direto, e o next/image com `fill` e
+                      // exatamente isso.
+                      "duotone relative h-14 md:h-16",
+                      THUMB_CLARO,
+                      "motion-safe:transition-opacity motion-safe:duration-150",
+                      activeIdx === i
+                        ? "outline outline-2 outline-blue outline-offset-0"
+                        : "opacity-75 hover:opacity-100 focus-visible:opacity-100",
+                    )}
+                  >
+                    <Image
+                      src={shot.src}
+                      alt=""
+                      fill
+                      sizes="120px"
+                      className="object-cover object-top"
+                    />
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : project.cover ? (
+            <DuotoneImage
+              src={project.cover}
+              alt={`${project.name} — captura de tela`}
+              ratio="var(--capa)"
+              sizes={CAPA_SIZES}
+              priority={index === 0}
+              preset="dark"
+              className={CAPA_SANGRIA}
+            />
+          ) : (
+            // Sem screenshot: a gravura procedural de raios, azul + creme.
+            <ProjectCover
+              slug={project.slug}
+              name={project.name}
+              language={project.stack[0]}
+              className={clsx(CAPA_SANGRIA, "aspect-[var(--capa)]")}
+            />
           )}
         </div>
 
-        <div className={clsx("flex flex-col gap-5", reversed && "md:order-1")}>
-          <div className="flex items-center gap-3">
-            {/* Sem `isPrivate` aqui: o chip "Repositório privado" logo abaixo
-                já dá esse aviso. Duas pílulas diziam a mesma coisa no card. */}
+        {/* ── DIREITA: o texto ────────────────────────────────────────────── */}
+        <div className="mt-5 md:mt-0">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {/* Vocabulario de metadado do site — BUILD/ANO/REPO. */}
+            <Meta
+              items={[
+                `BUILD ${String(index + 1).padStart(3, "0")}`,
+                `ANO ${project.year}`,
+                project.isPrivate && "REPO: PRIVADO",
+              ]}
+              className="text-ink-700"
+            />
             <StatusPill status={project.status} />
-            <span className="font-mono text-xs text-muted">{project.year}</span>
           </div>
 
-          <div>
-            <h3 className="text-balance text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-              {project.name}
-            </h3>
-            <p className="mt-2 text-balance text-lg text-indigo-300">
-              {project.tagline}
-            </p>
-          </div>
+          <h3 className="mt-5 text-balance font-display text-d2 uppercase text-ink">
+            {project.name}
+          </h3>
 
-          <p className="text-balance text-base leading-relaxed text-muted">
+          <p className="mt-3 font-mono text-tag uppercase text-blue">
+            {project.tagline}
+          </p>
+
+          <p className="medida mt-6 font-sans text-body text-ink-600">
             {project.description}
           </p>
 
           {project.highlights && (
-            <ul className="grid gap-2">
-              {project.highlights.map((h) => (
+            <ul className="mt-8">
+              {project.highlights.map((h, i) => (
                 <li
                   key={h}
-                  className="flex items-start gap-2 text-sm text-fg/80"
+                  // No celular o numero vai ACIMA do texto: uma calha de 2.5rem
+                  // sobrando de 350px espremeria a linha em duas ou tres
+                  // palavras. Da md para cima ele volta para a calha.
+                  className="grid grid-cols-1 gap-1 border-t border-dashed border-ink/20 py-3 md:grid-cols-[2.5rem_1fr] md:gap-3"
                 >
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-indigo-400" />
-                  <span>{h}</span>
+                  <span className="font-mono text-tag text-blue">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {/* `medida` no TEXTO e nao na linha: o filete tracejado
+                      atravessa a coluna inteira (e o que faz a lista ler como
+                      tabela), enquanto a prosa para nas 68ch — alinhada com a
+                      descricao e com a resposta de cada decisao. */}
+                  <span className="medida font-sans text-body text-ink-600">{h}</span>
                 </li>
               ))}
             </ul>
           )}
 
           {project.decisions && (
-            <div className="grid gap-3 rounded-2xl border border-border/50 bg-base/40 p-4">
-              {project.decisions.map((d) => (
-                <div key={d.q}>
-                  {/* Caixa alta em frase inteira apaga a forma da palavra e
-                      custa legibilidade; o acento mono/uppercase fica no
-                      eyebrow curto, e a pergunta vai em caixa normal. */}
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-indigo-300">
-                    Decisão
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-indigo-300">
+            <div className="mt-10">
+              {project.decisions.map((d, i) => (
+                <div key={d.q} className="mt-8 first:mt-0">
+                  <DashedRule className="border-ink" />
+                  <Label className="mt-4 block text-blue">
+                    DECISÃO {String(i + 1).padStart(2, "0")}
+                  </Label>
+                  <p className="mt-2 text-balance font-display text-d3 uppercase text-ink">
                     {d.q}
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-fg/80">{d.a}</p>
+                  <p className="medida mt-2 font-sans text-body text-ink-600">
+                    {d.a}
+                  </p>
                 </div>
               ))}
             </div>
           )}
 
-          <StackChips stack={project.stack} />
+          <Meta
+            items={[`STACK: ${project.stack.join(" · ")}`]}
+            className="mt-8 text-ink-700"
+          />
 
-          <div className="mt-2 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noreferrer"
-                className="group/btn inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_25px_rgba(99,102,241,0.35)] transition hover:shadow-[0_12px_35px_rgba(99,102,241,0.55)]"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Ver no ar
-                <ArrowUpRight className="h-3.5 w-3.5 transition group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5" />
-              </a>
+              <Botao href={project.demo} external variant="solid" className="text-cream">
+                VER NO AR ↗
+              </Botao>
             )}
             {project.github && !project.isPrivate && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-5 py-2.5 text-sm font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface"
-              >
-                <Github className="h-3.5 w-3.5" />
-                Código
-              </a>
+              <Botao href={project.github} external variant="outline" className="hover:text-cream">
+                CÓDIGO ↗
+              </Botao>
             )}
+            {/* Repositorio fechado nao vira botao: um retangulo com a mesma
+                forma dos CTAs promete um clique que nao existe. Vira metadado,
+                na mesma linha, alinhado com os botoes. */}
             {project.isPrivate && (
-              <span className="inline-flex cursor-default items-center gap-2 rounded-full border border-border/60 bg-surface/30 px-5 py-2.5 text-sm font-medium text-muted">
-                <Lock className="h-3.5 w-3.5" />
-                Repositório privado
-              </span>
+              <Meta
+                items={["REPOSITÓRIO PRIVADO"]}
+                className="self-center text-ink-700"
+              />
             )}
             {project.writeup && (
-              <a
+              <Botao
                 href={project.writeup}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-5 py-2.5 text-sm font-medium text-fg transition hover:border-indigo-400 hover:bg-indigo-500/20"
+                external
+                variant="outline"
+                className="hover:text-cream"
               >
-                <FileText className="h-3.5 w-3.5" />
-                Arquitetura &amp; decisões
-              </a>
+                ARQUITETURA &amp; DECISÕES ↗
+              </Botao>
             )}
           </div>
         </div>
