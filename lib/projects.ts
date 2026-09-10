@@ -84,6 +84,74 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
+    slug: "quintoandar-precificacao",
+    name: "Precificação QuintoAndar",
+    tagline:
+      "Preço de imóvel servido por API FastAPI na AWS: MAPE de 9,32% contra vendas reais de 2010, todo request logado e deploy contínuo com healthcheck",
+    description:
+      "Sprint do 4º semestre do Insper com o QuintoAndar como parceiro: um time de quatro tinha que responder por quanto um imóvel vende e sustentar essa resposta em produção. O dataset é o Ames Housing — 1.285 imóveis residenciais de 2006 a 2009, 80 features — e o teste final foi contra 175 vendas reais de 2010, em holdout temporal com ids disjuntos dos do treino. Saíram dois modelos: uma regressão linear de 4 features para explicar preço a corretor e proprietário (MAPE 11,9%, R² 0,832) e um Gradient Boosting para a calculadora pública. Dos 52 commits do repositório da aplicação, 20 são meus — o maior volume do time: a API FastAPI, o logging de predições, os 36 testes, o script e o relatório de validação com os dados de 2010 e o modelo mínimo de 8 campos.",
+    category: "featured",
+    // `shipped` e não `deployed`: o sistema rodou em produção com deploy
+    // contínuo na EC2 durante a sprint, mas a instância foi desligada quando ela
+    // acabou. Sem URL viva não há o que chamar de "no ar" — e por isso também
+    // não há `demo`. Sem `github`: os dois repositórios são privados, na
+    // organização insper-classroom.
+    status: "shipped",
+    isPrivate: true,
+    stack: [
+      "Python",
+      "FastAPI",
+      "scikit-learn",
+      "Pydantic",
+      "SQLite",
+      "Docker",
+      "GitHub Actions",
+      "AWS EC2",
+    ],
+    cover: "/projects/quintoandar-precificacao/cover.png",
+    gallery: [
+      {
+        src: "/projects/quintoandar-precificacao/cover.png",
+        label: "Calculadora pública — 8 campos e preço estimado pela API",
+      },
+      {
+        src: "/projects/quintoandar-precificacao/comparativo-mae.png",
+        label: "MAE dos 5 modelos no holdout cronológico de 2009",
+      },
+      {
+        src: "/projects/quintoandar-precificacao/previsto-vs-real.png",
+        label: "Previsto vs. real do Gradient Boosting",
+      },
+      {
+        src: "/projects/quintoandar-precificacao/latencia.png",
+        label: "Latência por chamada em produção (p95 11,7 ms)",
+      },
+    ],
+    highlights: [
+      "Gradient Boosting escolhido entre 5 modelos em validação cronológica: MAE de US$ 16.117 e MAPE de 9,83% no holdout de 2009, contra US$ 57.077 e 34,69% do baseline de mediana",
+      "Validação final contra as 175 vendas reais de 2010: MAE US$ 15.810, MAPE 9,32%, RMSE 26.071 e R² 0,894, com 92% dos imóveis dentro de 20% de erro",
+      "Calculadora pública reduzida de 12 para 8 campos por forward selection, no joelho da curva de erro",
+      "API FastAPI 0.115 com /predict, /predict/simples, /metrics e /health, contratos em Pydantic e o pré-processamento e as features portados do repo de modelo para ficarem idênticos aos do treino",
+      "Todo request gravado em SQLite — inclusive os 422 — com latência, versão do modelo, entrada e saída; o relatório de uso real fechou 300 chamadas com p95 de 11,7 ms e 94,3% de sucesso",
+      "36 testes em pytest distribuídos por 8 arquivos, e CI/CD que roda a suíte a cada push e, no merge da main, faz SSH + rsync e docker compose up --build --wait na EC2, com healthcheck depois do deploy",
+    ],
+    decisions: [
+      {
+        q: "Por que split cronológico e não aleatório?",
+        a: "Preço de imóvel anda com o tempo. Um split aleatório deixa venda de 2009 no treino e venda de 2007 no teste, e o modelo passa a ser avaliado sabendo o futuro. O corte é por data, a validação foi o ano de 2009, e o teste final foi contra as 175 vendas de 2010 — ano que o treino nunca viu, com ids disjuntos.",
+      },
+      {
+        q: "Por que logar também os requests que falham com 422?",
+        a: "Log só de predição bem-sucedida mede o modelo, não o serviço. Gravar o 422 junto é o que mostra qual contrato o cliente está errando e com que frequência — é dele que sai a taxa de sucesso de 94,3% nas 300 chamadas do relatório de uso, em vez de uma impressão de que estava tudo bem.",
+      },
+      {
+        q: "Por que não retreinar depois da validação com 2010?",
+        a: "O modelo treinado até 2009 errou 9,32% de MAPE num ano que nunca viu, contra 9,83% no holdout de 2009 — ou seja, não houve degradação a corrigir. Retreinar sem sinal de degradação troca um modelo medido por um modelo novo e não medido; a decisão de não mexer ficou escrita no relatório de validação.",
+      },
+    ],
+    year: "2026",
+  },
+  {
     slug: "wraeclast",
     name: "Project Wraeclast",
     tagline:
@@ -283,6 +351,35 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
+    slug: "cca-gestao",
+    name: "Gestão de núcleos CCA",
+    tagline:
+      "Spring Boot 4 / Java 21 + React 19 para núcleos socioeducativos: inscrição pública, matrícula, chamada e três papéis de acesso",
+    description:
+      "Sprint do 3º semestre, time de sete: sistema de gestão para núcleos CCA (Centro para Crianças e Adolescentes), da inscrição pública à chamada diária. Backend em Java 21 e Spring Boot 4 (webmvc, data-jpa, validation) sobre MySQL, com senha em BCrypt, documentação em springdoc OpenAPI e Dockerfile multi-stage — 11 domínios, 13 controllers e cerca de 73 endpoints REST; o front é React 19 com Vite 7 e react-router. Meus são os módulos de Inscrição e Fila de Espera, e 23 dos 90 commits do backend — o segundo maior volume do time.",
+    category: "more",
+    status: "shipped",
+    isPrivate: true,
+    stack: [
+      "Java 21",
+      "Spring Boot",
+      "Spring Data JPA",
+      "MySQL",
+      "React 19",
+      "Vite",
+    ],
+    // Sem `github` e sem `cover`: o repositório é privado (organização
+    // insper-classroom) e não há deploy de pé para fotografar — o card cai na
+    // capa gerada por ProjectCover.
+    highlights: [
+      "Inscrição e Fila de Espera meus de ponta a ponta — entidade, DTOs, controller e service — com idade calculada, múltiplos responsáveis por criança, vínculo inscrição↔fila e reordenação pelo admin",
+      "23 dos 90 commits do backend, o segundo maior volume entre os sete do time",
+      "11 domínios, 13 controllers e ~73 endpoints REST em Java 21 / Spring Boot 4, com papéis Admin, Gestor e Professor",
+      "DTOs refatorados para records de Java; no front, Inscrições e Matrículas saíram dos mocks para a API real, com suporte a múltiplos CCAs",
+    ],
+    year: "2025",
+  },
+  {
     slug: "ml-copa",
     name: "ML-Copa",
     tagline: "Predição de Copa do Mundo com XGBoost, Elo adaptativo e Dixon-Coles",
@@ -401,6 +498,36 @@ export const projects: Project[] = [
       "Cliente real na área de saúde / fonoaudiologia",
     ],
     year: "2026",
+  },
+  {
+    slug: "predictflow",
+    name: "PredictFlow",
+    tagline:
+      "Frontend Next.js 15 de um painel de pipeline de vendas: importação de CSV, dashboards Chart.js e alerta de negociação atrasada",
+    description:
+      "Sprint do 2º semestre, time de cinco: painel de pipeline de vendas que importa um CSV de negociações, classifica cada uma em cotado, execução ou negado, detecta atraso e dispara alerta por e-mail. O backend é FastAPI com MongoDB (Motor) e JWT, feito pelo time; o que é meu é o frontend — 29 dos 75 commits, o maior volume do repositório: autenticação, dashboard e as telas de pedido e de equipe.",
+    category: "more",
+    status: "shipped",
+    isPrivate: true,
+    stack: [
+      "Next.js 15",
+      "React 19",
+      "Tailwind CSS",
+      "Chart.js",
+      "JWT",
+      "FastAPI",
+      "MongoDB",
+    ],
+    // Sem `github` e sem `cover`: repositório privado da organização da
+    // disciplina, sem deploy de pé para capturar. A stack lista a API porque ela
+    // é o que o front consome — a autoria reivindicada aqui é só a do frontend.
+    highlights: [
+      "Maior contribuidor do frontend: 29 dos 75 commits (39%) — a API FastAPI/MongoDB é do time, não minha",
+      "Fluxo de autenticação inteiro em Next.js 15 (Pages Router): login, registro e recuperação de senha, com o JWT guardado em cookie",
+      "Dashboard em Chart.js com indicador do percentual de negociações atrasadas",
+      "Detalhe e timeline do pedido com filtros por cliente e por responsável, e página de equipe paginada separando usuários listados e não listados",
+    ],
+    year: "2025",
   },
   {
     slug: "universe-project",

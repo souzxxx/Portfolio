@@ -11,6 +11,11 @@ export const semesters: Semester[] = [
     highlights: [
       { name: "Insper Intro", description: "Fundamentos de programação e lógica" },
       { name: "Aulas Base", description: "Matemática, algoritmos, estruturas iniciais" },
+      {
+        name: "Sprint",
+        description:
+          "Rede social em Django 5 + PostgreSQL com login Google; comentários, curtidas, denúncias e perfil",
+      },
     ],
   },
   {
@@ -29,7 +34,11 @@ export const semesters: Semester[] = [
         name: "Programação Eficaz",
         description: "POO, padrões de design, qualidade de código",
       },
-      { name: "Sprint", description: "Projeto integrador do semestre" },
+      {
+        name: "Sprint",
+        description:
+          "PredictFlow: painel de pipeline de vendas em Next.js sobre API FastAPI/MongoDB; autenticação JWT e dashboards",
+      },
     ],
   },
   {
@@ -53,7 +62,11 @@ export const semesters: Semester[] = [
         description:
           "Q-Learning, SARSA, agentes (NQueens, Frozen Lake, agentes para SPFC)",
       },
-      { name: "SPRINT", description: "Projeto integrador interdisciplinar" },
+      {
+        name: "SPRINT",
+        description:
+          "Gestão de núcleos CCA em Spring Boot/Java 21 + React; módulos de inscrição e fila de espera",
+      },
     ],
   },
   {
@@ -79,7 +92,8 @@ export const semesters: Semester[] = [
       },
       {
         name: "Sprint",
-        description: "Projeto integrador final do semestre",
+        description:
+          "Precificação de imóveis com QuintoAndar: API FastAPI + Gradient Boosting em produção na AWS, CI/CD e 36 testes",
       },
     ],
   },

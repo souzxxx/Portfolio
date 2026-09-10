@@ -12,15 +12,29 @@ import { projects, type Project } from "@/lib/projects";
 // um projeto para destaque, troque a categoria E acrescente o slug aqui.
 const ORDER = [
   "financehub",
-  "wraeclast",
+  "quintoandar-precificacao",
   "commerce-nda",
   "portal-construtora",
   "sentinel",
+  "wraeclast",
 ] as const;
 
 const showcase = ORDER.map((slug) => projects.find((p) => p.slug === slug)).filter(
   (p): p is Project => Boolean(p),
 );
+
+/**
+ * Quantos destaques o site REALMENTE renderiza — depois do filtro, não o
+ * tamanho de ORDER: slug escrito errado aqui some da tela sem quebrar o build,
+ * e a numeração do índice tem que seguir o que a página mostra, não o que a
+ * lista prometeu.
+ *
+ * O ProjectGrid continua a contagem a partir daqui (`#07` quando são 6
+ * destaques). Antes disso o deslocamento era um `+ 6` cravado no meio do
+ * template string de lá, que passou a estar errado no instante em que esta
+ * lista ganhou um sexto item.
+ */
+export const FEATURED_COUNT = showcase.length;
 
 /**
  * FeaturedShowcase — o bloco PAPEL da fita editorial.

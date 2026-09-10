@@ -25,7 +25,7 @@ import type { Project } from "@/lib/projects";
  *
  * A ALTERNANCIA PAR/IMPAR MORREU. Nao existe mais `index % 2` nem
  * `md:order-1`/`md:order-2`: a capa fica SEMPRE a esquerda e o texto SEMPRE a
- * direita, nos cinco. Alternar lado e o gesto que faz uma pagina ler como
+ * direita, em todos. Alternar lado e o gesto que faz uma pagina ler como
  * landing page; repeticao rigida e o que faz ler como fita/relatorio, que e a
  * tese desta identidade.
  *

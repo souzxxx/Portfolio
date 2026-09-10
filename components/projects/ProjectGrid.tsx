@@ -4,16 +4,18 @@ import { Label } from "../ui/Label";
 import { SectionHeader } from "../ui/SectionHeader";
 import { Chapa } from "../ui/Chapa";
 import { ProjectCover } from "./ProjectCover";
+import { FEATURED_COUNT } from "./FeaturedShowcase";
 import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
 
 /**
  * ProjectGrid — a volta ao CARVAO, depois de dois blocos de papel seguidos.
  *
- * Saiu a grade de 14 cartoes em 3 colunas (canto arredondado, blur de fundo,
+ * Saiu a grade de cartoes em 3 colunas (canto arredondado, blur de fundo,
  * capa 16:10, gradiente no hover e um deslocamento de -6px por cartao).
- * Entrou um INDICE TABULAR: 14 linhas numeradas #06…#19 — a numeracao continua
- * de onde os 5 destaques pararam — com as colunas No · MINIATURA · NOME · ANO ·
- * STACK/STATUS, e a linha inteira invertendo para creme solido no hover.
+ * Entrou um INDICE TABULAR: uma linha por projeto "more", numerada a partir de
+ * onde os destaques pararam (ver FEATURED_COUNT), com as colunas No ·
+ * MINIATURA · NOME · ANO · STACK/STATUS, e a linha inteira invertendo para
+ * creme solido no hover.
  *
  * SOBRE CARVAO O ACENTO E O CREME — e nao ha um segundo escuro para disputar
  * com ele. Os tons usados sao os tres medidos contra #1C1A17: `cream` 15.66:1,
@@ -92,8 +94,11 @@ const INV_700 =
 const SANGRIA = "-mx-[var(--gutter)] px-[var(--gutter)] py-4 md:mx-0 md:px-0";
 
 function ProjectRow({ project, index }: { project: Project; index: number }) {
-  // Continua a numeracao dos 5 destaques: o primeiro item do indice e o #06.
-  const numero = `#${String(index + 6).padStart(2, "0")}`;
+  // Continua a numeracao dos destaques: o primeiro item do indice e o numero
+  // seguinte ao ultimo card do FeaturedShowcase. O deslocamento vem de
+  // FEATURED_COUNT, e nao de um numero cravado aqui — promover um projeto para
+  // destaque mudava a numeracao de 14 linhas sem nada falhar.
+  const numero = `#${String(index + FEATURED_COUNT + 1).padStart(2, "0")}`;
   const status = STATUS_LABEL[project.status];
   // Demo tem prioridade sobre repositorio: o que esta no ar vale mais que o
   // codigo. Sem nenhum dos dois a linha continua existindo — so nao e link.
