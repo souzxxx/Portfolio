@@ -14,7 +14,7 @@ import { stats } from "@/lib/projects";
  * A gravura da direita entra por `next/dynamic` com `ssr: false`: o chunk do
  * three nao existe no HTML, nao existe no bundle inicial e so e buscado depois,
  * ja dentro do proprio componente, em `requestIdleCallback`. `loading: () =>
- * null` porque nao ha o que mostrar enquanto carrega — o lugar dele ja e azul.
+ * null` porque nao ha o que mostrar enquanto carrega — o lugar dele ja e carvao.
  */
 const EngravedObject = dynamic(
   () => import("./EngravedObject").then((m) => m.EngravedObject),
@@ -29,7 +29,7 @@ const EngravedObject = dynamic(
  * flex de nivel de bloco, o que faz `w-full` valer; `min-h-[2.75rem]` garante
  * 44px de alvo de toque no mobile (o padding do primitivo sozinho da 42px).
  */
-const cta = "bg-blue [&>a]:flex [&>a]:min-h-[2.75rem] [&>a]:w-full sm:[&>a]:w-auto";
+const cta = "bg-carvao [&>a]:flex [&>a]:min-h-[2.75rem] [&>a]:w-full sm:[&>a]:w-auto";
 const ctaLabel = "w-full justify-center sm:w-auto sm:justify-start";
 
 export function Hero() {
@@ -38,9 +38,9 @@ export function Hero() {
     // `vh` e o bloco inteiro pula durante o primeiro scroll. `svh` mede a
     // viewport pequena e fica parado.
     //
-    // O bloco azul chapado E o fundo: nao ha mais glow radial, grade com mask
+    // O bloco carvao chapado E o fundo: nao ha mais glow radial, grade com mask
     // nem os dois orbes de canto. Sete camadas viraram uma cor.
-    <section className="block-blue relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-[var(--gutter)] pb-[var(--block)] pt-[clamp(2rem,4vw,4rem)]">
+    <section className="block-carvao relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-[var(--gutter)] pb-[var(--block)] pt-[clamp(2rem,4vw,4rem)]">
       <div className="mx-auto grid w-full max-w-[96rem] items-center gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.78fr)] lg:gap-x-12">
         {/* COLUNA ESQUERDA — sempre alinhada a esquerda, nunca centralizada.
             `min-w-0` nao e decoracao: item de grade nasce com `min-width: auto`,
@@ -88,9 +88,9 @@ export function Hero() {
               className="mt-4 text-cream-600"
             />
 
-            {/* Copy inalterada. Sobre azul existe UMA cor de texto aprovada para
-                prosa, entao a enfase deixa de ser cor e vira traco: sublinhado
-                de 1px com offset de 6px. */}
+            {/* Copy inalterada. Sobre carvao a prosa e sempre creme, entao a
+                enfase deixa de ser cor e vira traco: sublinhado de 1px com
+                offset de 6px. */}
             <p className="mt-8 medida font-sans text-lead text-cream">
               Construo backend, web e IA que rodam em produção:{" "}
               <span className="font-medium underline decoration-cream/45 decoration-[1px] underline-offset-[6px]">
@@ -117,11 +117,11 @@ export function Hero() {
             {/* CTAs. No mobile os retangulos encostam: `gap-px` sobre um fundo
                 `bg-cream/30` do container preenche a fresta entre as bordas
                 cremes de dois botoes vizinhos, entao a costura le como UM filete
-                continuo em vez de duas linhas com azul no meio — truque de
+                continuo em vez de duas linhas com carvao no meio — truque de
                 prancha. Vira fila com folga a partir de `sm`. */}
             <div className="mt-8 grid grid-cols-2 gap-px bg-cream/30 sm:flex sm:flex-wrap sm:gap-3 sm:bg-transparent">
               <div className={clsx(cta, "col-span-2")}>
-                <Botao href="#projects" variant="solid" className={clsx(ctaLabel, "text-blue")}>
+                <Botao href="#projects" variant="solid" className={clsx(ctaLabel, "text-carvao")}>
                   Ver projetos ↓
                 </Botao>
               </div>
@@ -129,7 +129,7 @@ export function Hero() {
                 <Botao
                   href="https://github.com/souzxxx"
                   external
-                  className={clsx(ctaLabel, "hover:text-blue")}
+                  className={clsx(ctaLabel, "hover:text-carvao")}
                 >
                   GitHub ↗
                 </Botao>
@@ -138,7 +138,7 @@ export function Hero() {
                 <Botao
                   href="https://www.linkedin.com/in/leonardo-souzx"
                   external
-                  className={clsx(ctaLabel, "hover:text-blue")}
+                  className={clsx(ctaLabel, "hover:text-carvao")}
                 >
                   LinkedIn ↗
                 </Botao>
@@ -146,7 +146,7 @@ export function Hero() {
               <div className={cta}>
                 <Botao
                   href="mailto:leonardosouzasilva9@gmail.com"
-                  className={clsx(ctaLabel, "hover:text-blue")}
+                  className={clsx(ctaLabel, "hover:text-carvao")}
                 >
                   Email ↗
                 </Botao>
@@ -155,7 +155,7 @@ export function Hero() {
                 <Botao
                   href="/leonardo-souza-cv.pdf"
                   download
-                  className={clsx(ctaLabel, "hover:text-blue")}
+                  className={clsx(ctaLabel, "hover:text-carvao")}
                 >
                   Currículo ↓
                 </Botao>
@@ -177,14 +177,14 @@ export function Hero() {
                 ainda mais longe da dobra. Ancorar em `absolute bottom` nao
                 resolve: o hero mede ~1150px, entao o rodape do bloco tambem
                 esta abaixo da primeira tela. A referencia desta identidade nao
-                tem indicador de rolagem nenhum — o corte do bloco azul na borda
+                tem indicador de rolagem nenhum — o corte do bloco carvao na borda
                 inferior ja e o convite. */}
           </Reveal>
         </div>
 
         {/* COLUNA DIREITA — `aspect-square` reserva a altura ANTES de qualquer
             mount, entao o canvas nasce sem CLS. Abaixo de 1024px o componente
-            devolve null e o bloco azul fica sozinho: isso e o DESENHO do mobile,
+            devolve null e o bloco carvao fica sozinho: isso e o DESENHO do mobile,
             nao o desktop encolhido. */}
         <div aria-hidden className="pointer-events-none relative hidden aspect-square w-full lg:block">
           <EngravedObject />

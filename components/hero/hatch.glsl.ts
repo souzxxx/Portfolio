@@ -2,7 +2,7 @@
  * hatch.glsl.ts — o shader de gravura do hero.
  *
  * A tese: a figura da direita nao e um "efeito 3D", e uma CHAPA GRAVADA. Duas
- * cores e nada entre elas — o azul do bloco (#1620DC) e o creme (#F5F3EE). O
+ * cores e nada entre elas — o carvao do bloco (#1C1A17) e o creme (#F5F3EE). O
  * volume aparece so pela DENSIDADE da hachura, como numa xilogravura, nunca
  * por um degrade de cor.
  *
@@ -27,7 +27,7 @@
  * facetado (icosaedro de detalhe 0, normais planas) os tres vertices de uma
  * face compartilham a mesma normal, mas dois vertices no mesmo canto do solido
  * pertencem a faces com normais DIFERENTES: deslocar pela normal separaria as
- * faces e abriria fendas de ~0.06 unidade nas arestas, com o azul do bloco
+ * faces e abriria fendas de ~0.06 unidade nas arestas, com o carvao do bloco
  * vazando por dentro da figura. `normalize(position)` e continuo entre faces —
  * o mesmo canto tem a mesma posicao —, entao o solido respira inteiro.
  */
@@ -79,10 +79,10 @@ export const vertex = /* glsl */ `
  *
  *   2. TOM. Este e o furo maior, e e aritmetica: a cobertura de duas tramas
  *      sobrepostas e `1 - (1-tone)^2`. Com a camada 2 ligada no NUCLEO da
- *      sombra, onde tone chega a 0.86, isso da 0.98 — sobra 2% de azul, e 2% de
- *      azul num campo creme nao le como linha cruzada, le como PONTO. A
+ *      sombra, onde tone chega a 0.86, isso da 0.98 — sobra 2% de carvao, e 2%
+ *      de carvao num campo creme nao le como linha cruzada, le como PONTO. A
  *      contra-hachura so e legivel como cruzamento no MEIO-TOM: em tone 0.5 a
- *      cobertura e 0.75, ou seja 25% de azul distribuido num losango nitido.
+ *      cobertura e 0.75, ou seja 25% de carvao distribuido num losango nitido.
  *      Por isso a camada 2 agora e gatilhada por `tone` e vive numa faixa
  *      estreita de meio-tom, e nao por `l` no fundo da sombra.
  *
@@ -100,7 +100,7 @@ export const vertex = /* glsl */ `
  * borda de sombra.
  */
 export const fragment = /* glsl */ `
-  uniform vec3 uBlue;
+  uniform vec3 uCarvao;
   uniform vec3 uCream;
 
   varying vec3 vNormal;
@@ -118,8 +118,8 @@ export const fragment = /* glsl */ `
     float l = clamp(dot(normalize(vNormal), normalize(vec3(0.42, 0.78, 0.55))), 0.0, 1.0);
 
     // Densidade de tinta, COMPRIMIDA para 0.14-0.86. Este intervalo e a
-    // diferenca entre gravura e degrade: no cru (0-1) a area clara fica azul
-    // chapado — e como o azul do objeto e o MESMO do bloco, meia esfera
+    // diferenca entre gravura e degrade: no cru (0-1) a area clara fica carvao
+    // chapado — e como o carvao do objeto e o MESMO do bloco, meia esfera
     // simplesmente desaparece — e a escura vira creme macico, sem trama. Preso
     // entre 0.14 e 0.86 nao existe um so fragmento sem linha: a esfera inteira
     // e hachura, e o que muda de um polo ao outro e a espessura do traco.
@@ -128,7 +128,7 @@ export const fragment = /* glsl */ `
     // Contorno. Numa gravura de verdade a trama fecha na virada da forma, e e
     // isso que faz um volume ter borda sem precisar de uma linha de contorno
     // desenhada. rim mede o quanto a normal foge da camera; perto da silhueta
-    // o traco engrossa e a esfera ganha aresta contra o azul do bloco.
+    // o traco engrossa e a esfera ganha aresta contra o carvao do bloco.
     float rim = 1.0 - abs(dot(normalize(vNormal), normalize(-vView)));
     tone = max(tone, smoothstep(0.62, 1.0, rim) * 0.78);
 
@@ -153,6 +153,6 @@ export const fragment = /* glsl */ `
       smoothstep(0.34, 0.46, tone) * (1.0 - smoothstep(0.58, 0.70, tone));
     ink = max(ink, ink2 * crossed);
 
-    gl_FragColor = vec4(mix(uBlue, uCream, ink), 1.0);
+    gl_FragColor = vec4(mix(uCarvao, uCream, ink), 1.0);
   }
 `;

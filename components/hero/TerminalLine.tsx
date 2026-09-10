@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 /**
  * TerminalLine — a barra que assina "terminal" na primeira dobra.
  *
- * Retangulo creme chapado sobre o azul, canto vivo, sem sombra e sem blur: le
+ * Retangulo creme chapado sobre o carvao, canto vivo, sem sombra e sem blur: le
  * como um campo de comando impresso na prancha, nao como um widget.
  *
  * O comando e REAL e verificavel — o arquivo existe em `public/` e o prebuild
@@ -64,11 +64,11 @@ export function TerminalLine({ className }: { className?: string }) {
     // troca da fonte de maquina de escrever no swap nao empurra nada.
     <div
       className={clsx(
-        "flex min-h-[2.75rem] w-full max-w-[46rem] items-stretch border border-cream/40 bg-cream text-ink",
+        "flex min-h-[2.75rem] w-full max-w-[46rem] items-stretch border border-cream/40 bg-cream text-carvao",
         className,
       )}
     >
-      <span className="hidden shrink-0 items-center border-r border-dashed border-ink/30 px-3 font-mono text-tag uppercase text-ink-700 sm:flex">
+      <span className="hidden shrink-0 items-center border-r border-dashed border-carvao/30 px-3 font-mono text-tag uppercase text-ink-700 sm:flex">
         CV
       </span>
 
@@ -77,7 +77,7 @@ export function TerminalLine({ className }: { className?: string }) {
           no desktop, tres em 390px — a caixa tem `min-h`, nao altura fixa. */}
       <code
         ref={codigo}
-        className="min-w-0 flex-1 whitespace-pre-wrap break-all px-3 py-2.5 font-mono text-cmd text-ink"
+        className="min-w-0 flex-1 whitespace-pre-wrap break-all px-3 py-2.5 font-mono text-cmd text-carvao"
       >
         {COMANDO}
       </code>
@@ -85,7 +85,7 @@ export function TerminalLine({ className }: { className?: string }) {
       <button
         type="button"
         onClick={copiar}
-        className="min-h-[2.75rem] shrink-0 border-l border-dashed border-ink/30 px-3 font-mono text-tag uppercase text-blue motion-safe:transition-colors motion-safe:duration-150 hover:bg-blue hover:text-cream"
+        className="min-h-[2.75rem] shrink-0 border-l border-dashed border-carvao/30 px-3 font-mono text-tag uppercase text-carvao motion-safe:transition-colors motion-safe:duration-150 hover:bg-carvao hover:text-cream"
       >
         {/* Unico feedback animado da secao — e e troca de TEXTO, nao de layout:
             nada desliza, nada pulsa. `aria-live` para o leitor de tela receber

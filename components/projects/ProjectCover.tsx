@@ -11,9 +11,16 @@ import { Meta } from "../ui/Meta";
  * ciano, rosa, ambar, verde…) e as iniciais em gradiente — sozinho ele
  * introduzia ~14 cores fora do sistema. Entrou uma GRAVURA PROCEDURAL: raios
  * retos de 1px em creme irradiando de um foco abaixo da borda inferior, sobre
- * azul chapado, com as iniciais em serifa caixa alta por cima. Mesmo motivo do
- * halo de xilogravura, desenhado aqui em SVG — nenhum asset externo, ~0.6KB de
- * markup, zero request, e nada de gradiente.
+ * carvao chapado, com as iniciais em serifa caixa alta por cima. Mesmo motivo
+ * do halo de xilogravura, desenhado aqui em SVG — nenhum asset externo, ~0.6KB
+ * de markup, zero request, e nada de gradiente.
+ *
+ * ELA CONTINUA GRAVADA ENQUANTO AS CAPAS DE FOTO NAO. A cianotipia saiu dos
+ * screenshots reais (que agora entram em cor natural, via <Chapa>) porque
+ * captura de produto e PROVA, e prova nao se estiliza. Aqui nao ha prova
+ * nenhuma para preservar: o projeto nao tem screenshot, e o que a capa mostra e
+ * um DESENHO — entao o tratamento de duas cores e o conteudo, nao um filtro por
+ * cima dele.
  *
  * DETERMINISTICO POR CONSTRUCAO: toda a geometria sai de `hash(slug)`, nunca de
  * `Math.random()`. O mesmo slug produz exatamente o mesmo SVG no servidor e no
@@ -82,7 +89,7 @@ export function ProjectCover({
   return (
     <div
       className={clsx(
-        "relative flex flex-col items-center justify-center overflow-hidden bg-blue text-cream",
+        "relative flex flex-col items-center justify-center overflow-hidden bg-carvao text-cream",
         // Altura: quem chama manda (o indice pede `aspect-[4/3]` na miniatura,
         // a fita editorial pede quadrado). So quando o call site nao declara
         // nem proporcao nem altura e que a capa cai no 8/5 padrao — assim o

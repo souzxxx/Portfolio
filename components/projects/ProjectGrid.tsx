@@ -2,12 +2,12 @@ import { Bloco } from "../ui/Bloco";
 import { Meta } from "../ui/Meta";
 import { Label } from "../ui/Label";
 import { SectionHeader } from "../ui/SectionHeader";
-import { DuotoneImage } from "../ui/DuotoneImage";
+import { Chapa } from "../ui/Chapa";
 import { ProjectCover } from "./ProjectCover";
 import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
 
 /**
- * ProjectGrid — o TERCEIRO campo de cor do site: BREU.
+ * ProjectGrid — a volta ao CARVAO, depois de dois blocos de papel seguidos.
  *
  * Saiu a grade de 14 cartoes em 3 colunas (canto arredondado, blur de fundo,
  * capa 16:10, gradiente no hover e um deslocamento de -6px por cartao).
@@ -15,12 +15,11 @@ import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
  * de onde os 5 destaques pararam — com as colunas No · MINIATURA · NOME · ANO ·
  * STACK/STATUS, e a linha inteira invertendo para creme solido no hover.
  *
- * SOBRE BREU O ACENTO E O CREME. O azul de assinatura sobre breu da 2.00:1, e
- * por isso nao existe uma unica classe de cor azul neste arquivo, de proposito.
- * Os tons usados sao os tres medidos contra #141414: `cream` 16.61:1,
- * `cream-600` 12.43:1 e `cream-700` 7.41:1. Quando a linha inverte, todos viram
- * os tons medidos contra #F5F3EE: `ink` 16.61:1, `ink-600` 10.25:1, `ink-700`
- * 6.50:1. Nenhum estado desta secao sai da matriz.
+ * SOBRE CARVAO O ACENTO E O CREME — e nao ha um segundo escuro para disputar
+ * com ele. Os tons usados sao os tres medidos contra #1C1A17: `cream` 15.66:1,
+ * `cream-600` 11.72:1 e `cream-700` 6.99:1. Quando a linha inverte, todos viram
+ * os tons medidos contra #F5F3EE: `carvao` 15.66:1, `ink-600` 10.25:1,
+ * `ink-700` 6.50:1. Nenhum estado desta secao sai da matriz.
  *
  * UM markup, DOIS layouts. E uma <ol> semantica e nao uma <table> justamente
  * para que as mesmas celulas se reorganizem por posicionamento de grid em vez
@@ -42,50 +41,38 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
 };
 
 /**
- * Preset da cianotipia por projeto. So tres dos 14 tem screenshot; o criterio e
- * a luminancia da captura, nao o projeto:
- *
- *   universe-project → `dark`  UI escura, o preset padrao abre bem.
- *   ml-copa          → `dark`  o PNG e regerado em duotone azul por outro item
- *                              da wave; ate la a versao antiga sai clara.
- *   usp-fono         → `light` MEDIDO: a captura e uma UI quase branca (topo
- *                              petroleo, corpo #EAF6F8 com cartoes brancos).
- *                              Com `dark` o `screen` estoura e a miniatura vira
- *                              uma chapa creme lisa, sem desenho nenhum; com
- *                              `light` (contraste 1.05 / brilho 0.86) o
- *                              cabecalho e a grade de cartoes voltam a aparecer.
- *
- * Qualquer projeto fora do mapa cai no padrao `dark`.
+ * O MAPA DE PRESET DA CIANOTIPIA MORREU COM ELA. Ele existia porque o duotone
+ * reagia a luminancia da captura: a UI quase branca do usp-fono estourava no
+ * `screen` e a miniatura saia como uma chapa creme lisa, sem desenho, entao
+ * cada screenshot precisava de uma calibracao propria. Em cor natural nao ha
+ * calibracao a fazer — a captura e ela mesma, clara ou escura.
  */
-const DUO_PRESET: Record<string, "light" | "dark"> = {
-  "usp-fono": "light",
-};
 
 /**
- * A inversao creme↔breu da linha inteira, em tres estados:
+ * A inversao creme↔carvao da linha inteira, em tres estados:
  *   `md:group-hover` — ponteiro, so no desktop (evita o hover grudado do touch);
  *   `group-focus-within` — teclado, com a mesma leitura visual do hover;
  *   `active` — toque, o unico retorno visual que o celular tem.
  *
  * Como cada celula pinta a propria cor, a inversao precisa ser repetida celula
- * a celula: `text-ink` no wrapper so resolveria o que herda `currentColor`.
+ * a celula: `text-carvao` no wrapper so resolveria o que herda `currentColor`.
  *
  * A classe `group` fica no <li> APENAS quando a linha tem destino (ver
  * `ProjectRow`). Sem essa condicao, passar o mouse por uma linha sem link
- * viraria o texto para os tons de papel mantendo o fundo breu — `ink-600` sobre
- * `ink` da 1.9:1, ou seja, texto invisivel.
+ * viraria o texto para os tons de papel mantendo o fundo carvao — `ink-600`
+ * sobre carvao da 1.53:1, ou seja, texto invisivel.
  */
 const ROW =
   "block motion-safe:transition-colors motion-safe:duration-150 " +
-  "active:bg-cream active:text-ink " +
-  "group-focus-within:bg-cream group-focus-within:text-ink " +
-  "md:group-hover:bg-cream md:group-hover:text-ink " +
+  "active:bg-cream active:text-carvao " +
+  "group-focus-within:bg-cream group-focus-within:text-carvao " +
+  "md:group-hover:bg-cream md:group-hover:text-carvao " +
   // REGRA SISTEMATICA: todo elemento que INVERTE o fundo no foco precisa fixar
   // a cor do anel na cor do BLOCO, nunca deixa-la em `currentColor`. O anel
   // global (globals.css) e `2px solid currentColor` com offset de 2px, ou seja,
-  // ele e desenhado FORA da caixa invertida — sobre o breu da secao. Como a
-  // linha focada vira `text-ink` #141414, `currentColor` daria 1:1 contra o
-  // fundo breu e o anel simplesmente nao existiria. Em creme sao 16.61:1.
+  // ele e desenhado FORA da caixa invertida — sobre o carvao da secao. Como a
+  // linha focada vira `text-carvao` #1C1A17, `currentColor` daria 1:1 contra o
+  // fundo carvao e o anel simplesmente nao existiria. Em creme sao 15.66:1.
   // Mesmo ajuste ja aplicado em About.tsx, Footer.tsx e NavBar.tsx.
   "focus-visible:outline-cream";
 const INV_600 =
@@ -145,19 +132,20 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
         {href ? "↗" : ""}
       </span>
 
-      {/* 2 · miniatura 56x42. NAO inverte no hover — screenshot invertido fica
-              sujo; o que muda e so a opacidade. Fora do mobile, onde a coluna
-              inteira nao existe. */}
+      {/* 2 · miniatura 56x42, em COR NATURAL como as capas dos destaques. NAO
+              inverte no hover — screenshot invertido fica sujo; o que muda e so
+              a opacidade. A moldura e creme a 20% (e nao carvao) porque aqui a
+              chapa cai sobre o carvao da secao: uma borda escura sobre fundo
+              escuro nao existiria. Fora do mobile, onde a coluna inteira nao
+              existe. */}
       <div className="hidden md:block">
         {project.cover ? (
-          <DuotoneImage
+          <Chapa
             src={project.cover}
             alt=""
             ratio="4 / 3"
             sizes="56px"
-            preset={DUO_PRESET[project.slug] ?? "dark"}
-            interactive={false}
-            className="w-full opacity-70 motion-safe:transition-opacity motion-safe:duration-150 md:group-hover:opacity-100"
+            className="w-full border border-cream/20 opacity-70 motion-safe:transition-opacity motion-safe:duration-150 md:group-hover:opacity-100"
           />
         ) : (
           // O wrapper carrega a proporcao 4/3 e o recorte: assim a capa
@@ -224,13 +212,13 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
 
 export function ProjectGrid() {
   return (
-    <Bloco ground="ink" id="more">
+    <Bloco ground="carvao" id="more">
       <div className="mx-auto max-w-[96rem]">
         <SectionHeader
           eyebrow="#03 · ÍNDICE"
           title="Mais projetos"
           description="Coisas que construí explorando linguagens, paradigmas e domínios — de Prolog a Python, de compilador a firmware embarcado, de jogos a automação de processos."
-          tone="ink"
+          tone="carvao"
         />
 
         {/* A borda de baixo fecha o indice: cada linha traz a propria borda de

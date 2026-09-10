@@ -4,8 +4,8 @@
  * EngravedObject — a gravura da coluna direita do hero.
  *
  * Um icosaedro abstrato renderizado por ShaderMaterial GLSL autoral (ver
- * `hatch.glsl.ts`) em hachura cruzada de exatamente DUAS cores: o azul do bloco
- * e o creme. Objeto abstrato de proposito — zero leitura mitologica, nada de
+ * `hatch.glsl.ts`) em hachura cruzada de exatamente DUAS cores: o carvao do
+ * bloco e o creme. Objeto abstrato de proposito — zero leitura mitologica, nada de
  * estatua, busto ou figura; a referencia entra como TRATAMENTO (duas cores,
  * linha, alto contraste), nunca como assunto.
  *
@@ -34,7 +34,7 @@
  * procedural de raios — linhas retas de 1px em creme irradiando de um foco,
  * determinístico, sem `Math.random`, na mesma familia da capa procedural dos
  * projetos — e MANTENHA a dependencia instalada. O hero continua sendo bloco
- * azul + serifa, que e o que faz a identidade; o objeto e ornamento, nunca
+ * carvao + serifa, que e o que faz a identidade; o objeto e ornamento, nunca
  * informacao.
  */
 
@@ -48,15 +48,15 @@ import { fragment, vertex } from "./hatch.glsl";
 function EngravedIcosahedron() {
   const mesh = useRef<Mesh>(null);
 
-  // #1620DC e #F5F3EE em 0-1. O ShaderMaterial cru nao passa por conversao de
+  // #1C1A17 e #F5F3EE em 0-1. O ShaderMaterial cru nao passa por conversao de
   // color space (nao inclui o chunk de colorspace), entao o valor escrito em
-  // gl_FragColor chega ao buffer exatamente como esta aqui — e o azul do objeto
-  // casa PIXEL A PIXEL com o `bg-blue` da section. E isso que faz a figura
-  // "ser" o fundo em vez de um retangulo colado sobre ele.
+  // gl_FragColor chega ao buffer exatamente como esta aqui — e o carvao do
+  // objeto casa PIXEL A PIXEL com o `bg-carvao` da section. E isso que faz a
+  // figura "ser" o fundo em vez de um retangulo colado sobre ele.
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uBlue: { value: new Vector3(0.086, 0.125, 0.863) },
+      uCarvao: { value: new Vector3(0.11, 0.102, 0.09) },
       uCream: { value: new Vector3(0.961, 0.953, 0.933) },
     }),
     [],

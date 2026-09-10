@@ -10,9 +10,9 @@ const SITE_URL = "https://portfolio-souzxxxs-projects.vercel.app";
 
 // Paleta do sistema, repetida aqui em hex porque `next/og` renderiza fora do
 // Tailwind: satori nao enxerga nem as classes nem as variaveis do next/font.
-const AZUL = "#1620DC";
-const CREME = "#F5F3EE"; // 8.33:1 sobre o azul
-const CREME_600 = "#D8D4C8"; // 6.23:1 sobre o azul
+const CARVAO = "#1C1A17";
+const CREME = "#F5F3EE"; // 15.66:1 sobre o carvao
+const CREME_600 = "#D8D4C8"; // 11.72:1 sobre o carvao
 const FILETE = "rgba(245,243,238,0.45)";
 
 type Fonte = {
@@ -25,9 +25,10 @@ type Fonte = {
 /**
  * opengraph-image — o preview de TODO link compartilhado (LinkedIn, WhatsApp,
  * Slack). E a primeira coisa que um recrutador ve, antes de abrir o site: por
- * isso ela carrega a identidade inteira em um quadro — campo azul chapado (zero
- * gradiente), nome em serifa display caixa alta com tracking POSITIVO e dois
- * filetes tracejados creme.
+ * isso ela carrega a identidade inteira em um quadro — campo carvao chapado
+ * (zero gradiente), nome em serifa display caixa alta com tracking POSITIVO e
+ * dois filetes tracejados creme. O layout nao mudou com a troca de cor: e o
+ * mesmo quadro, agora no escuro unico do site em vez do azul de assinatura.
  *
  * A fonte vem de public/fonts/ por rede porque satori so aceita buffer de fonte,
  * nunca uma familia CSS. Se o fetch falhar (rede fora, deploy novo, cold start
@@ -59,7 +60,7 @@ export default async function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          backgroundColor: AZUL,
+          backgroundColor: CARVAO,
           padding: "0 84px",
         }}
       >

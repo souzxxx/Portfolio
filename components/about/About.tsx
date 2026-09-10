@@ -6,20 +6,21 @@ import { Reveal } from "../ui/Reveal";
 import { SerifDisplay } from "../ui/SerifDisplay";
 
 /**
- * About — o bloco de CONTATO, quarto campo de cor do site: BREU.
+ * About — o bloco de CONTATO, o ultimo campo CARVAO do site.
  *
- * E aqui que vive o UNICO elemento dourado do portfolio inteiro (o CTA de
- * curriculo), e e aqui por razao medida, nao por gosto: gold #E8B23A sobre
- * cream #F5F3EE da 1.74:1 (reprova ate o minimo 3:1 de componente da 1.4.11),
- * enquanto sobre ink #141414 da 9.53:1 nos dois sentidos. O dourado so existe
- * porque existe um fundo breu para segura-lo.
+ * E aqui que vive o UNICO acento cromatico do portfolio inteiro (o CTA de
+ * curriculo, em dourado), e e aqui por razao medida, nao por gosto: gold
+ * #D4A017 sobre cream #F5F3EE da 2.14:1 (reprova ate o minimo 3:1 de
+ * componente da 1.4.11), enquanto sobre carvao #1C1A17 da 7.31:1 nos dois
+ * sentidos. O dourado so existe porque existe um fundo carvao para segura-lo —
+ * ele nunca toca papel, em lugar nenhum do site.
  *
  * Sem server-side state e sem hook nenhum: componente de servidor. O unico
  * pedaco de cliente que entra e o <Reveal>, que ja e "use client" por conta
  * propria — o resto vai como HTML, e o bundle da home nao cresce.
  *
  * O feedback de interacao das linhas de contato e UM so: a linha inteira
- * inverte creme<->breu. Sem icone, sem seta que desliza, sem sombra.
+ * inverte creme<->carvao. Sem icone, sem seta que desliza, sem sombra.
  */
 
 type Contato = {
@@ -50,14 +51,14 @@ const contatos: Contato[] = [
 ];
 
 // Enfase dentro da prosa: peso + sublinhado fino de 1px em creme a 45%. Sobre
-// breu, cor de enfase seria ou o azul (2.00:1, proibido) ou o dourado (que e
-// exclusivo do CTA) — entao a enfase aqui e desenhada, nao colorida.
+// carvao a unica cor disponivel para enfase seria o dourado, que e exclusivo do
+// CTA — entao a enfase aqui e desenhada, nao colorida.
 const enfase =
   "font-medium underline decoration-cream/45 decoration-[1px] underline-offset-4";
 
 export function About() {
   return (
-    <Bloco ground="ink" id="about">
+    <Bloco ground="carvao" id="about">
       <div className="mx-auto max-w-[72rem]">
         <Reveal>
           <Meta
@@ -109,11 +110,11 @@ export function About() {
                   className={clsx(
                     "group grid grid-cols-[minmax(0,1fr)_1.5rem] items-baseline gap-x-3 gap-y-1 py-4",
                     "md:grid-cols-[6.5rem_minmax(0,1fr)_1.5rem] md:gap-y-0",
-                    "hover:bg-cream hover:text-ink focus-visible:bg-cream focus-visible:text-ink",
+                    "hover:bg-cream hover:text-carvao focus-visible:bg-cream focus-visible:text-carvao",
                     // O anel global e `currentColor`; com a linha invertida a
-                    // cor de texto vira breu e o anel — desenhado 2px FORA da
-                    // caixa, ja sobre o bloco breu — ficaria breu sobre breu.
-                    // Forcar creme devolve 16.61:1 ao anel sem tocar a
+                    // cor de texto vira carvao e o anel — desenhado 2px FORA da
+                    // caixa, ja sobre o bloco carvao — ficaria carvao sobre
+                    // carvao. Forcar creme devolve 15.66:1 ao anel sem tocar a
                     // inversao, que continua sendo o feedback principal.
                     "focus-visible:outline-cream",
                     "md:-mx-4 md:px-4",
@@ -147,11 +148,11 @@ export function About() {
               O variante arbitrario `[&>a:focus-visible]` tambem so pode vir
               daqui, e conserta um furo REAL de acessibilidade medido no
               navegador: o anel de foco global e `outline: 2px solid
-              currentColor`, e no CTA dourado `currentColor` e #141414 — a
+              currentColor`, e no CTA dourado `currentColor` e #1C1A17 — a
               MESMA cor do bloco onde o anel e desenhado (offset 2px, ou seja,
-              fora do dourado). Resultado medido: anel breu sobre breu, 1:1,
-              invisivel no teclado, justo no unico CTA principal do site.
-              Creme devolve 16.61:1. A regra global usa `:where()`, entao
+              fora do dourado). Resultado medido: anel carvao sobre carvao,
+              1:1, invisivel no teclado, justo no unico CTA principal do site.
+              Creme devolve 15.66:1. A regra global usa `:where()`, entao
               especificidade 0 — esta utility ganha sem `!important`. */}
           <div className="mt-12 grid [&>a:focus-visible]:outline-cream md:block">
             <Botao

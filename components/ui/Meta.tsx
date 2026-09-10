@@ -11,9 +11,9 @@ import clsx from "clsx";
  * inline sem ternario: `items={["ANO 2026", isPrivate && "REPO: PRIVADO"]}`.
  *
  * Sem caixa, sem borda, sem bolinha: herda `currentColor` e por isso funciona
- * identico nos tres fundos (azul, papel, breu). Para baixar o tom, passe a cor
+ * identico nos dois fundos (carvao e papel). Para baixar o tom, passe a cor
  * pelo `className` respeitando a matriz de contraste — `text-ink-700` no
- * papel, `text-cream-600` no azul, `text-cream-700` no breu.
+ * papel, `text-cream-700`/`text-cream-600` no carvao.
  *
  * Vocabulario do site (mantenha o dialeto): `BUILD nnn`, `STATUS: NO AR |
  * ENTREGUE | EM CURSO`, `STACK: …`, `ANO 2026`, `REPO: PRIVADO`, `DESDE 2026`.

@@ -1,8 +1,8 @@
 import clsx from "clsx";
 
 /**
- * CutWordmark — a peca tipografica gigante que faz a virada do campo azul do
- * hero para o papel das secoes editoriais.
+ * CutWordmark — a peca tipografica gigante que faz a virada do campo carvao
+ * do hero para o papel das secoes editoriais.
  *
  * API (contrato, nao mude):
  *   <CutWordmark text?={string} />   // default: "SOUZXX"
@@ -54,8 +54,8 @@ const WORDMARK = "SOUZXX";
 
 /**
  * A linha de letras, sem fundo e sem padding: quem chama e que escolhe o
- * campo de cor, a goteira e a medida. Cor tambem vem de fora (`text-blue` no
- * papel, `text-cream` no breu) — o componente nunca decide contraste.
+ * campo de cor, a goteira e a medida. Cor tambem vem de fora (`text-carvao`
+ * no papel, `text-cream` no carvao) — o componente nunca decide contraste.
  */
 export function WordmarkRow({
   text = WORDMARK,
@@ -82,7 +82,7 @@ export function CutWordmark({ text = WORDMARK }: { text?: string }) {
   return (
     <div className="block-paper relative w-full overflow-hidden pb-[clamp(1rem,3vw,2.5rem)] pt-[clamp(2rem,5vw,4rem)]">
       <div className="mx-auto max-w-[96rem] px-[var(--gutter)]">
-        <WordmarkRow text={text} className="text-blue" />
+        <WordmarkRow text={text} className="text-carvao" />
       </div>
       <span className="sr-only">{text.toLowerCase()}</span>
     </div>

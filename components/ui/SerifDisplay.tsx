@@ -20,7 +20,7 @@ import type { ReactNode } from "react";
  * e 0.95 — abaixo disso o til encosta na linha de cima.
  *
  * Sem gradiente, sem clip de texto, sem animacao: a cor e sempre a herdada do
- * bloco (creme sobre azul/breu, breu sobre papel), ou uma da paleta passada
+ * bloco (creme sobre carvao, carvao sobre papel), ou uma da paleta passada
  * explicitamente pelo `className`.
  */
 export function SerifDisplay({

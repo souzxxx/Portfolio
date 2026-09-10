@@ -30,51 +30,59 @@ const config: Config = {
     },
     extend: {
       // ---------------------------------------------------------------------
+      // DUAS COLUNAS DE COR, E UM SO ESCURO.
+      //
+      // O sistema anterior tinha DOIS escuros: um acento cromatico saturado
+      // usado como campo inteiro e o "breu" #141414 das secoes de indice e
+      // contato. O acento saiu (satura demais: em bloco chapado do tamanho de
+      // uma dobra o olho cansa antes de terminar de ler), e com ele saiu tambem
+      // a razao de existir do breu — dois cinzas escuros vizinhos dao 1.06:1 um
+      // contra o outro, ou seja, seriam indistinguiveis como campos de cor.
+      // Agora existe UM escuro — carvao #1C1A17 — e UM claro — papel creme
+      // #F5F3EE. Todo bloco do site e um dos dois.
+      //
       // MATRIZ DE CONTRASTE (WCAG 2.1, calculada — nao estimada)
       //
-      //   cream    #F5F3EE sobre blue    #1620DC =  8.33:1  texto principal sobre azul
-      //   cream600 #D8D4C8 sobre blue    #1620DC =  6.23:1  secundario sobre azul
-      //   cream    #F5F3EE sobre blue700 #0D1596 = 12.10:1  sobre azul pressed
-      //   ink      #141414 sobre cream   #F5F3EE = 16.61:1  texto principal sobre papel
-      //   ink600   #3C3A34 sobre cream   #F5F3EE = 10.25:1  prosa secundaria sobre papel
-      //   ink700   #5A5750 sobre cream   #F5F3EE =  6.50:1  rotulo mono sobre papel
-      //   blue     #1620DC sobre cream   #F5F3EE =  8.33:1  link/rotulo azul sobre papel
-      //   blue700  #0D1596 sobre cream   #F5F3EE = 12.10:1  hover de link sobre papel
-      //   cream    #F5F3EE sobre ink     #141414 = 16.61:1  texto principal sobre breu
-      //   cream600 #D8D4C8 sobre ink     #141414 = 12.43:1  secundario sobre breu
-      //   cream700 #A8A49B sobre ink     #141414 =  7.41:1  terciario sobre breu
-      //   gold     #E8B23A sobre ink     #141414 =  9.53:1  dourado sobre breu
-      //   ink      #141414 sobre gold    #E8B23A =  9.53:1  texto do CTA dourado
+      //   cream    #F5F3EE sobre carvao    #1C1A17 = 15.66:1  texto principal sobre carvao
+      //   cream600 #D8D4C8 sobre carvao    #1C1A17 = 11.72:1  secundario sobre carvao
+      //   cream700 #A8A49B sobre carvao    #1C1A17 =  6.99:1  terciario sobre carvao
+      //   cream    #F5F3EE sobre carvao700 #0F0E0C = 17.40:1  sobre carvao pressed
+      //   carvao   #1C1A17 sobre cream     #F5F3EE = 15.66:1  texto principal sobre papel
+      //   ink600   #3C3A34 sobre cream     #F5F3EE = 10.25:1  prosa secundaria sobre papel
+      //   ink700   #5A5750 sobre cream     #F5F3EE =  6.50:1  rotulo mono sobre papel
+      //   gold     #D4A017 sobre carvao    #1C1A17 =  7.31:1  dourado sobre carvao
+      //   carvao   #1C1A17 sobre gold      #D4A017 =  7.31:1  texto do CTA dourado
       //
-      // TRES PROIBICOES ABSOLUTAS, medidas:
-      //   1. cream700 #A8A49B sobre blue = 3.71:1 → REPROVA AA. `cream.700` e
-      //      EXCLUSIVO de fundo breu; sobre azul so existem cream.DEFAULT e
-      //      cream.600.
-      //   2. gold #E8B23A sobre cream = 1.74:1. O dourado NUNCA toca papel —
-      //      nem como texto nem como bloco (1.74 tambem reprova o minimo 3:1
-      //      de contorno de componente da 1.4.11). O CTA dourado vive no breu.
-      //   3. blue #1620DC sobre ink #141414 = 2.00:1. NUNCA texto azul sobre
-      //      breu; sobre breu o acento e o creme. E por isso que este sistema
-      //      nao precisa de uma quarta cor.
+      // DUAS PROIBICOES ABSOLUTAS, medidas:
+      //   1. gold #D4A017 sobre cream #F5F3EE = 2.14:1. O DOURADO NUNCA TOCA
+      //      PAPEL — nem como texto nem como bloco (2.14 reprova tanto o 4.5:1
+      //      de texto quanto o minimo 3:1 de contorno de componente da 1.4.11).
+      //      O dourado e o UNICO acento cromatico do site e existe num lugar so:
+      //      o CTA de curriculo, que vive sobre carvao.
+      //   2. Nao existe um segundo escuro. Antes de acrescentar um cinza
+      //      "quase carvao" para diferenciar duas secoes vizinhas, lembre que
+      //      #1C1A17 contra #141414 da 1.06:1: a diferenca nao chega ao olho, so
+      //      ao inspetor. O ritmo entre secoes se faz alternando carvao e papel
+      //      (ver a partitura em app/page.tsx), nunca dois escuros encostados.
       //
-      // O azul de assinatura e #1620DC (R22 G32 B220): subir R/G e baixar B em
-      // relacao ao RGB puro tira ~9% de luminancia e da corpo — le como tinta
-      // ultramarina de gravura, nao como neon de monitor.
+      // POR QUE `ink` NAO TEM `DEFAULT`: `ink.600` e `ink.700` sao as duas
+      // diluicoes do carvao usadas na prosa sobre papel. Um `ink.DEFAULT` seria
+      // um SEGUNDO NOME para o mesmo #1C1A17 — e o portfolio e lido como
+      // amostra de codigo, entao um token so pode ter um nome. Texto cheio
+      // sobre papel e `text-carvao`.
+      //
+      // O carvao #1C1A17 (R28 G26 B23) nao e preto puro: os 5 pontos de
+      // diferenca entre R e B deixam o campo QUENTE, o que casa com o creme do
+      // papel (que tambem puxa amarelo) e tira do bloco a leitura de "fundo
+      // #000 de terminal". `carvao.700` #0F0E0C e a mesma cor um degrau abaixo,
+      // reservada a estado pressed — em botao escuro o hover continua sendo a
+      // INVERSAO creme/carvao, nao um escurecimento.
       // ---------------------------------------------------------------------
       colors: {
-        blue: { DEFAULT: "#1620DC", 700: "#0D1596" },
+        carvao: { DEFAULT: "#1C1A17", 700: "#0F0E0C" },
         cream: { DEFAULT: "#F5F3EE", 600: "#D8D4C8", 700: "#A8A49B" },
-        ink: { DEFAULT: "#141414", 600: "#3C3A34", 700: "#5A5750" },
-        gold: "#E8B23A",
-        // Aliases legados apontando para os novos valores: evitam que arquivo
-        // ainda nao migrado fique visualmente quebrado no meio da wave.
-        base: "#F5F3EE",
-        surface: "#F5F3EE",
-        elevated: "#F5F3EE",
-        border: "#141414",
-        fg: "#141414",
-        muted: "#3C3A34",
-        subtle: "#5A5750",
+        ink: { 600: "#3C3A34", 700: "#5A5750" },
+        gold: "#D4A017",
       },
       // DECISAO DE SISTEMA: `font-mono` passa a ser Courier Prime (maquina de
       // escrever), o que converte as 23 ocorrencias de `font-mono` ja

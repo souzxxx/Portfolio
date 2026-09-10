@@ -10,7 +10,7 @@ import { Component, type ReactNode } from "react";
  * erro, o throw sobe ate a raiz e o Next troca a PAGINA INTEIRA pela tela de
  * erro — o portfolio inteiro cai por causa de um ornamento.
  *
- * Aqui o hero degrada para azul chapado, que continua sendo o desenho: a
+ * Aqui o hero degrada para carvao chapado, que continua sendo o desenho: a
  * identidade e o bloco de cor + a serifa, nao o objeto. Custa ~0.4KB.
  */
 export class CanvasBoundary extends Component<

@@ -26,7 +26,7 @@ import {
  * SERIALIZA `style="opacity:0;transform:translateY(10px)"` em cada wrapper — 21
  * deles nesta home. Com JS desligado (ou bloqueado por extensao, ou num crawler
  * que nao executa script) a pagina rendia so a NavBar, o selo e o <h1>: todo o
- * resto era um campo azul vazio. O fallback de 2s nao cobre esse caso, porque
+ * resto era um campo carvao vazio. O fallback de 2s nao cobre esse caso, porque
  * ele TAMBEM depende de JS. O alcance do componente cresceu muito nesta wave —
  * ele embrulha todo SectionHeader, os paragrafos do About e cada semestre da
  * linha do tempo —, entao o custo do cenario sem JS passou de "algumas secoes"

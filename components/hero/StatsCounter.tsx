@@ -34,12 +34,11 @@ export function StatsCounter({
     <div className="border-dashed border-cream/25 px-4 py-5 max-sm:[&:nth-child(2n)]:border-l max-sm:[&:nth-child(2n+1)]:pl-0 max-sm:[&:nth-child(n+3)]:border-t sm:border-l sm:first:border-l-0 sm:first:pl-0">
       <div className="font-mono text-[clamp(1.85rem,3.4vw,3rem)] leading-none tabular-nums text-cream">
         {value}
-        {/* O sufixo perde a cor de acento: sobre azul existe UMA cor de texto,
+        {/* O sufixo perde a cor de acento: sobre carvao a prosa e sempre creme,
             e o "k" e parte do numero, nao um enfeite. */}
         <span>{suffix}</span>
       </div>
-      {/* cream-600 sobre azul = 6.23:1. NUNCA cream-700 aqui: da 3.71:1 e
-          reprova AA — cream-700 e exclusivo de fundo breu. */}
+      {/* cream-600 sobre carvao = 11.72:1. */}
       <div className="mt-2 font-mono text-tag uppercase text-cream-600">
         {label}
       </div>

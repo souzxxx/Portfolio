@@ -79,9 +79,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Azul de assinatura: e a primeira diferenca que aparece no celular, na
-  // barra do navegador do Android, antes mesmo do primeiro scroll.
-  themeColor: "#1620DC",
+  // Carvao de assinatura: e a primeira diferenca que aparece no celular, na
+  // barra do navegador do Android, antes mesmo do primeiro scroll. E o MESMO
+  // valor do `bg-carvao` do hero, entao a barra do sistema e o topo da pagina
+  // leem como um campo continuo em vez de dois retangulos escuros diferentes.
+  themeColor: "#1C1A17",
   width: "device-width",
   initialScale: 1,
 };

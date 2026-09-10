@@ -30,8 +30,11 @@ import { stack, type Tech } from "@/lib/stack";
  * limpar `lib/stack.ts` depois, este era o unico lugar que o consumia.
  *
  * ZERO animacao aqui dentro: um unico <Reveal> no bloco todo, nenhum por item.
- * Sobre papel os tons sao `ink` (16.61:1) para o dado e o azul de assinatura
- * (8.33:1) so no rotulo da coluna — o unico azul que este bloco usa.
+ * Sobre papel o dado e o rotulo de coluna sao ambos `carvao` (15.66:1) — o que
+ * separa um do outro nao e mais cor, e tipografia: o rotulo e mono em caixa
+ * alta com tracking de 0.18em, o dado e mono em caixa baixa. Quando o acento
+ * era azul, a diferenca vinha de graca; num sistema de uma cor so ela tem que
+ * ser desenhada.
  */
 
 /** A ordem de leitura das colunas: do que ele escreve para onde ele roda. */
@@ -61,17 +64,17 @@ export function StackMarquee() {
           <div className="mt-[clamp(2.5rem,6vw,4rem)] grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-5">
             {CATEGORIAS.map(({ key, titulo }) => (
               <div key={key}>
-                <Label className="text-blue">{titulo}</Label>
+                <Label className="text-carvao">{titulo}</Label>
                 {/* O filete do cabecalho e o unico solido em intencao: fecha o
-                    rotulo antes da primeira tecnologia. `border-ink` sobe o
-                    tracejado de currentColor para o breu cheio. */}
-                <DashedRule className="mt-2 border-ink" />
+                    rotulo antes da primeira tecnologia. `border-carvao` sobe o
+                    tracejado de currentColor para o carvao cheio. */}
+                <DashedRule className="mt-2 border-carvao" />
                 {stack
                   .filter((tech) => tech.category === key)
                   .map((tech) => (
                     <p
                       key={tech.name}
-                      className="border-b border-dashed border-ink/20 py-2.5 font-mono text-[15px] text-ink md:py-2 md:text-body"
+                      className="border-b border-dashed border-carvao/20 py-2.5 font-mono text-[15px] text-carvao md:py-2 md:text-body"
                     >
                       {tech.name}
                     </p>

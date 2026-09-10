@@ -21,18 +21,16 @@ import type { ReactNode } from "react";
  * ── COMO A INVERSAO FUNCIONA ──────────────────────────────────────────────
  * `solid` e `outline` sao construidos em `currentColor`: a superficie do botao
  * (`bg-current` / `border-current`) usa a cor de TEXTO herdada do bloco, que a
- * matriz de contraste ja aprovou naquele fundo (creme sobre azul, breu sobre
- * papel, creme sobre breu). O que o botao NAO consegue deduzir sozinho e a cor
- * de FUNDO do bloco — e essa e exatamente a cor que o rotulo precisa ter
- * quando a superficie esta preenchida. Por isso o CALL SITE informa a cor de
- * inversao pelo `className`, um exemplo por fundo:
+ * matriz de contraste ja aprovou naquele fundo (creme sobre carvao, carvao
+ * sobre papel). O que o botao NAO consegue deduzir sozinho e a cor de FUNDO do
+ * bloco — e essa e exatamente a cor que o rotulo precisa ter quando a
+ * superficie esta preenchida. Por isso o CALL SITE informa a cor de inversao
+ * pelo `className`, um exemplo por fundo:
  *
- *   sobre azul  →  <Botao variant="solid"   className="text-blue" />
- *                  <Botao variant="outline" className="hover:text-blue" />
- *   sobre papel →  <Botao variant="solid"   className="text-cream" />
- *                  <Botao variant="outline" className="hover:text-cream" />
- *   sobre breu  →  <Botao variant="solid"   className="text-ink" />
- *                  <Botao variant="outline" className="hover:text-ink" />
+ *   sobre carvao →  <Botao variant="solid"   className="text-carvao" />
+ *                   <Botao variant="outline" className="hover:text-carvao" />
+ *   sobre papel  →  <Botao variant="solid"   className="text-cream" />
+ *                   <Botao variant="outline" className="hover:text-cream" />
  *
  * `className` e aplicado ao <span> do rotulo (nao ao <a>), porque o <a> precisa
  * manter a cor herdada do bloco para pintar `bg-current`/`border-current`. Esse
@@ -41,9 +39,12 @@ import type { ReactNode } from "react";
  * para cor; para largura/margem, envolva o botao no layout do call site.
  *
  * `gold` traz as proprias cores e ignora a regra acima. E EXCLUSIVO de fundo
- * breu: gold #E8B23A sobre cream #F5F3EE = 1.74:1, que reprova ate o minimo
- * 3:1 de componente. Sobre breu da 9.53:1 nos dois sentidos. E o unico
- * elemento dourado do site inteiro (o CTA de curriculo).
+ * carvao: gold #D4A017 sobre cream #F5F3EE = 2.14:1, que reprova ate o minimo
+ * 3:1 de componente — o dourado NUNCA toca papel. Sobre carvao da 7.31:1 nos
+ * dois sentidos. E o UNICO acento cromatico do site inteiro, e ele existe num
+ * lugar so: o CTA de curriculo. O hover dele e a mesma inversao dos outros dois
+ * variantes (a superficie esvazia para carvao e o rotulo vira dourado), nao um
+ * escurecimento — por isso `carvao.700` nao aparece aqui.
  */
 export function Botao({
   href,
@@ -70,7 +71,8 @@ export function Botao({
         "inline-flex border align-middle motion-safe:transition-colors motion-safe:duration-150",
         variant === "solid" && "border-current bg-current hover:bg-transparent",
         variant === "outline" && "border-current bg-transparent hover:bg-current",
-        variant === "gold" && "border-gold bg-gold text-ink hover:bg-ink hover:text-gold",
+        variant === "gold" &&
+          "border-gold bg-gold text-carvao hover:bg-carvao hover:text-gold",
       )}
     >
       <span

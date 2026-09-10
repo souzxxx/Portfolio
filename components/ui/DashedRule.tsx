@@ -7,9 +7,9 @@ import clsx from "clsx";
  *   <DashedRule className?={string} />
  *
  * Filete tracejado de 1px em `currentColor` a 35% de opacidade (classe `.rule`
- * em globals.css). Como usa currentColor, a mesma classe resolve os tres
- * fundos: creme sobre azul, breu sobre papel, creme sobre breu — nao existe
- * variante por secao, nem borda solida, nem sombra, em lugar nenhum do site.
+ * em globals.css). Como usa currentColor, a mesma classe resolve os dois
+ * fundos: creme sobre carvao, carvao sobre papel — nao existe variante por
+ * secao, nem borda solida, nem sombra, em lugar nenhum do site.
  *
  * `aria-hidden` porque e ornamento: a separacao semantica ja vem da estrutura
  * de <section>/<h2>, e um <hr> anunciado a cada linha de tabela seria ruido

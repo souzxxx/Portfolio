@@ -21,24 +21,26 @@
   }
 
   body {
-    @apply bg-cream text-ink font-sans antialiased;
+    @apply bg-cream text-carvao font-sans antialiased;
     /* Zero gradiente em qualquer lugar do site, inclusive no body: os campos
        de cor sao chapados e trocam por secao. */
     background-image: none;
   }
 
-  /* Os tres campos de cor do site. O fundo fica SEMPRE na <section> e NUNCA
-     num wrapper interno — e isso que evita a costura de 1px entre blocos em
-     DPR fracionario (1.25x, 1.5x), onde dois retangulos empilhados nao caem
-     no mesmo pixel fisico. */
-  .block-blue {
-    @apply bg-blue text-cream;
+  /* OS DOIS campos de cor do site — eram tres. O campo do antigo acento
+     saturado saiu com ele, e o segundo escuro (o "breu" #141414) saiu junto:
+     dava 1.06:1 contra o carvao, ou seja, dois blocos escuros vizinhos nao
+     leriam como dois campos, leriam como um so com uma emenda suspeita. Agora
+     ha carvao e papel, e o ritmo se faz alternando os dois.
+
+     O fundo fica SEMPRE na <section> e NUNCA num wrapper interno — e isso que
+     evita a costura de 1px entre blocos em DPR fracionario (1.25x, 1.5x), onde
+     dois retangulos empilhados nao caem no mesmo pixel fisico. */
+  .block-carvao {
+    @apply bg-carvao text-cream;
   }
   .block-paper {
-    @apply bg-cream text-ink;
-  }
-  .block-ink {
-    @apply bg-ink text-cream;
+    @apply bg-cream text-carvao;
   }
 
   /* Ritmo de bloco: um unico par de paddings para o site inteiro. */
@@ -52,69 +54,27 @@
     max-width: 68ch;
   }
 
-  /* Divisor UNICO do site. `currentColor` resolve os tres fundos com uma
-     classe so: sobre azul sai creme, sobre papel sai breu, sobre breu sai
-     creme — sem variante por secao. */
+  /* Divisor UNICO do site. `currentColor` resolve os dois fundos com uma
+     classe so: sobre carvao sai creme, sobre papel sai carvao — sem variante
+     por secao. */
   .rule {
     border: 0;
     border-top: 1px dashed currentColor;
     opacity: 0.35;
   }
 
-  /* Cianotipia autoral, 100% CSS, sobre os screenshots reais do repo:
-     azul embaixo → imagem dessaturada em `screen` → creme em `multiply` →
-     hachura diagonal por cima. `isolation: isolate` cria o contexto de
-     mesclagem aqui dentro e impede o blend de vazar para a pagina inteira. */
-  .duotone {
-    position: relative;
-    isolation: isolate;
-    background: #1620dc;
-    --duo-contrast: 1.28;
-    --duo-bright: 1.06;
-  }
-  .duotone > img {
-    filter: grayscale(1) contrast(var(--duo-contrast)) brightness(var(--duo-bright));
-    mix-blend-mode: screen;
-    opacity: 0.92;
-  }
-  /* A camada de multiply e CREME, nao azul — e ela que abre a segunda cor da
-     cianotipia. MEDIDO nos screenshots reais do repo: com #1620DC aqui, o
-     multiply zera os canais R e G do que o `screen` acabou de abrir (o azul
-     tem R .086 / G .125) e a imagem inteira vira uma chapa azul sem detalhe;
-     com #F5F3EE (.96/.95/.93) as altas-luzes viram creme, as sombras ficam
-     azuis e o desenho da UI continua legivel. */
-  .duotone::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    mix-blend-mode: multiply;
-    background: #f5f3ee;
-  }
-  .duotone::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    mix-blend-mode: multiply;
-    opacity: 0.16;
-    background: repeating-linear-gradient(35deg, #0d1596 0 1.4px, transparent 1.4px 6px);
-  }
-  /* Volta a cor real: hover do desktop e botao [ COR ] do mobile. */
-  .duotone[data-color="on"] > img {
-    filter: none;
-    mix-blend-mode: normal;
-    opacity: 1;
-  }
-  .duotone[data-color="on"]::after,
-  .duotone[data-color="on"]::before {
-    display: none;
-  }
+  /* A PILHA `.duotone` FOI REMOVIDA (cianotipia: base azul + `screen` +
+     `multiply` creme + hachura diagonal, com um estado `data-color="on"` que
+     devolvia a cor real no hover). Screenshot de produto e PROVA, e prova nao
+     se estiliza: a captura real entra em cor natural, com moldura de 1px em
+     carvao (ver components/ui/Chapa.tsx). A gravura de duas cores continua
+     viva onde ela e DESENHO e nao registro — o objeto GLSL do hero e a capa
+     procedural dos projetos sem screenshot (components/projects/ProjectCover). */
 
-  /* Foco AA POR CONSTRUCAO nos tres fundos: o anel usa `currentColor`, e a
+  /* Foco AA POR CONSTRUCAO nos dois fundos: o anel usa `currentColor`, e a
      cor de texto de cada bloco JA foi medida contra aquele fundo na matriz do
-     tailwind.config.ts. Logo o anel herda a razao do texto (8.33:1 no azul,
-     16.61:1 no papel e no breu) sem precisar de uma cor de foco por secao.
+     tailwind.config.ts. Logo o anel herda a razao do texto (15.66:1 tanto no
+     carvao quanto no papel) sem precisar de uma cor de foco por secao.
      `:where()` tem especificidade 0, entao qualquer componente sobrescreve
      sem !important. */
   :where(a, button, [tabindex]:not([tabindex="-1"])):focus-visible {
@@ -124,7 +84,7 @@
   }
 
   ::selection {
-    background: #1620dc;
+    background: #1c1a17;
     color: #f5f3ee;
   }
 
@@ -136,7 +96,7 @@
     background: #f5f3ee;
   }
   ::-webkit-scrollbar-thumb {
-    background: #141414;
+    background: #1c1a17;
     border-radius: 0;
     border: 0;
   }

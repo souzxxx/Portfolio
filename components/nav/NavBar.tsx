@@ -7,13 +7,14 @@ import { DashedRule } from "../ui/DashedRule";
 /**
  * NavBar — DUAS pecas, e nada mais.
  *
- * 1) CABECALHO EM FLUXO que pinta o PROPRIO campo azul. `app/page.tsx` renderiza
- *    <NavBar /> como irmao imediatamente acima de <Hero />, e o Hero tambem
- *    pinta `bg-blue`: os dois leem como um campo continuo, sem costura, e nenhum
- *    dos dois precisa saber a altura do outro. Por isso o azul mora aqui dentro
- *    (`block-blue`) e nao num wrapper da pagina.
+ * 1) CABECALHO EM FLUXO que pinta o PROPRIO campo carvao. `app/page.tsx`
+ *    renderiza <NavBar /> como irmao imediatamente acima de <Hero />, e o Hero
+ *    tambem pinta `bg-carvao`: os dois leem como um campo continuo, sem costura,
+ *    e nenhum dos dois precisa saber a altura do outro. Por isso o carvao mora
+ *    aqui dentro (`block-carvao`) e nao num wrapper da pagina.
  *
- * 2) BARRA STICKY DE 44px que so aparece DEPOIS do hero. Solida (`bg-ink`), sem
+ * 2) BARRA STICKY DE 44px que so aparece DEPOIS do hero. Solida (`bg-carvao`,
+ *    o MESMO escuro do cabecalho — nao existe um segundo escuro no site), sem
  *    `backdrop-filter`: filtro de fundo em elemento `position: fixed` e a causa
  *    do jank de scroll no iOS Safari que a auditoria reportou. Altura FIXA em
  *    qualquer viewport e transicao so de `transform` — zero layout shift quando
@@ -45,18 +46,18 @@ export function NavBar() {
 
   return (
     <>
-      <header className="block-blue w-full">
+      <header className="block-carvao w-full">
         <nav
           aria-label="Principal"
           className="mx-auto flex max-w-[96rem] flex-wrap items-baseline justify-between gap-4 px-[var(--gutter)] pb-5 pt-6"
         >
           {/* O feedback e a INVERSAO, nunca um fade de opacidade: e a mesma
-              lingua dos links do rodape e das linhas de contato. Sobre azul,
-              creme com texto azul da 8.33:1. O `-mx-1/px-1` faz a caixa creme
+              lingua dos links do rodape e das linhas de contato. Sobre carvao,
+              creme com texto carvao da 15.66:1. O `-mx-1/px-1` faz a caixa creme
               nascer 4px alem do glifo sem deslocar o alinhamento do gutter. */}
           <a
             href="#top"
-            className="-mx-1 px-1 font-mono text-selo uppercase text-cream motion-safe:transition-colors motion-safe:duration-150 hover:bg-cream hover:text-blue"
+            className="-mx-1 px-1 font-mono text-selo uppercase text-cream motion-safe:transition-colors motion-safe:duration-150 hover:bg-cream hover:text-carvao"
           >
             souzxx
           </a>
@@ -129,7 +130,7 @@ export function NavBar() {
           elemento da ordem de tabulacao enquanto ela esta recolhida. */}
       <div
         className={clsx(
-          "fixed inset-x-0 top-0 z-50 h-11 border-b border-cream/25 bg-ink text-cream",
+          "fixed inset-x-0 top-0 z-50 h-11 border-b border-cream/25 bg-carvao text-cream",
           "motion-safe:transition-transform motion-safe:duration-200",
           scrolled ? "translate-y-0" : "invisible -translate-y-full",
         )}
@@ -139,11 +140,11 @@ export function NavBar() {
           className="mx-auto flex h-11 max-w-[96rem] items-center justify-between gap-4 px-[var(--gutter)]"
         >
           {/* `-my-3 py-3` leva o alvo de toque a 44px sem esticar a barra, que
-              tem altura FIXA de 44px. Mesma inversao do cabecalho, agora sobre
-              breu: creme com texto breu, 16.61:1. */}
+              tem altura FIXA de 44px. Mesma inversao do cabecalho: creme com
+              texto carvao, 15.66:1. */}
           <a
             href="#top"
-            className="-mx-1 -my-3 px-1 py-3 font-mono text-tag uppercase text-cream motion-safe:transition-colors motion-safe:duration-150 hover:bg-cream hover:text-ink focus-visible:bg-cream focus-visible:text-ink focus-visible:outline-cream"
+            className="-mx-1 -my-3 px-1 py-3 font-mono text-tag uppercase text-cream motion-safe:transition-colors motion-safe:duration-150 hover:bg-cream hover:text-carvao focus-visible:bg-cream focus-visible:text-carvao focus-visible:outline-cream"
           >
             souzxx
           </a>
