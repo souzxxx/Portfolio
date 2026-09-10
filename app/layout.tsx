@@ -1,7 +1,44 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Instrument_Serif, Courier_Prime, Silkscreen } from "next/font/google";
 import "./globals.css";
+
+// Tres familias novas (o teto do sistema), subset latin, display swap.
+// `preload` so na display: ela e a unica que participa do LCP, que continua
+// sendo o <h1> de texto renderizado no servidor. `adjustFontFallback` gera as
+// metricas do fallback local, matando FOUT e CLS na troca.
+const display = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: "normal",
+  variable: "--font-display",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ["Times New Roman", "Times", "serif"],
+});
+
+// Mono de maquina de escrever: e o `font-mono` do site inteiro (dado real,
+// comandos, rotulos de metadado). Geist Mono segue disponivel como `font-code`.
+const typewriter = Courier_Prime({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-typewriter",
+  display: "swap",
+  preload: false,
+  fallback: ["Courier New", "Courier", "monospace"],
+});
+
+// Bitmap 8-bit: exclusiva do banner do footer, nada mais no site.
+const bitmap = Silkscreen({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bitmap",
+  display: "swap",
+  preload: false,
+  fallback: ["Courier New", "monospace"],
+});
 
 const SITE_URL = "https://portfolio-souzxxxs-projects.vercel.app";
 const TITLE = "Leonardo Souza — Backend, Web & IA";
@@ -34,7 +71,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0f",
+  // Azul de assinatura: e a primeira diferenca que aparece no celular, na
+  // barra do navegador do Android, antes mesmo do primeiro scroll.
+  themeColor: "#1620DC",
   width: "device-width",
   initialScale: 1,
 };
@@ -81,7 +120,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${display.variable} ${typewriter.variable} ${bitmap.variable}`}
     >
       <body>
         <script
