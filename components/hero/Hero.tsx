@@ -3,8 +3,7 @@
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ArrowDown, FileDown, Github, Linkedin, Mail } from "lucide-react";
-import { GradientText } from "../ui/GradientText";
-import { Magnetic } from "../ui/Magnetic";
+import { SerifDisplay } from "../ui/SerifDisplay";
 import { StatsCounter } from "./StatsCounter";
 import { stats } from "@/lib/projects";
 
@@ -69,7 +68,7 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 text-balance text-2xl font-medium tracking-tight text-muted sm:text-3xl md:text-4xl lg:text-5xl"
             >
-              <GradientText>Backend, Web &amp; IA</GradientText>
+              <SerifDisplay>Backend, Web &amp; IA</SerifDisplay>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -115,56 +114,46 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.45 }}
             className="flex flex-wrap items-center gap-4"
           >
-            <Magnetic>
-              <a
-                href="#projects"
-                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-3 font-medium text-white shadow-[0_8px_30px_rgba(99,102,241,0.4)] transition hover:shadow-[0_12px_40px_rgba(99,102,241,0.6)]"
-              >
-                Ver projetos
-                <ArrowDown className="h-4 w-4 transition group-hover:translate-y-0.5" />
-              </a>
-            </Magnetic>
-            <Magnetic>
-              <a
-                href="https://github.com/souzxxx"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-              >
-                <Github className="h-4 w-4" />
-                GitHub
-              </a>
-            </Magnetic>
-            <Magnetic>
-              <a
-                href="https://www.linkedin.com/in/leonardo-souzx"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-              >
-                <Linkedin className="h-4 w-4" />
-                LinkedIn
-              </a>
-            </Magnetic>
-            <Magnetic>
-              <a
-                href="mailto:leonardosouzasilva9@gmail.com"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-              >
-                <Mail className="h-4 w-4" />
-                Email
-              </a>
-            </Magnetic>
-            <Magnetic>
-              <a
-                href="/leonardo-souza-cv.pdf"
-                download
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
-              >
-                <FileDown className="h-4 w-4" />
-                Currículo
-              </a>
-            </Magnetic>
+            <a
+              href="#projects"
+              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-3 font-medium text-white shadow-[0_8px_30px_rgba(99,102,241,0.4)] transition hover:shadow-[0_12px_40px_rgba(99,102,241,0.6)]"
+            >
+              Ver projetos
+              <ArrowDown className="h-4 w-4 transition group-hover:translate-y-0.5" />
+            </a>
+            <a
+              href="https://github.com/souzxxx"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/leonardo-souzx"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+            >
+              <Linkedin className="h-4 w-4" />
+              LinkedIn
+            </a>
+            <a
+              href="mailto:leonardosouzasilva9@gmail.com"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+            >
+              <Mail className="h-4 w-4" />
+              Email
+            </a>
+            <a
+              href="/leonardo-souza-cv.pdf"
+              download
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/40 px-6 py-3 font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface/80"
+            >
+              <FileDown className="h-4 w-4" />
+              Currículo
+            </a>
           </motion.div>
 
           {/* Stats line */}

@@ -10,8 +10,7 @@ import {
   FileDown,
 } from "lucide-react";
 import { Reveal } from "../ui/Reveal";
-import { GradientText } from "../ui/GradientText";
-import { Magnetic } from "../ui/Magnetic";
+import { SerifDisplay } from "../ui/SerifDisplay";
 
 export function About() {
   return (
@@ -32,7 +31,7 @@ export function About() {
         <Reveal delay={0.05}>
           <h2 className="mt-8 text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-fg sm:text-6xl md:text-7xl">
             Vamos construir algo que{" "}
-            <GradientText>aguenta produção</GradientText>.
+            <SerifDisplay>aguenta produção</SerifDisplay>.
           </h2>
         </Reveal>
 
@@ -64,54 +63,46 @@ export function About() {
 
         <Reveal delay={0.25}>
           <div className="mt-12 flex flex-wrap gap-4">
-            <Magnetic className="max-w-full">
-              <motion.a
-                href="mailto:leonardosouzasilva9@gmail.com"
-                className="group inline-flex max-w-full items-center gap-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 text-base font-medium text-white shadow-[0_10px_40px_rgba(99,102,241,0.4)] transition hover:shadow-[0_14px_50px_rgba(99,102,241,0.6)] sm:px-8"
-              >
-                <Mail className="h-5 w-5 flex-shrink-0" />
-                <span className="break-all text-left">
-                  leonardosouzasilva9@gmail.com
-                </span>
-                <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </motion.a>
-            </Magnetic>
-            <Magnetic className="max-w-full">
-              <a
-                href="https://github.com/souzxxx"
-                target="_blank"
-                rel="noreferrer"
-                className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
-              >
-                <Github className="h-5 w-5 flex-shrink-0" />
-                <span className="break-all text-left">github.com/souzxxx</span>
-                <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </a>
-            </Magnetic>
-            <Magnetic className="max-w-full">
-              <a
-                href="https://www.linkedin.com/in/leonardo-souzx"
-                target="_blank"
-                rel="noreferrer"
-                className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
-              >
-                <Linkedin className="h-5 w-5 flex-shrink-0" />
-                <span className="break-all text-left">
-                  linkedin.com/in/leonardo-souzx
-                </span>
-                <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </a>
-            </Magnetic>
-            <Magnetic className="max-w-full">
-              <a
-                href="/leonardo-souza-cv.pdf"
-                download
-                className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
-              >
-                <FileDown className="h-5 w-5 flex-shrink-0" />
-                <span className="text-left">Baixar currículo</span>
-              </a>
-            </Magnetic>
+            <motion.a
+              href="mailto:leonardosouzasilva9@gmail.com"
+              className="group inline-flex max-w-full items-center gap-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 text-base font-medium text-white shadow-[0_10px_40px_rgba(99,102,241,0.4)] transition hover:shadow-[0_14px_50px_rgba(99,102,241,0.6)] sm:px-8"
+            >
+              <Mail className="h-5 w-5 flex-shrink-0" />
+              <span className="break-all text-left">
+                leonardosouzasilva9@gmail.com
+              </span>
+              <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </motion.a>
+            <a
+              href="https://github.com/souzxxx"
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
+            >
+              <Github className="h-5 w-5 flex-shrink-0" />
+              <span className="break-all text-left">github.com/souzxxx</span>
+              <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/leonardo-souzx"
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
+            >
+              <Linkedin className="h-5 w-5 flex-shrink-0" />
+              <span className="break-all text-left">
+                linkedin.com/in/leonardo-souzx
+              </span>
+              <ArrowUpRight className="h-4 w-4 flex-shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+            <a
+              href="/leonardo-souza-cv.pdf"
+              download
+              className="group inline-flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/60 px-6 py-4 text-base font-medium text-fg backdrop-blur transition hover:border-indigo-500/50 hover:bg-surface sm:px-8"
+            >
+              <FileDown className="h-5 w-5 flex-shrink-0" />
+              <span className="text-left">Baixar currículo</span>
+            </a>
           </div>
         </Reveal>
       </div>
