@@ -1,63 +1,87 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { Bloco } from "../ui/Bloco";
 import { Reveal } from "../ui/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { semesters } from "@/lib/academic";
 
+/**
+ * AcademicTimeline — o SEGUNDO bloco AZUL do site, e o que da o ritmo da
+ * publicacao: sem ele o azul apareceria uma vez so, no hero, e a peca leria
+ * como "uma capa azul + um site claro" em vez de uma partitura de cor.
+ *
+ * Saiu a grade de 5 cartoes translucidos (canto arredondado, borda, blur de
+ * fundo), com a pilula do numero do semestre, um icone por highlight, o filete
+ * de gradiente que aparecia no hover e o deslocamento de -4px por cartao.
+ * Entrou uma ESCADA: o numero do semestre num trilho a esquerda, o label em
+ * serifa caixa alta, e os highlights como linhas de tabela separadas por filete
+ * tracejado.
+ *
+ * ZERO hover na secao inteira, e nenhum icone vindo de biblioteca externa. O
+ * unico movimento e um <Reveal> por semestre — cinco no total: layout estatico
+ * e confiante nao desliza a cada celula.
+ *
+ * CONTRASTE: sobre o azul de assinatura so existem `cream` (8.33:1) e
+ * `cream-600` (6.23:1). `cream-700` da 3.71:1 e REPROVA AA — nao aparece neste
+ * arquivo. O proprio azul tambem nao: sobre azul, azul some.
+ *
+ * DIACRITICO: o titulo da secao e os labels de semestre usam `d2`/`d3`, cujo
+ * leading minimo e 0.95/1.02. Com o `d1` de 0.88 o til de FORMACAO encostaria
+ * na linha de cima.
+ */
 export function AcademicTimeline() {
   return (
-    <section id="academic" className="relative py-32 md:py-40">
-      <div className="mx-auto max-w-7xl px-6 md:px-12">
+    <Bloco ground="blue" id="academic">
+      <div className="mx-auto max-w-[96rem]">
         <SectionHeader
-          eyebrow="Formação"
+          eyebrow="#04 · FORMAÇÃO"
           title="Insper · BCC"
           description="Bacharelado em Ciência da Computação. Cinco semestres explorando da matemática discreta a sistemas distribuídos, IA aplicada, dados em larga escala e arquitetura de baixo nível."
+          tone="blue"
         />
 
-        <div className="mt-20 grid gap-6 md:grid-cols-2">
-          {semesters.map((sem, i) => (
-            <Reveal key={sem.number} delay={i * 0.06}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                transition={{ type: "spring", stiffness: 240, damping: 20 }}
-                /* backdrop-blur-md: card grande, mesmo motivo dos cards de projeto. */
-                className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-surface/40 p-7 backdrop-blur-md transition-colors hover:border-indigo-500/40"
-              >
-                {/* corner ornament */}
-                <div className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-indigo-300">
-                  <GraduationCap className="h-3.5 w-3.5" />
+        {/* A borda de baixo fecha a escada: cada degrau traz a propria borda de
+            cima, entao sem isto o ultimo semestre ficaria aberto. */}
+        <div className="mt-[clamp(2.5rem,6vw,4rem)] border-b border-dashed border-cream/30">
+          {semesters.map((sem) => (
+            <Reveal key={sem.number}>
+              {/* MOBILE: duas colunas de largura automatica, o que poe S{n} e o
+                  label do semestre na MESMA linha, alinhados pela base.
+                  DESKTOP: a primeira trilha vira o trilho de --rail, a mesma
+                  coluna de numero que o resto do site usa. O posicionamento das
+                  celulas nao muda entre os dois — so a largura da trilha. */}
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 border-t border-dashed border-cream/30 py-[clamp(1.75rem,3.5vw,3rem)] md:grid-cols-[var(--rail)_minmax(0,1fr)] md:gap-x-8">
+                <span className="font-display text-[34px] leading-none text-cream-600 md:text-d3">
                   S{sem.number}
-                </div>
+                </span>
 
-                <h3 className="text-2xl font-semibold tracking-tight text-fg">
+                <h3 className="font-display text-d3 uppercase text-cream">
                   {sem.label}
                 </h3>
 
-                <ul className="mt-6 grid gap-3">
+                <div className="col-span-2 mt-5 self-start md:col-span-1 md:col-start-2 md:mt-6">
                   {sem.highlights.map((h) => (
-                    <li
+                    // Cada highlight e uma linha de tabela: nome a esquerda,
+                    // descricao a direita, filete tracejado no lugar da borda
+                    // do cartao. No mobile quebra em duas linhas e o filete
+                    // continua sendo o unico separador. `py-3` + `text-body`
+                    // deixa cada celula em ~50px, acima do minimo de 44.
+                    <div
                       key={h.name}
-                      className="flex items-start gap-3 border-l-2 border-indigo-500/30 pl-4"
+                      className="grid gap-1 border-t border-dashed border-cream/20 py-3 md:grid-cols-[1fr_1.4fr] md:gap-6"
                     >
-                      <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-indigo-400" />
-                      <div className="flex flex-col">
-                        <span className="font-medium text-fg">{h.name}</span>
-                        <span className="text-sm text-muted">
-                          {h.description}
-                        </span>
-                      </div>
-                    </li>
+                      <span className="font-sans text-body font-medium text-cream">
+                        {h.name}
+                      </span>
+                      <span className="font-sans text-body text-cream-600">
+                        {h.description}
+                      </span>
+                    </div>
                   ))}
-                </ul>
-
-                <span className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              </motion.div>
+                </div>
+              </div>
             </Reveal>
           ))}
         </div>
       </div>
-    </section>
+    </Bloco>
   );
 }
