@@ -1,48 +1,89 @@
+import clsx from "clsx";
+
 /**
- * CutWordmark — a peca tipografica gigante cortada nas DUAS bordas da
- * viewport. Elemento grafico, nao conteudo: e a virada do campo azul do hero
- * para o papel das secoes editoriais.
+ * CutWordmark — a peca tipografica gigante que faz a virada do campo azul do
+ * hero para o papel das secoes editoriais.
  *
  * API (contrato, nao mude):
  *   <CutWordmark text?={string} />   // default: "SOUZXX"
+ *   <WordmarkRow text?={string} className?={string} />  // usado tambem no rodape
  *
  * Server component: sem estado, sem motion, sem JS. Ele nao pisca, nao entra
  * com fade e nao reage ao scroll — a referencia e "estatica e confiante".
  *
- * GEOMETRIA: o <span> tem 118% da largura do container e e deslocado -9%, o
- * que abre 10.6% de sangria a esquerda e 7.4% a direita, em qualquer viewport
- * de 320 a 1920.
+ * O CORTE VIROU AJUSTE (correcao de bug visual). A versao anterior punha o
+ * <span> a 118% da largura e o deslocava -9%, o que jogava a PRIMEIRA LETRA
+ * para fora da borda esquerda: em 1440 e em 390 o leitor via "OUZXX" e lia
+ * como falha de render, nao como gesto grafico. Agora a palavra e composta
+ * para a MEDIDA do site — nenhum glifo cortado, e a escala fica MAIOR do que
+ * era (455px em 1440 contra os 352px do teto antigo de `text-wm`), entao a
+ * peca ganha presenca em vez de perder.
  *
- * MEDIDO (Instrument Serif 400, caixa alta, playwright): a mancha de tinta de
- * "SOUZXX" (6 caracteres) da 2.67x o font-size — ou seja ~71vw enquanto o
- * clamp do token `wm` esta na faixa dos 27vw, e ~65vw a partir de 1300px,
- * quando o clamp trava em 22rem. Com 6 caracteres, portanto, a palavra SANGRA
- * A ESQUERDA e sobra papel a direita; ela so encosta nas duas bordas com uma
- * string mais longa (a partir de ~10 caracteres) ou com um `wm` maior — para
- * cortar os dois lados com 6 caracteres o token precisaria ir a
- * clamp(6.5rem, 45vw, 54rem), o que tambem triplicaria a altura da faixa.
- * O token e fixado pela direcao de arte e consumido tambem pelo rodape, entao
- * fica como esta; a decisao de subir `wm` (ou de alongar o texto padrao) e de
- * la, nao daqui.
+ * MATEMATICA DO AJUSTE (medido no proprio site, Instrument Serif 400, caixa
+ * alta, tracking -0.01em, playwright):
+ *   - a mancha de "SOUZXX" (6 caracteres) da 2.828x o font-size;
+ *   - logo o font-size que preenche a medida e larguraDaMedida / 2.828, ou
+ *     seja 35.4% dela. Usamos 33.9% (divisor 2.95), que deixa ~4% de folga;
+ *   - essa folga vai para os vaos entre as letras via `justify-between`
+ *     (~11px por vao em 1440, ~3px em 390): a palavra encosta nas duas
+ *     margens da medida sem nunca estourar, em qualquer largura de 320 a
+ *     1920, sem media query.
  *
- * ALTURA: determinada pelo line-height 0.74 que ja vem embutido no token
- * `text-wm`, mais os paddings em clamp — nada de altura calculada em JS,
- * entao zero CLS. NAO acrescente `leading-none` aqui: 1.0 e mais frouxo que
- * 0.74 e sobrescreveria o token, engordando o bloco e afrouxando o corte.
+ * POR QUE `cqw` E NAO `vw`: `100vw` inclui a barra de rolagem e ignora o
+ * `max-w-[96rem]` do site — os dois erros empurrariam a ultima letra para
+ * fora justamente nas larguras grandes. `cqw` mede o container real, entao o
+ * ajuste vale tanto dentro da medida de 96rem quanto no mobile. O elemento
+ * que declara `container-type` NAO tem padding proprio de proposito: assim a
+ * caixa consultada e exatamente a mesma que a linha de letras ocupa.
  *
- * ACESSIBILIDADE: a palavra visivel e `aria-hidden` porque esta cortada e em
- * caixa alta forcada; o nome legivel vai num `.sr-only` ao lado, em caixa
- * baixa, para que o leitor de tela leia "souzxx" e nao soletre.
+ * O `-ml-[0.04em]` e correcao OPTICA, nao layout: o "S" tem 0.041em de
+ * sidebearing esquerdo, que a 455px vira 19px de recuo visivel contra os
+ * titulos alinhados na goteira. O negativo devolve a tinta a linha da grade;
+ * a direita ja cai naturalmente a ~4px, pelo tracking negativo da ultima
+ * letra.
+ *
+ * ALTURA: line-height 0.74 (a mesma proporcao do token `wm`) mais os paddings
+ * em clamp — nada de altura calculada em JS, entao zero CLS.
+ *
+ * ACESSIBILIDADE: a linha de letras e `aria-hidden` (esta quebrada em 6
+ * <span> e em caixa alta forcada, o que faz leitor de tela soletrar); o nome
+ * legivel vai num `.sr-only` ao lado, em caixa baixa.
  */
-export function CutWordmark({ text = "SOUZXX" }: { text?: string }) {
+
+const WORDMARK = "SOUZXX";
+
+/**
+ * A linha de letras, sem fundo e sem padding: quem chama e que escolhe o
+ * campo de cor, a goteira e a medida. Cor tambem vem de fora (`text-blue` no
+ * papel, `text-cream` no breu) — o componente nunca decide contraste.
+ */
+export function WordmarkRow({
+  text = WORDMARK,
+  className,
+}: {
+  text?: string;
+  className?: string;
+}) {
   return (
-    <div className="block-paper relative w-full select-none overflow-hidden pt-[clamp(2rem,5vw,4rem)] pb-[clamp(1rem,3vw,2.5rem)]">
-      <span
-        aria-hidden
-        className="block w-[118%] -translate-x-[9%] whitespace-nowrap font-display text-wm uppercase text-blue"
-      >
-        {text}
-      </span>
+    <div
+      aria-hidden
+      className={clsx("select-none [container-type:inline-size]", className)}
+    >
+      <div className="-ml-[0.04em] flex justify-between whitespace-nowrap font-display text-[33.9cqw] uppercase leading-[0.74] tracking-[-0.01em]">
+        {text.split("").map((letra, i) => (
+          <span key={`${letra}-${i}`}>{letra}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function CutWordmark({ text = WORDMARK }: { text?: string }) {
+  return (
+    <div className="block-paper relative w-full overflow-hidden pb-[clamp(1rem,3vw,2.5rem)] pt-[clamp(2rem,5vw,4rem)]">
+      <div className="mx-auto max-w-[96rem] px-[var(--gutter)]">
+        <WordmarkRow text={text} className="text-blue" />
+      </div>
       <span className="sr-only">{text.toLowerCase()}</span>
     </div>
   );

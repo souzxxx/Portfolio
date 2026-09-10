@@ -1,5 +1,6 @@
 import { DashedRule } from "./ui/DashedRule";
 import { Meta } from "./ui/Meta";
+import { WordmarkRow } from "./ui/CutWordmark";
 
 /**
  * Footer — continua o MESMO campo breu do bloco de contato, sem costura: o
@@ -7,8 +8,9 @@ import { Meta } from "./ui/Meta";
  * area escura de fechamento. Nao ha borda, nem gap, nem wrapper entre eles.
  *
  * Tres peças, de cima para baixo:
- *   1. wordmark gigante cortado nas DUAS bordas da viewport;
- *   2. banner 8-bit autoral (texto puro, nenhuma imagem);
+ *   1. wordmark gigante ajustado a medida, palavra inteira, encostando nas
+ *      duas margens (a mesma peca do <CutWordmark>, em creme);
+ *   2. banner 8-bit autoral (texto puro em Silkscreen, uma camada so);
  *   3. a faixa de meta: copyright, links e a linha tecnica.
  */
 
@@ -31,42 +33,32 @@ const WORDMARK = "SOUZXX";
 export function Footer() {
   return (
     <footer className="block-ink overflow-clip">
-      {/* WORDMARK CORTADO NAS DUAS BORDAS.
-          Medida: "SOUZXX" em Instrument Serif caixa alta tem mancha de ~2.67x o
-          font-size. Com `text-wm` (que trava em 22rem acima de ~1300px) a
-          palavra corrida da ~940px em 1440 — sangraria so a esquerda e deixaria
-          630px de papel a direita. Distribuindo as 6 letras com
-          `justify-between` num container de 118% deslocado -9vw, a primeira e a
-          ultima letra caem FORA das duas bordas em qualquer largura (390 ou
-          1440) e o excedente vira respiro entre as letras, que e exatamente o
-          gesto editorial pretendido. O `overflow-clip` do footer garante zero
-          scroll horizontal. */}
-      <div
-        aria-hidden
-        className="flex w-[118%] -translate-x-[9vw] select-none justify-between whitespace-nowrap pt-10 font-display text-wm uppercase leading-[0.74] tracking-[-0.01em] text-cream"
-      >
-        {WORDMARK.split("").map((letra, i) => (
-          <span key={`${letra}-${i}`}>{letra}</span>
-        ))}
+      {/* WORDMARK AJUSTADO A MEDIDA — a MESMA peca do <CutWordmark>, so que em
+          creme sobre breu. Antes o bloco tinha 118% de largura e -9vw de
+          deslocamento, o que jogava o "S" para fora da borda esquerda: em 1440
+          e em 390 lia-se "OUZXX", que o olho registra como bug de render e nao
+          como corte editorial. Agora as 6 letras sao compostas para a medida
+          (`max-w-[96rem]` + goteira, igual ao resto do site) e a folga de ~4%
+          vira respiro entre elas — palavra inteira, encostando nas duas
+          margens. A matematica do ajuste esta documentada em CutWordmark.tsx.
+          O `overflow-clip` do footer continua como rede de seguranca. */}
+      <div className="mx-auto max-w-[96rem] px-[var(--gutter)] pt-10">
+        <WordmarkRow text={WORDMARK} className="text-cream" />
       </div>
 
       {/* BANNER 8-BIT AUTORAL — texto puro em Silkscreen, sem imagem nenhuma.
-          O bisel e uma COPIA absoluta deslocada 3px/3px, nao um `text-shadow`
-          desfocado: bitmap nao tem penumbra, tem degrau. A copia e decorativa
-          (`aria-hidden`) e o azul de assinatura entra aqui como valor arbitrario
-          de cor, e nao pela classe nomeada da paleta, de proposito: a proibicao
-          de azul sobre breu existe porque azul lido COMO TEXTO da 2.00:1, e esta
-          camada nunca e lida — quem carrega a leitura sao os glifos creme por
-          cima, a 16.61:1. Escrever o hex aqui mantem o grep de auditoria limpo
-          sem esconder a intencao. */}
-      <p className="relative mt-8 px-[var(--gutter)] font-bitmap text-[clamp(2rem,9vw,4.5rem)] uppercase leading-none tracking-[0.06em] text-cream">
-        <span
-          aria-hidden
-          className="absolute left-[calc(var(--gutter)+3px)] top-[3px] text-[#1620DC]"
-        >
-          {WORDMARK}
-        </span>
-        <span className="relative">{WORDMARK}</span>
+          BISEL REMOVIDO (correcao de bug visual): a copia azul deslocada
+          3px/3px nao lia como degrau de bitmap, lia como franja serrilhada —
+          na tela o azul #1620DC contra o breu #141414 da 2.00:1, entao a copia
+          nao aparecia como sombra colorida, so sujava o contorno dos glifos e
+          passava impressao de render quebrado. Agora e creme puro sobre breu
+          (16.61:1), UMA camada so.
+          Para o banner nao perder presenca sem a segunda camada, o corpo sobe
+          de clamp(2rem,9vw,4.5rem) para clamp(2.25rem,10vw,5.25rem) e o
+          tracking de 0.06em para 0.14em — peso vem de escala e de ar entre os
+          glifos, nunca de sombra. */}
+      <p className="mt-8 px-[var(--gutter)] font-bitmap text-[clamp(2.25rem,10vw,5.25rem)] uppercase leading-none tracking-[0.14em] text-cream">
+        {WORDMARK}
       </p>
 
       <DashedRule className="mt-10 border-cream" />
