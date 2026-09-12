@@ -5,7 +5,9 @@ import { SectionHeader } from "../ui/SectionHeader";
 import { Chapa } from "../ui/Chapa";
 import { ProjectCover } from "./ProjectCover";
 import { FEATURED_COUNT } from "./FeaturedShowcase";
-import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
+import { getMoreProjects, type LocalizedProject } from "@/lib/projects";
+import { dict } from "@/lib/dict";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * ProjectGrid — a volta ao CARVAO, depois de dois blocos de papel seguidos.
@@ -16,6 +18,19 @@ import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
  * onde os destaques pararam (ver FEATURED_COUNT), com as colunas No ·
  * MINIATURA · NOME · ANO · STACK/STATUS, e a linha inteira invertendo para
  * creme solido no hover.
+ *
+ * O IDIOMA E UMA PROP, NAO UM ESTADO. `lang` chega da rota (pt em "/", en em
+ * "/en") e desce por `getMoreProjects(lang)` e `dict[lang]`. Nada aqui vira
+ * `"use client"` por causa disso: a secao inteira — cabecalho, 14 linhas e as
+ * 14 miniaturas — continua sendo HTML de servidor, que era o ponto de ter
+ * gastado uma wave tirando JavaScript desta pagina.
+ *
+ * NAO HA MAIS UM `STATUS_LABEL` AQUI. Este arquivo mantinha uma tabela de tres
+ * linhas (deployed/shipped/wip) em portugues, e o <StatusPill> mantinha OUTRA,
+ * identica, do outro lado do repositorio — duas copias que so podiam divergir.
+ * Os dois passaram a ler `dict[lang].status`, e o prefixo do rotulo mobile saiu
+ * do JSX para `dict[lang].status.prefixo` ("STATUS:" nos dois idiomas, mas no
+ * dicionario, onde o tradutor consegue ve-lo).
  *
  * SOBRE CARVAO O ACENTO E O CREME — e nao ha um segundo escuro para disputar
  * com ele. Os tons usados sao os tres medidos contra #1C1A17: `cream` 15.66:1,
@@ -34,13 +49,6 @@ import { moreProjects, type Project, type ProjectStatus } from "@/lib/projects";
  * ate as bordas da viewport. A secao que ocupava ~14 telas de cartao com imagem
  * passa a ser um indice varrivel de ~4.
  */
-
-/** deployed → NO AR · shipped → ENTREGUE · wip → EM CURSO. */
-const STATUS_LABEL: Record<ProjectStatus, string> = {
-  deployed: "NO AR",
-  shipped: "ENTREGUE",
-  wip: "EM CURSO",
-};
 
 /**
  * O MAPA DE PRESET DA CIANOTIPIA MORREU COM ELA. Ele existia porque o duotone
@@ -93,13 +101,26 @@ const INV_700 =
  */
 const SANGRIA = "-mx-[var(--gutter)] px-[var(--gutter)] py-4 md:mx-0 md:px-0";
 
-function ProjectRow({ project, index }: { project: Project; index: number }) {
+function ProjectRow({
+  project,
+  index,
+  lang,
+}: {
+  project: LocalizedProject;
+  index: number;
+  lang: Lang;
+}) {
+  const d = dict[lang];
   // Continua a numeracao dos destaques: o primeiro item do indice e o numero
   // seguinte ao ultimo card do FeaturedShowcase. O deslocamento vem de
   // FEATURED_COUNT, e nao de um numero cravado aqui — promover um projeto para
   // destaque mudava a numeracao de 14 linhas sem nada falhar.
   const numero = `#${String(index + FEATURED_COUNT + 1).padStart(2, "0")}`;
-  const status = STATUS_LABEL[project.status];
+  // O rotulo do estado, no idioma da rota. O mais largo dos seis e o ingles
+  // "IN PROGRESS": 11 caracteres a 0.6875rem em Courier Prime (avanco 0.6em)
+  // mais 0.18em de tracking dao ~94px, e a coluna de status do desktop tem
+  // 9rem = 144px — ou seja, o ingles cabe na mesma trilha sem reflow.
+  const status = d.status[project.status];
   // Demo tem prioridade sobre repositorio: o que esta no ar vale mais que o
   // codigo. Sem nenhum dos dois a linha continua existindo — so nao e link.
   const href = project.demo ?? project.github;
@@ -120,9 +141,13 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
       {/* 1 · numero de indice */}
       <Label className={INV_700}>{numero}</Label>
 
-      {/* 1b · status, so no mobile: no desktop ele viaja junto da stack */}
+      {/* 1b · status, so no mobile: no desktop ele viaja junto da stack.
+              O "STATUS:" e um rotulo de metadado como qualquer outro e por
+              isso mora no dicionario, e nao aqui — mesmo saindo igual nas duas
+              linguas, um rotulo invisivel ao tradutor e um rotulo que a
+              proxima lingua esquece. */}
       <Label className="col-start-2 justify-self-end md:hidden">
-        STATUS: {status}
+        {d.status.prefixo} {status}
       </Label>
 
       {/* 1c · alvo de 44x44 para o toque. A margem vertical negativa devolve a
@@ -142,7 +167,13 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
               a opacidade. A moldura e creme a 20% (e nao carvao) porque aqui a
               chapa cai sobre o carvao da secao: uma borda escura sobre fundo
               escuro nao existiria. Fora do mobile, onde a coluna inteira nao
-              existe. */}
+              existe.
+              E NAO GANHA LUPA. As chapas dos destaques ampliam porque vivem
+              soltas no card; estas vivem DENTRO do <a> da linha, e um clique
+              que as vezes navega para o projeto e as vezes abre um dialogo e
+              pior que qualquer um dos dois sozinho — o visitante perde a
+              previsibilidade do alvo, que e a unica coisa que um indice
+              tabular tem a oferecer. */}
       <div className="hidden md:block">
         {project.cover ? (
           <Chapa
@@ -215,22 +246,33 @@ function ProjectRow({ project, index }: { project: Project; index: number }) {
   );
 }
 
-export function ProjectGrid() {
+export function ProjectGrid({ lang }: { lang: Lang }) {
+  // A lista ja chega achatada no idioma da rota: `getMoreProjects` devolve
+  // `LocalizedProject`, onde nome e tagline sao `string`. Este componente nunca
+  // ve um `I18n`, e por isso nao ha um `pick()` perdido no meio do JSX.
+  const projetos = getMoreProjects(lang);
+  const d = dict[lang];
+
   return (
     <Bloco ground="carvao" id="more">
       <div className="mx-auto max-w-[96rem]">
         <SectionHeader
-          eyebrow="#03 · ÍNDICE"
-          title="Mais projetos"
-          description="Coisas que construí explorando linguagens, paradigmas e domínios — de Prolog a Python, de compilador a firmware embarcado, de jogos a automação de processos."
+          eyebrow={d.secoes.indice.eyebrow}
+          title={d.secoes.indice.title}
+          description={d.secoes.indice.description}
           tone="carvao"
         />
 
         {/* A borda de baixo fecha o indice: cada linha traz a propria borda de
             cima, entao sem isto a ultima ficaria aberta. */}
         <ol className="mt-[clamp(2.5rem,6vw,4rem)] border-b border-dashed border-cream/25">
-          {moreProjects.map((project, i) => (
-            <ProjectRow key={project.slug} project={project} index={i} />
+          {projetos.map((project, i) => (
+            <ProjectRow
+              key={project.slug}
+              project={project}
+              index={i}
+              lang={lang}
+            />
           ))}
         </ol>
       </div>

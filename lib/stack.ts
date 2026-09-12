@@ -1,6 +1,15 @@
 export interface Tech {
   name: string;
   category: "frontend" | "backend" | "ml" | "infra" | "language";
+  /**
+   * A cor de marca da tecnologia — HOJE SEM NENHUM CONSUMIDOR. Quem lia este
+   * campo era a bolinha colorida da fita rolante; a fita saiu na wave visual e
+   * a tabela que ficou no lugar (components/stack/StackMarquee.tsx) pinta todo
+   * nome em `carvao`, porque ~20 cores de marca numa seção só eram mais cores
+   * do que o site inteiro usa. O campo continua aqui por ser barato de manter e
+   * caro de reconstituir, mas quem acrescentar uma tecnologia não deve esperar
+   * ver essa cor na tela.
+   */
   color: string;
 }
 
@@ -23,6 +32,10 @@ export const stack: Tech[] = [
   { name: "Vite", category: "frontend", color: "#646cff" },
   { name: "LVGL", category: "frontend", color: "#4c9aff" },
 
+  // Node.js abre a coluna de back-end por ser o runtime embaixo do resto dela:
+  // Next.js, Drizzle e praticamente todo o TypeScript deste portfólio rodam
+  // nele. A ordem do array é a ordem da coluna na tabela da seção de stack.
+  { name: "Node.js", category: "backend", color: "#5fa04e" },
   { name: "FastAPI", category: "backend", color: "#009688" },
   { name: "Spring", category: "backend", color: "#6db33f" },
   { name: "WebSocket", category: "backend", color: "#4fb3d9" },

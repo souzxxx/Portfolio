@@ -11,6 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { projects } from "../lib/projects";
+import { CV_PDF, LANGS } from "../lib/i18n";
 
 type Check = {
   origem: string;
@@ -19,12 +20,21 @@ type Check = {
   obrigatorio: boolean;
 };
 
-// O PDF do currículo é gerado por `npm run cv` (scripts/build-cv.ts) e está
-// versionado em public/. Dois CTAs dependem dele (hero e sobre), então a
-// ausência é falha de build, não aviso: apagá-lo por acidente tem que derrubar
-// o deploy em vez de publicar dois links quebrados.
+// Os DOIS PDFs do currículo são gerados por `npm run cv` (scripts/build-cv.ts)
+// e estão versionados em public/. Dois CTAs dependem deles em cada idioma (hero
+// e sobre), então a ausência é falha de build, não aviso: apagar um por acidente
+// tem que derrubar o deploy em vez de publicar links quebrados.
+//
+// Os caminhos vêm de CV_PDF (lib/i18n.ts), o mesmo mapa que os botões do site e
+// o gerador leem — repeti-los aqui criaria um terceiro lugar para o nome do
+// arquivo divergir, e este é justamente o script que existe para pegar arquivo
+// que não está onde alguém disse que estaria. tsconfig.json exclui scripts/,
+// então o import é RELATIVO (o alias @/ não existe aqui).
+//
+// O INGLÊS É OBRIGATÓRIO COMO O PORTUGUÊS. Enquanto /en/cv não existia, este
+// check reprovava o build de propósito — um CTA de currículo em inglês que baixa
+// 404 é pior que CTA nenhum.
 const CV_OBRIGATORIO = true;
-const CV_PATH = "/leonardo-souza-cv.pdf";
 
 const publicDir = path.join(process.cwd(), "public");
 
@@ -63,12 +73,14 @@ for (const project of projects) {
   }
 }
 
-checks.push({
-  origem: "cv · pdf",
-  caminho: CV_PATH,
-  ok: existe(CV_PATH),
-  obrigatorio: CV_OBRIGATORIO,
-});
+for (const lang of LANGS) {
+  checks.push({
+    origem: `cv · pdf (${lang})`,
+    caminho: CV_PDF[lang],
+    ok: existe(CV_PDF[lang]),
+    obrigatorio: CV_OBRIGATORIO,
+  });
+}
 
 const larguraOrigem = Math.max(...checks.map((c) => c.origem.length), 6);
 const larguraCaminho = Math.max(...checks.map((c) => c.caminho.length), 7);

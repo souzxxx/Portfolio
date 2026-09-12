@@ -1,6 +1,8 @@
 import { DashedRule } from "./ui/DashedRule";
 import { Meta } from "./ui/Meta";
 import { WordmarkRow } from "./ui/CutWordmark";
+import { dict } from "@/lib/dict";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * Footer — continua o MESMO campo carvao do bloco de contato, sem costura: o
@@ -13,35 +15,52 @@ import { WordmarkRow } from "./ui/CutWordmark";
  *      duas margens (a mesma peca do <CutWordmark>, em creme);
  *   2. banner 8-bit autoral (texto puro em Silkscreen, uma camada so);
  *   3. a faixa de meta: copyright, links e a linha tecnica.
+ *
+ * O QUE TRADUZ AQUI E POUCO, e de proposito. O rotulo do link de e-mail
+ * ("Email") e a linha tecnica da direita vem de `dict[lang].rodape`. O
+ * copyright continua montado NESTE arquivo porque "© 2026 Leonardo Souza" e
+ * identico nos dois idiomas — poe-lo no dicionario obrigaria a duplicar o ano
+ * e o nome em dois arquivos, e o ano nem e texto: sai de `getFullYear()`. Os
+ * enderecos de GitHub e LinkedIn tambem ficam: o rotulo do primeiro E o
+ * endereco ("github.com/souzxxx") e o do segundo e nome proprio.
  */
 
-const links = [
-  {
-    label: "github.com/souzxxx",
-    href: "https://github.com/souzxxx",
-    externo: true,
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/leonardo-souzx",
-    externo: true,
-  },
-  { label: "Email", href: "mailto:leonardosouzasilva9@gmail.com" },
-];
+const WORDMARK = "SOUZXXX";
 
-const WORDMARK = "SOUZXX";
+export function Footer({ lang }: { lang: Lang }) {
+  const d = dict[lang];
 
-export function Footer() {
+  const links = [
+    {
+      label: "github.com/souzxxx",
+      href: "https://github.com/souzxxx",
+      externo: true,
+    },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/leonardo-souzx",
+      externo: true,
+    },
+    { label: d.rodape.email, href: "mailto:leonardosouzasilva9@gmail.com" },
+  ];
+
   return (
     <footer className="block-carvao overflow-clip">
       {/* WORDMARK AJUSTADO A MEDIDA — a MESMA peca do <CutWordmark>, so que em
           creme sobre carvao. Antes o bloco tinha 118% de largura e -9vw de
           deslocamento, o que jogava o "S" para fora da borda esquerda: em 1440
           e em 390 lia-se "OUZXX", que o olho registra como bug de render e nao
-          como corte editorial. Agora as 6 letras sao compostas para a medida
-          (`max-w-[96rem]` + goteira, igual ao resto do site) e a folga de ~4%
-          vira respiro entre elas — palavra inteira, encostando nas duas
-          margens. A matematica do ajuste esta documentada em CutWordmark.tsx.
+          como corte editorial. Agora as 7 letras de SOUZXXX sao compostas para
+          a medida (`max-w-[96rem]` + goteira, igual ao resto do site) e a folga
+          de 4.17% vira respiro entre elas — palavra inteira, encostando nas
+          duas margens, com 11.4px de vao em 1440 e 3.0px em 390. Ganhar o
+          terceiro X custou altura: em 1440 o corpo caiu de ~455px para ~371px,
+          porque a largura e fixa pela medida e 7 glifos dentro dela sao
+          necessariamente menores que 6. A conta NAO e a mancha da palavra em
+          texto corrido — kerning nao atravessa fronteira de elemento e a peca
+          compoe uma letra por <span>, entao a mancha que vale e a soma das
+          sete caixas (3.478x, contra 3.284x em texto corrido). A matematica
+          inteira esta documentada em CutWordmark.tsx.
           O `overflow-clip` do footer continua como rede de seguranca. */}
       <div className="mx-auto max-w-[96rem] px-[var(--gutter)] pt-10">
         <WordmarkRow text={WORDMARK} className="text-cream" />
@@ -57,7 +76,17 @@ export function Footer() {
           Para o banner nao perder presenca sem a segunda camada, o corpo sobe
           de clamp(2rem,9vw,4.5rem) para clamp(2.25rem,10vw,5.25rem) e o
           tracking de 0.06em para 0.14em — peso vem de escala e de ar entre os
-          glifos, nunca de sombra. */}
+          glifos, nunca de sombra.
+
+          O SETIMO GLIFO NAO EXIGIU MEXER NO CLAMP, e isso foi medido, nao
+          suposto: em Silkscreen 400 com tracking 0.14em, "SOUZXXX" ocupa
+          6.48x o font-size (contra 5.465x de "SOUZXX"). Nos dois extremos que
+          importam a caixa continua folgada — em 390 o corpo e 39px (10vw) e a
+          palavra da 253px numa largura util de 350px; em 1440 o corpo bate no
+          teto de 84px e a palavra da 544px numa largura util de 1344px. O pior
+          caso da faixa inteira e ~72% de ocupacao, entao nao ha transbordo em
+          largura nenhuma de 320 a 1920 — e por isso NAO ha overflow escondido
+          aqui: esconder transbordo e apagar o sintoma, e este nao existe. */}
       <p className="mt-8 px-[var(--gutter)] font-bitmap text-[clamp(2.25rem,10vw,5.25rem)] uppercase leading-none tracking-[0.14em] text-cream">
         {WORDMARK}
       </p>
@@ -96,15 +125,7 @@ export function Footer() {
         </ul>
 
         <div className="py-4 md:justify-self-end md:py-6 md:text-right">
-          <Meta
-            items={[
-              "Next.js 14 (App Router)",
-              "conteúdo tipado em lib/",
-              "deploy na Vercel",
-              "São Paulo",
-            ]}
-            className="text-cream-700"
-          />
+          <Meta items={d.rodape.tecnica} className="text-cream-700" />
         </div>
       </div>
     </footer>

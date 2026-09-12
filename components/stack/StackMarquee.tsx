@@ -4,6 +4,8 @@ import { DashedRule } from "../ui/DashedRule";
 import { Reveal } from "../ui/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
 import { stack, type Tech } from "@/lib/stack";
+import { dict } from "@/lib/dict";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * StackMarquee — o NOME do export nao mudou (app/page.tsx importa
@@ -35,25 +37,46 @@ import { stack, type Tech } from "@/lib/stack";
  * alta com tracking de 0.18em, o dado e mono em caixa baixa. Quando o acento
  * era azul, a diferenca vinha de graca; num sistema de uma cor so ela tem que
  * ser desenhada.
+ *
+ * O NOME DA TECNOLOGIA NAO TRADUZ, e por isso `lib/stack.ts` fica fora do
+ * `I18n<T>`: "TypeScript", "pgvector" e "Spring" sao os mesmos nos dois
+ * idiomas, e duplica-los criaria um lugar onde as duas linguas podem discordar
+ * sobre como a ferramenta se chama. O que traduz e o TITULO DA COLUNA
+ * ("LINGUAGENS" / "LANGUAGES"), e ele agora vem de `dict[lang].categorias`.
  */
 
-/** A ordem de leitura das colunas: do que ele escreve para onde ele roda. */
-const CATEGORIAS: { key: Tech["category"]; titulo: string }[] = [
-  { key: "language", titulo: "LINGUAGENS" },
-  { key: "frontend", titulo: "FRONT-END" },
-  { key: "backend", titulo: "BACK-END" },
-  { key: "ml", titulo: "ML" },
-  { key: "infra", titulo: "INFRA" },
+/**
+ * A ordem de leitura das colunas: do que ele escreve para onde ele roda. So a
+ * ORDEM mora aqui — o titulo de cada coluna vem do dicionario.
+ *
+ * Havia uma constante local com os cinco titulos cravados em portugues
+ * ("LINGUAGENS", "FRONT-END", …), e ela era a fonte real na tela: enquanto
+ * existiu, `dict.categorias` estava traduzido e ninguem lia, entao /en saia
+ * com "LINGUAGENS" no cabecalho da primeira coluna. Ordem e layout, titulo e
+ * texto — sao coisas diferentes e agora moram em lugares diferentes.
+ *
+ * O tipo `Tech["category"]` e o guard: acrescentar uma categoria em
+ * lib/stack.ts sem acrescentar a chave em `Dict["categorias"]` vira erro de
+ * compilacao aqui embaixo, e nao uma coluna com cabecalho vazio na tela.
+ */
+const ORDEM: Tech["category"][] = [
+  "language",
+  "frontend",
+  "backend",
+  "ml",
+  "infra",
 ];
 
-export function StackMarquee() {
+export function StackMarquee({ lang }: { lang: Lang }) {
+  const d = dict[lang];
+
   return (
     <Bloco ground="paper" id="stack">
       <div className="mx-auto max-w-[96rem]">
         <SectionHeader
-          eyebrow="#05 · FERRAMENTAL"
-          title="Tecnologias que uso"
-          description="Frontend, backend, ML, infra — escolho a ferramenta certa para cada problema, não a moda."
+          eyebrow={d.secoes.stack.eyebrow}
+          title={d.secoes.stack.title}
+          description={d.secoes.stack.description}
           tone="paper"
         />
 
@@ -62,9 +85,9 @@ export function StackMarquee() {
               A secao inteira passa a caber em ~1,5 tela, em vez de rolar
               sozinha para sempre. */}
           <div className="mt-[clamp(2.5rem,6vw,4rem)] grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-5">
-            {CATEGORIAS.map(({ key, titulo }) => (
+            {ORDEM.map((key) => (
               <div key={key}>
-                <Label className="text-carvao">{titulo}</Label>
+                <Label className="text-carvao">{d.categorias[key]}</Label>
                 {/* O filete do cabecalho e o unico solido em intencao: fecha o
                     rotulo antes da primeira tecnologia. `border-carvao` sobe o
                     tracejado de currentColor para o carvao cheio. */}

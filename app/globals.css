@@ -83,6 +83,26 @@
     border-radius: 0;
   }
 
+  /* TRAVA DE SCROLL DA LUPA (components/ui/Lupa.tsx). Enquanto um <dialog>
+     modal estiver aberto, o documento atrás dele para de rolar.
+
+     Por que em CSS e não num efeito do React: isto é comportamento de
+     DOCUMENTO, não de componente. Em JS seria um `useEffect` que escreve em
+     `document.documentElement.style` e precisa desfazer a escrita no cleanup —
+     e todo cleanup que não roda (desmonte durante navegação, erro no meio do
+     efeito, dois modais abertos ao mesmo tempo) deixa a página travada sem
+     ninguém para destravá-la. A regra abaixo não tem estado para vazar: ela
+     vale exatamente enquanto o atributo `open` existir no DOM, e o `open` é
+     escrito pelo próprio `showModal()`.
+
+     `overscroll-behavior` é o par necessário do `overflow: hidden` no iOS, onde
+     o gesto de rolar encadeia para o elemento de trás mesmo com o overflow
+     travado. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   ::selection {
     background: #1c1a17;
     color: #f5f3ee;

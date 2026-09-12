@@ -1,7 +1,9 @@
 import { Bloco } from "../ui/Bloco";
 import { Reveal } from "../ui/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
-import { semesters } from "@/lib/academic";
+import { getSemestres } from "@/lib/academic";
+import { dict } from "@/lib/dict";
+import type { Lang } from "@/lib/i18n";
 
 /**
  * AcademicTimeline — a escada da formacao, em PAPEL.
@@ -28,6 +30,19 @@ import { semesters } from "@/lib/academic";
  * serifa caixa alta, e os highlights como linhas de tabela separadas por filete
  * tracejado.
  *
+ * IDIOMA POR PROP, NAO POR ESTADO. `lang` entra pelo call site (a rota decide
+ * qual) e o componente le `getSemestres(lang)` e `dict[lang]`. Isso mantem o
+ * arquivo como componente de SERVIDOR: nada aqui vira `"use client"` por causa
+ * da traducao, entao a secao continua saindo como HTML puro — o que importa
+ * porque ela e a maior da pagina em numero de nos (5 semestres x ~3 highlights
+ * = ~15 linhas de tabela).
+ *
+ * O `S{n}` do trilho NAO passa pelo dicionario: e o numero do semestre, e
+ * numero nao traduz. Traduzi-lo criaria um lugar onde as duas linguas podem
+ * discordar sobre em que semestre a pessoa esta. O ORDINAL, esse sim, viaja
+ * dentro do `label` que vem de lib/academic.ts ("3º Semestre" / "3rd
+ * Semester").
+ *
  * ZERO hover na secao inteira, e nenhum icone vindo de biblioteca externa. O
  * unico movimento e um <Reveal> por semestre — cinco no total: layout estatico
  * e confiante nao desliza a cada celula.
@@ -41,21 +56,24 @@ import { semesters } from "@/lib/academic";
  * leading minimo e 0.95/1.02. Com o `d1` de 0.88 o til de FORMACAO encostaria
  * na linha de cima.
  */
-export function AcademicTimeline() {
+export function AcademicTimeline({ lang }: { lang: Lang }) {
+  const d = dict[lang];
+  const semestres = getSemestres(lang);
+
   return (
     <Bloco ground="paper" id="academic">
       <div className="mx-auto max-w-[96rem]">
         <SectionHeader
-          eyebrow="#04 · FORMAÇÃO"
-          title="Insper · BCC"
-          description="Bacharelado em Ciência da Computação. Cinco semestres explorando da matemática discreta a sistemas distribuídos, IA aplicada, dados em larga escala e arquitetura de baixo nível."
+          eyebrow={d.secoes.academico.eyebrow}
+          title={d.secoes.academico.title}
+          description={d.secoes.academico.description}
           tone="paper"
         />
 
         {/* A borda de baixo fecha a escada: cada degrau traz a propria borda de
             cima, entao sem isto o ultimo semestre ficaria aberto. */}
         <div className="mt-[clamp(2.5rem,6vw,4rem)] border-b border-dashed border-carvao/30">
-          {semesters.map((sem) => (
+          {semestres.map((sem) => (
             <Reveal key={sem.number}>
               {/* MOBILE: duas colunas de largura automatica, o que poe S{n} e o
                   label do semestre na MESMA linha, alinhados pela base.

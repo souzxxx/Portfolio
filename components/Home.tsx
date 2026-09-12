@@ -7,8 +7,26 @@ import { AcademicTimeline } from "@/components/academic/AcademicTimeline";
 import { StackMarquee } from "@/components/stack/StackMarquee";
 import { About } from "@/components/about/About";
 import { Footer } from "@/components/Footer";
+import type { Lang } from "@/lib/i18n";
+import { dict } from "@/lib/dict";
 
 /**
+ * Home — a página inicial das DUAS línguas, escrita uma vez.
+ *
+ * POR QUE ELA SAIU DE app/page.tsx. Com route group por idioma existem duas
+ * rotas de home (app/(pt)/page.tsx para "/" e app/(en)/en/page.tsx para
+ * "/en"), e as duas montam exatamente os mesmos nove blocos na mesma ordem.
+ * Se a ordem morasse nas rotas, ela existiria em dois arquivos — e a partitura
+ * de cor abaixo é justamente o tipo de regra que quebra sem ninguém notar:
+ * quem acrescentar uma seção nova vai editar a rota que estava aberta, e o
+ * outro idioma sai com dois campos escuros encostados. Aqui a ordem é uma só e
+ * a língua é um parâmetro.
+ *
+ * ESTE COMPONENTE É DE SERVIDOR, e continua sendo depois de bilíngue: `lang`
+ * chega como prop da rota e desce como prop. Nenhum bloco precisou virar
+ * `"use client"` por causa do idioma — que é a razão inteira de o idioma ser
+ * rota e não estado (ver o cabeçalho de lib/i18n.ts).
+ *
  * RITMO DE BLOCOS — a partitura de cor da home, fixada aqui e em nenhum outro
  * lugar. Cada componente pinta o proprio campo; esta pagina so define a ordem:
  *
@@ -38,21 +56,25 @@ import { Footer } from "@/components/Footer";
  *
  * Sem `relative isolate` no wrapper: nao ha mais nenhuma camada `-z-10` (nem
  * gradiente, nem grade, nem orbe) a isolar.
+ *
+ * O `id="top"` é a âncora do "voltar ao topo" do rodapé e NÃO muda de língua:
+ * ele é endereço, não texto (ver a nota dos `href` em lib/dict.pt.ts).
  */
-export default function HomePage() {
+export function Home({ lang }: { lang: Lang }) {
+  const d = dict[lang];
   return (
     <div id="top">
-      <NavBar />
+      <NavBar lang={lang} d={d.nav} />
       <main>
-        <Hero />
+        <Hero lang={lang} d={d.hero} />
         <CutWordmark />
-        <FeaturedShowcase />
-        <ProjectGrid />
-        <AcademicTimeline />
-        <StackMarquee />
-        <About />
+        <FeaturedShowcase lang={lang} />
+        <ProjectGrid lang={lang} />
+        <AcademicTimeline lang={lang} />
+        <StackMarquee lang={lang} />
+        <About lang={lang} />
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </div>
   );
 }
