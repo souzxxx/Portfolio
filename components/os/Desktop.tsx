@@ -155,6 +155,7 @@ function Icone({
         target={externo ? "_blank" : undefined}
         rel={externo ? "noreferrer" : undefined}
         download={download || undefined}
+        data-zoom={href.startsWith("/") && !download ? "" : undefined}
       >
         {conteudo}
       </a>

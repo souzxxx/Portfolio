@@ -5,6 +5,7 @@ import { HTML_LANG } from "@/lib/i18n";
 import "../globals.css";
 import { fontVariables } from "../fonts";
 import { VIEWPORT, metadataDaHome, personJsonLd } from "../metadata";
+import { ZoomLinks } from "@/components/os/ZoomLinks";
 
 /**
  * O layout-raiz do PORTUGUÊS — a língua que mora na raiz, "/".
@@ -54,6 +55,7 @@ export default function PtRootLayout({
           }}
         />
         {children}
+        <ZoomLinks />
       </body>
     </html>
   );

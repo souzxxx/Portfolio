@@ -5,6 +5,7 @@ import { HTML_LANG } from "@/lib/i18n";
 import "../globals.css";
 import { fontVariables } from "../fonts";
 import { VIEWPORT, metadataDaHome, personJsonLd } from "../metadata";
+import { ZoomLinks } from "@/components/os/ZoomLinks";
 
 /**
  * O layout-raiz do INGLÊS — a língua que mora em "/en".
@@ -40,6 +41,7 @@ export default function EnRootLayout({
           }}
         />
         {children}
+        <ZoomLinks />
       </body>
     </html>
   );

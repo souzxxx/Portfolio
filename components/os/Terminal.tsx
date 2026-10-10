@@ -38,6 +38,7 @@ export function Terminal({
         <a
           key={p.slug}
           href={hrefProjeto(lang, p.slug)}
+          data-zoom=""
           className="col-span-2 grid grid-cols-subgrid underline-offset-2 hover:bg-cream hover:text-carvao"
         >
           <span className="opacity-60">{p.apelido}/</span>

@@ -223,3 +223,19 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* O cursor de seta do Macintosh, em pixel, só sobre a mesa: creme com
+   contorno carvão, 1-bit, sem antialias. Links e campos mantêm o cursor
+   do sistema (mãozinha e barra de texto), que é affordance, não decoração. */
+.mesa {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='34' viewBox='0 0 11 17' shape-rendering='crispEdges'%3E%3Cpath fill='%231C1A17' d='M0 0h1v1H0zM0 1h2v1H0zM0 2h3v1H0zM0 3h4v1H0zM0 4h5v1H0zM0 5h6v1H0zM0 6h7v1H0zM0 7h8v1H0zM0 8h9v1H0zM0 9h10v1H0zM0 10h11v1H0zM0 11h7v1H0zM0 12h3v1H0zM4 12h4v1H4zM0 13h2v1H0zM5 13h3v1H5zM0 14h1v1H0zM5 14h4v1H5zM6 15h3v1H6zM6 16h2v1H6z'/%3E%3Cpath fill='%23F5F3EE' d='M1 2h1v1H1zM1 3h2v1H1zM1 4h3v1H1zM1 5h4v1H1zM1 6h5v1H1zM1 7h6v1H1zM1 8h7v1H1zM1 9h8v1H1zM1 10h5v1H1zM1 11h2v1H1zM4 11h2v1H4zM1 12h1v1H1zM5 12h2v1H5zM6 13h1v1H6zM6 14h2v1H6zM7 15h1v1H7z'/%3E%3C/svg%3E")
+      1 1,
+    default;
+}
+.mesa :where(a, button, [role="button"]) {
+  cursor: pointer;
+}
+.mesa :where(input) {
+  cursor: text;
+}

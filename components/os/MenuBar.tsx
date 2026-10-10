@@ -103,6 +103,7 @@ export function MenuBar({
                   <li key={p.slug}>
                     <a
                       href={hrefProjeto(lang, p.slug)}
+                      data-zoom=""
                       onClick={() => setAberto(false)}
                       className="flex items-baseline gap-3 px-3 py-2 normal-case outline-none hover:bg-carvao hover:text-cream focus-visible:bg-carvao focus-visible:text-cream"
                     >
