@@ -27,7 +27,7 @@ export type ProjectCategory = "featured" | "more";
  * `name` É `I18n`, e é o único campo aqui que às vezes tem os dois lados
  * iguais. Metade dos cards se chama por nome próprio (FinanceHub, Sentinel,
  * CacaOS, PredictFlow) e aí `pt` e `en` saem idênticos de propósito; a outra
- * metade se chama por DESCRIÇÃO em português ("Portal interno de construtora",
+ * metade se chama por DESCRIÇÃO em português ("Gestão de núcleos CCA",
  * "Compilador de linguagem própria"), e descrição é prosa: sem traduzir, o card
  * de /en apareceria com título em português e tagline em inglês logo abaixo.
  * É a mesma regra que lib/academic.ts já aplica ao `name` de cada highlight —
@@ -52,13 +52,153 @@ export interface Project {
   /** Só FeaturedCard renderiza — no card do grid não cabe pergunta + resposta. */
   decisions?: { q: I18n; a: I18n }[];
   writeup?: string;
+  /**
+   * O papel do dono no projeto, quando ele é verificável — a página de case
+   * mostra como PAPEL na faixa de metadados. Ausente quando não há o que
+   * afirmar além de "fiz", e aí a faixa simplesmente não tem a célula.
+   */
+  role?: I18n;
   year: string;
 }
 
 export const projects: Project[] = [
   // ─── FEATURED ───────────────────────────────────────────────
   {
+    // Os números deste card saem do histórico do repositório (git shortlog
+    // -sne --all: 101 dos 125 commits) e do código da branch mais recente, não
+    // de memória. Projeto de equipe na IOTech: a frase diz "desenvolvedor
+    // principal", nunca "sozinho".
+    slug: "tecna-site",
+    role: {
+      pt: "Desenvolvedor principal · equipe IOTech",
+      en: "Principal developer · IOTech team",
+    },
+    name: {
+      pt: "TECNA — site comercial",
+      en: "TECNA — commercial website",
+    },
+    tagline: {
+      pt: "Site bilíngue de uma construtora de Brasília/DF em Next 16: conteúdo vindo do CMS do Portal no build, rebuild a cada publicação e tradução por LLM revisada por gente",
+      en: "Bilingual website for a Brasília/DF builder on Next 16: content pulled from the Portal's CMS at build time, a rebuild on every publish, and LLM translation reviewed by a person",
+    },
+    description: {
+      pt: "Novo site comercial da TECNA, construtora de alto padrão de Brasília/DF, feito pela IOTech: um HUB com as quatro unidades de negócio — TECNA Construtora, TECNA Home, TECNA Engenharia e Imóveis TECNA —, um subsite por unidade com página de obra, Quem Somos, blog, investidor e contato, em português e inglês. É projeto de equipe, e sou o desenvolvedor principal: 101 dos 125 commits do repositório são meus. Todo texto, obra e post é editado num CMS dentro do Portal TECNA; o site lê esse conteúdo no build, se reconstrói por Deploy Hook a cada publicação e, se o CMS não tiver um campo, cai no conteúdo local empacotado em vez de quebrar a página.",
+      en: "TECNA's new commercial website — a high-end builder in Brasília/DF — built through IOTech: a HUB with the four business units — TECNA Construtora, TECNA Home, TECNA Engenharia and Imóveis TECNA —, one sub-site per unit with project pages, About, blog, investor and contact pages, in Portuguese and English. It is a team project, and I am the principal developer: 101 of the repository's 125 commits are mine. Every text, project and post is edited in a CMS inside the TECNA Portal; the site reads that content at build time, rebuilds through a Deploy Hook on every publish and, when the CMS is missing a field, falls back to bundled local content instead of breaking the page.",
+    },
+    category: "featured",
+    status: "deployed",
+    isPrivate: true,
+    stack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS 4",
+      "Server Actions",
+      "Anthropic SDK",
+      "Playwright",
+      "axe-core",
+      "Vercel",
+    ],
+    // Sem `github`: repositório privado da IOTech. O `demo` é o deploy da
+    // Vercel — o domínio da TECNA ainda aponta para o WordPress antigo.
+    demo: "https://tecna-landingpage.vercel.app",
+    cover: "/projects/tecna/cover.webp",
+    gallery: [
+      {
+        src: "/projects/tecna/cover.webp",
+        label: {
+          pt: "HUB — as quatro unidades; o card em foco sai nítido, os outros desfocados",
+          en: "HUB — the four business units; the focused card goes sharp, the rest stay blurred",
+        },
+      },
+      {
+        src: "/projects/tecna/construtora.webp",
+        label: {
+          pt: "Subsite da TECNA Construtora",
+          en: "TECNA Construtora sub-site",
+        },
+      },
+      {
+        src: "/projects/tecna/imoveis.webp",
+        label: {
+          pt: "Subsite Imóveis TECNA — lançamentos residenciais",
+          en: "Imóveis TECNA sub-site — residential launches",
+        },
+      },
+      {
+        src: "/projects/tecna/quem-somos.webp",
+        label: {
+          pt: "Quem Somos — índice lateral fixo e sete tópicos editáveis no CMS",
+          en: "About — sticky side index and seven topics editable in the CMS",
+        },
+      },
+      {
+        src: "/projects/tecna/hub.webp",
+        label: {
+          pt: "HUB em repouso, sem nenhum card em foco",
+          en: "HUB at rest, with no card in focus",
+        },
+      },
+      {
+        src: "/projects/tecna/mobile.webp",
+        label: {
+          pt: "HUB no celular — os cards empilhados",
+          en: "HUB on mobile — the cards stacked",
+        },
+      },
+    ],
+    highlights: [
+      {
+        pt: "Next 16 + React 19 + TypeScript + Tailwind 4 com quatro dependências de runtime (next, react, react-dom e @vercel/analytics) e as páginas pré-renderizadas estáticas por generateStaticParams",
+        en: "Next 16 + React 19 + TypeScript + Tailwind 4 with four runtime dependencies (next, react, react-dom and @vercel/analytics) and pages prerendered static through generateStaticParams",
+      },
+      {
+        pt: "Contrato tipado entre dois repositórios: o site busca o conteúdo na API do Portal no build, publicar no CMS dispara um Deploy Hook, e o botão “Traduzir o que falta” preenche o inglês por LLM (Anthropic SDK) para alguém revisar antes de salvar",
+        en: "A typed contract between two repositories: the site fetches content from the Portal's API at build time, publishing in the CMS fires a Deploy Hook, and a “Translate what's missing” button fills in the English through an LLM (Anthropic SDK) for a person to review before saving",
+      },
+      {
+        pt: "Migração do WordPress sem perder SEO: 28 posts importados com HTML limpo por lista fechada, 9 redirecionamentos permanentes das URLs antigas, hreflang com x-default, JSON-LD e sitemap nas duas línguas",
+        en: "Migrating off WordPress without losing SEO: 28 posts imported with HTML sanitized by a closed allowlist, 9 permanent redirects from the old URLs, hreflang with x-default, JSON-LD and a sitemap in both languages",
+      },
+      {
+        pt: "Formulário de contato por server action com validação no servidor, honeypot, trava de tempo de 3 s, rate limit por IP e consentimento LGPD — e ele nunca finge sucesso; CSP estrita, HSTS e nenhum cookie ou terceiro em runtime",
+        en: "Contact form as a server action with server-side validation, a honeypot, a 3-second time trap, per-IP rate limiting and LGPD consent — and it never fakes success; strict CSP, HSTS and no cookies or third parties at runtime",
+      },
+      {
+        pt: "E2E em Playwright contra o build de produção, incluindo um spec que percorre o sitemap inteiro caçando a grafia errada da marca, e axe (WCAG 2.1 AA) nas páginas principais a 1440 e 390 px",
+        en: "Playwright E2E against the production build, including a spec that crawls the whole sitemap hunting for misspellings of the brand, and axe (WCAG 2.1 AA) on the main pages at 1440 and 390 px",
+      },
+    ],
+    decisions: [
+      {
+        q: {
+          pt: "Por que ler o CMS no build e não a cada request?",
+          en: "Why read the CMS at build time instead of on every request?",
+        },
+        a: {
+          pt: "O conteúdo de um site de construtora muda poucas vezes por semana, e quem lê é muito mais gente do que quem edita. No build a página sai estática, rápida e sem depender do Portal estar de pé; a publicação no CMS dispara um Deploy Hook, então o atraso entre salvar e ver no ar é o tempo de um build. E se o CMS ainda não tiver um campo, o site cai no conteúdo local empacotado em vez de renderizar um buraco.",
+          en: "A builder's website changes a few times a week, and far more people read it than edit it. At build time the page comes out static, fast and independent of the Portal being up; publishing in the CMS fires a Deploy Hook, so the delay between saving and seeing it live is one build. And when the CMS does not have a field yet, the site falls back to bundled local content instead of rendering a hole.",
+        },
+      },
+      {
+        q: {
+          pt: "Por que a tradução por LLM não salva sozinha?",
+          en: "Why doesn't the LLM translation save itself?",
+        },
+        a: {
+          pt: "É texto institucional de uma empresa, e tradução de máquina erra tom e termo técnico de construção sem avisar. O botão preenche só o que está faltando em inglês, em lotes, sem atropelar o que alguém já digitou; a pessoa lê e só então salva. O LLM economiza a digitação, não a revisão.",
+          en: "It is a company's institutional copy, and machine translation gets tone and construction terminology wrong without warning. The button fills in only what is missing in English, in batches, without overwriting what someone already typed; a person reads it and only then saves. The LLM saves the typing, not the review.",
+        },
+      },
+    ],
+    year: "2026",
+  },
+  {
     slug: "financehub",
+    role: {
+      pt: "Projeto pessoal · solo",
+      en: "Personal project · solo",
+    },
     name: {
       pt: "FinanceHub",
       en: "FinanceHub",
@@ -165,6 +305,10 @@ export const projects: Project[] = [
   },
   {
     slug: "quintoandar-precificacao",
+    role: {
+      pt: "API, testes e validação · time de 4",
+      en: "API, tests and validation · team of 4",
+    },
     name: {
       pt: "Precificação QuintoAndar",
       en: "QuintoAndar Pricing",
@@ -288,6 +432,10 @@ export const projects: Project[] = [
   },
   {
     slug: "wraeclast",
+    role: {
+      pt: "Projeto pessoal · solo",
+      en: "Personal project · solo",
+    },
     name: {
       pt: "Project Wraeclast",
       en: "Project Wraeclast",
@@ -376,6 +524,10 @@ export const projects: Project[] = [
   },
   {
     slug: "commerce-nda",
+    role: {
+      pt: "Solo · sob contrato",
+      en: "Solo · under contract",
+    },
     name: {
       pt: "E-commerce transacional (sob NDA)",
       en: "Transactional e-commerce (under NDA)",
@@ -459,78 +611,92 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
-    slug: "portal-construtora",
+    // Era `portal-construtora`, com o cliente anônimo. A TECNA agora pode ser
+    // nomeada, e o slug virou endereço de página de case — por isso mudou junto,
+    // antes de qualquer link externo apontar para ele.
+    //
+    // Números de autoria relidos no repositório (git shortlog -sne --all, só
+    // leitura): 256 dos 1.288 commits, 118 deles no módulo do manual. O script
+    // que extrai o catálogo do PDF do manual tem autoria "Claude" no histórico,
+    // e por isso saiu daqui: o card só reivindica o que está no nome do dono.
+    slug: "portal-tecna",
+    role: {
+      pt: "Full-stack · equipe IOTech",
+      en: "Full-stack · IOTech team",
+    },
     name: {
-      pt: "Portal interno de construtora",
-      en: "Construction company internal portal",
+      pt: "Portal TECNA",
+      en: "TECNA Portal",
     },
     tagline: {
-      pt: "Módulo de manual do proprietário num portal Next.js em produção: importação auditável de PDF, exportação em PDF/Excel e três otimizações de desempenho",
-      en: "Homeowner's manual module in a Next.js portal in production: auditable PDF import, PDF/Excel export, and three performance optimizations",
+      pt: "O super app interno da TECNA em Next.js 16: quatro sistemas novos meus — Qualidade com tela de campo sem sinal, Planejamento com caminho crítico, Segurança e Gerenciamento de Projetos —, o manual do proprietário e o CMS do site",
+      en: "TECNA's internal super app on Next.js 16: four new systems of mine — Quality with an offline field screen, Planning with critical path, Safety and Project Management —, the homeowner's manual and the website's CMS",
     },
     description: {
-      pt: "Portal em Next.js 16 e React 19 que reúne sob um login só os sistemas internos de uma construtora — atendimento pós-obra, portal do cliente, avaliação de obras, departamento pessoal e o manual do proprietário do imóvel. É projeto de equipe em repositório privado: dos 583 commits, cerca de 150 são meus, e 108 deles estão concentrados no módulo do manual do proprietário — que é o que descrevo aqui. O documento que esse módulo gera é lido pelo comprador do imóvel como parte do contrato, então a exigência não é volume de tela: é que o dado de garantia esteja certo e que o caminho da correção seja auditável.",
-      en: "A Next.js 16 and React 19 portal that puts a construction company's internal systems behind a single login — post-handover support, the client portal, site evaluation, personnel administration, and the homeowner's manual. It is a team project in a private repository: of the 583 commits, around 150 are mine, and 108 of those sit in the homeowner's manual module — which is what I describe here. The document that module produces is read by the buyer as part of the contract, so the requirement is not screen count: it is that the warranty data be correct and that the path to a correction be auditable.",
+      pt: "O Portal TECNA reúne sob um login só os sistemas internos da construtora — atendimento pós-obra, portal do cliente, departamento pessoal, suprimentos, o manual do proprietário e o CMS do site comercial —, num app Next.js 16 / React 19 com um deploy e um PostgreSQL só, via Drizzle. É projeto de equipe na IOTech, em repositório privado: dos 1.288 commits, 256 são meus, entre o fim de agosto e outubro de 2026. O que é meu: 118 commits no módulo do manual do proprietário, os quatro sistemas novos — Qualidade, Planejamento, Segurança e Gerenciamento de Projetos — e o CMS “Site Institucional” que alimenta o site comercial da TECNA.",
+      en: "The TECNA Portal puts the builder's internal systems behind a single login — post-handover support, the client portal, personnel administration, procurement, the homeowner's manual and the commercial website's CMS —, in one Next.js 16 / React 19 app with one deploy and one PostgreSQL database, through Drizzle. It is a team project at IOTech, in a private repository: of the 1,288 commits, 256 are mine, from late August to October 2026. What is mine: 118 commits in the homeowner's manual module, the four new systems — Quality, Planning, Safety and Project Management — and the “Site Institucional” CMS that feeds TECNA's commercial website.",
     },
     category: "featured",
     status: "deployed",
     isPrivate: true,
     stack: [
-      "Next.js",
-      "React",
+      "Next.js 16",
+      "React 19",
       "TypeScript",
       "Drizzle ORM",
       "PostgreSQL",
-      "Tailwind",
+      "Zod",
+      "IndexedDB",
+      "Service Worker",
       "Vitest",
       "Playwright",
       "Vercel",
     ],
-    // Sem `github`, sem `demo` e sem `cover`: repositório privado de terceiro,
-    // e o que se vê dos deploys sem login é tela de autenticação — o mesmo tipo
-    // de screenshot que já foi removido do projeto-software por ler como imagem
-    // quebrada. Cliente não identificado por contrato.
+    // Sem `github`, sem `demo` e sem `cover`: repositório privado da IOTech, e
+    // o que se vê do deploy sem login é a tela de autenticação — o mesmo tipo de
+    // screenshot que já foi removido do projeto-software por ler como imagem
+    // quebrada. A capa cai no ProjectCover.
     highlights: [
       {
-        pt: "Módulo do manual do proprietário: de um manual real em PDF de 197 páginas sai um catálogo estruturado com 33 fichas de sistemas construtivos, 146 garantias, 39 manutenções preventivas, 78 cuidados e 131 casos de perda de garantia",
-        en: "Homeowner's manual module: a real 197-page PDF manual turns into a structured catalog of 33 building-system records, 146 warranties, 39 preventive maintenance items, 78 care instructions and 131 warranty-voiding cases",
+        pt: "Qualidade: a tela de campo funciona sem sinal — a aplicação inteira fica no IndexedDB antes de ir para a rede, um service worker reabre a tela offline, e a fila (criar, respostas, arquivos, concluir) só esvazia com a confirmação do servidor, com teto de 3 MB",
+        en: "Quality: the field screen works with no signal — the whole inspection lives in IndexedDB before it touches the network, a service worker reopens the screen offline, and the queue (create, answers, files, complete) only drains on the server's confirmation, capped at 3 MB",
       },
       {
-        pt: "O script de importação não escreve no banco: ele gera um .sql que um humano lê em diff antes de virar migração, e confere a extração por contagem estrutural em vez de conferir texto a olho",
-        en: "The import script never writes to the database: it emits a .sql that a human reads as a diff before it becomes a migration, and it checks the extraction by structural counts instead of by eyeballing text",
+        pt: "Reenvio sem duplicar: a inspeção nasce com o id gerado no aparelho (o mesmo corpo de novo responde 200 com criada: false; o mesmo id em outro checklist, 409), o anexo é deduplicado pelo clienteId e a resposta mais velha não passa por cima da mais nova",
+        en: "Resending without duplicates: the inspection is created with the id generated on the device (the same body again returns 200 with created: false; the same id on another checklist, 409), attachments are deduplicated by clientId, and an older answer never overwrites a newer one",
       },
       {
-        pt: "Três otimizações de desempenho minhas no mesmo módulo: fim do N+1 (uma consulta por obra em vez de uma por unidade), logo do PDF embutido uma vez em vez de por página, e lista de fichas carregada sem baixar o texto de todas",
-        en: "Three performance optimizations of mine in that same module: the N+1 gone (one query per development instead of one per unit), the PDF logo embedded once instead of per page, and the record list loaded without pulling every record's full text",
+        pt: "Planejamento: o cálculo do cronograma é uma função pura usada no servidor e na prévia da tela — dias úteis, predecessoras (vale a mais atrasada), ciclo recusado, atraso real e caminho crítico — e o Gantt mostra a linha de base",
+        en: "Planning: the schedule calculation is a pure function shared by the server and the on-screen preview — business days, predecessors (the latest one wins), cycles rejected, actual delay and critical path — and the Gantt shows the baseline",
       },
       {
-        pt: "Sistema de equipe em produção: as 204 rotas de API passam por uma casca única que centraliza autenticação, papel, permissão de app e capacidade, relida do banco a cada request",
-        en: "A team system in production: all 204 API routes go through a single wrapper that centralizes authentication, role, app permission and capability, re-read from the database on every request",
+        pt: "Manual do proprietário: o quadro da obra exportado em PDF e em Excel, e quatro otimizações minhas — uma consulta por obra em vez de uma por unidade, o logo embutido uma vez por PDF em vez de por página, a lista de fichas sem baixar o texto de todas e o segundo PDF da mesma obra saindo na hora",
+        en: "Homeowner's manual: the development's board exported to PDF and Excel, and four optimizations of mine — one query per development instead of one per unit, the logo embedded once per PDF instead of per page, the record list without pulling every record's text, and the second PDF of the same development coming out instantly",
       },
       {
-        pt: "A suíte roda contra um Postgres real e descartável, com as migrações de verdade e uma trava explícita para nunca apontar para o banco de produção — 181 arquivos de teste em Vitest e 6 suítes de ponta a ponta em Playwright",
-        en: "The suite runs against a real, disposable Postgres, with the actual migrations and an explicit guard so it can never point at the production database — 181 Vitest test files and 6 end-to-end Playwright suites",
+        pt: "CMS “Site Institucional”: abas por página do site comercial, gravação por seção que não apaga a edição de outra, limpeza do HTML dos posts por lista fechada e tradução automática por LLM em lotes, sem atropelar o que se digita",
+        en: "“Site Institucional” CMS: tabs per page of the commercial website, per-section saving that never wipes another section's edits, post HTML sanitized by a closed allowlist, and batched LLM auto-translation that never overwrites what someone is typing",
       },
     ],
     decisions: [
       {
         q: {
-          pt: "Como importar dado de garantia de um PDF sem arriscar gravar uma extração errada num documento contratual?",
-          en: "How do you import warranty data from a PDF without risking a bad extraction landing in a contractual document?",
+          pt: "Como uma inspeção de qualidade sobrevive a uma obra sem sinal?",
+          en: "How does a quality inspection survive a construction site with no signal?",
         },
         a: {
-          pt: "O script de importação nunca grava no banco. Ele emite um .sql revisável em diff, que só vira migração depois de alguém ler; a conferência é estrutural (quantas fichas, quantas garantias, quantas preventivas), porque conferir centenas de linhas de texto a olho não é verificação, é esperança.",
-          en: "The import script never writes to the database. It emits a .sql you review as a diff, and it only becomes a migration after someone reads it; the check is structural (how many records, how many warranties, how many preventive items), because eyeballing hundreds of lines of text is not verification, it is hope.",
+          pt: "Tratando a rede como a parte que falha. Tudo é gravado no aparelho primeiro; o envio é uma fila ordenada que só tira um passo quando o servidor confirma — rede caída, 5xx e 401 param e guardam. Do outro lado, toda rota aceita o mesmo pedido duas vezes sem duplicar, porque a fila VAI reenviar: a inspeção nasce com o id do aparelho e o anexo carrega o clienteId.",
+          en: "By treating the network as the part that fails. Everything is written to the device first; sending is an ordered queue that only drops a step when the server confirms — a dropped network, 5xx and 401 stop and keep. On the other side, every route accepts the same request twice without duplicating, because the queue WILL resend: the inspection is born with the device's id and each attachment carries its clientId.",
         },
       },
       {
         q: {
-          pt: "Por que isto entra no portfólio como módulo, e não como produto inteiro?",
-          en: "Why does this go in the portfolio as a module and not as a whole product?",
+          pt: "O que é meu num sistema de 1.288 commits?",
+          en: "What is mine in a 1,288-commit system?",
         },
         a: {
-          pt: "É projeto de equipe: a maior parte dos commits do repositório é de outro desenvolvedor. O que reivindico é o que o histórico confirma como meu — o módulo do manual do proprietário e as otimizações dele. O resto do sistema aparece como contexto, não como autoria.",
-          en: "It is a team project: most of the repository's commits belong to another developer. What I claim is what the history confirms as mine — the homeowner's manual module and its optimizations. The rest of the system is here as context, not as authorship.",
+          pt: "É projeto de equipe, e a maior parte dos commits é de outras pessoas. O que reivindico é o que o histórico confirma no meu nome — o manual do proprietário, os quatro sistemas novos e o CMS do site. Login, hub, atendimento pós-obra e portal do cliente aparecem aqui como contexto, não como autoria.",
+          en: "It is a team project, and most of the commits belong to other people. What I claim is what the history confirms under my name — the homeowner's manual, the four new systems and the website's CMS. Login, the hub, post-handover support and the client portal are here as context, not as authorship.",
         },
       },
     ],
@@ -538,6 +704,10 @@ export const projects: Project[] = [
   },
   {
     slug: "sentinel",
+    role: {
+      pt: "Projeto pessoal · solo",
+      en: "Personal project · solo",
+    },
     name: {
       pt: "Sentinel",
       en: "Sentinel",
@@ -640,6 +810,10 @@ export const projects: Project[] = [
   },
   {
     slug: "cca-gestao",
+    role: {
+      pt: "Backend · time de 7",
+      en: "Backend · team of 7",
+    },
     name: {
       pt: "Gestão de núcleos CCA",
       en: "CCA center management",
@@ -1172,6 +1346,7 @@ export interface LocalizedProject {
   highlights?: string[];
   decisions?: { q: string; a: string }[];
   writeup?: string;
+  role?: string;
   year: string;
 }
 
@@ -1179,6 +1354,7 @@ function achatar(project: Project, lang: Lang): LocalizedProject {
   return {
     ...project,
     name: pick(project.name, lang),
+    role: project.role ? pick(project.role, lang) : undefined,
     tagline: pick(project.tagline, lang),
     description: pick(project.description, lang),
     gallery: project.gallery?.map((chapa) => ({
@@ -1204,4 +1380,34 @@ export function getProjects(lang: Lang): LocalizedProject[] {
  */
 export function getMoreProjects(lang: Lang): LocalizedProject[] {
   return getProjects(lang).filter((p) => p.category === "more");
+}
+
+// ─── ORDEM DE LEITURA ───────────────────────────────────────────
+//
+// A curadoria dos destaques. Era a constante ORDER dentro de
+// components/projects/FeaturedShowcase.tsx; subiu para cá quando as páginas de
+// case passaram a precisar dela para o "Próximo projeto". O aviso que morava lá
+// continua valendo: projeto `featured` fora desta lista não renderiza na home.
+export const FEATURED_ORDER = [
+  "tecna-site",
+  "financehub",
+  "quintoandar-precificacao",
+  "portal-tecna",
+  "wraeclast",
+  "commerce-nda",
+  "sentinel",
+] as const;
+
+/**
+ * Todos os projetos na ordem em que um visitante os percorre pelas páginas de
+ * case: primeiro os destaques na ordem curada, depois os "more" na ordem em que
+ * estão declarados. É a sequência do "Próximo projeto →", que dá a volta no fim.
+ */
+export function ordemDeLeitura(lang: Lang): LocalizedProject[] {
+  const todos = getProjects(lang);
+  const destaques = FEATURED_ORDER.map((slug) =>
+    todos.find((p) => p.slug === slug),
+  ).filter((p): p is LocalizedProject => Boolean(p));
+  const vistos = new Set(destaques.map((p) => p.slug));
+  return [...destaques, ...todos.filter((p) => !vistos.has(p.slug))];
 }

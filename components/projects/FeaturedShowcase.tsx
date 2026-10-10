@@ -2,7 +2,11 @@ import { Bloco } from "../ui/Bloco";
 import { CabecalhoPasta, contar } from "./CabecalhoPasta";
 import { PastaProjeto } from "./PastaProjeto";
 import { Pilha } from "./Pilha";
-import { getProjects, type LocalizedProject } from "@/lib/projects";
+import {
+  FEATURED_ORDER,
+  getProjects,
+  type LocalizedProject,
+} from "@/lib/projects";
 import { dict } from "@/lib/dict";
 import type { Lang } from "@/lib/i18n";
 
@@ -16,15 +20,9 @@ import type { Lang } from "@/lib/i18n";
 // um projeto para destaque, troque a categoria E acrescente o slug aqui.
 //
 // A ordem é a MESMA nos dois idiomas: `slug` não é prosa, não passa por `I18n`.
-const ORDER = [
-  "tecna-site",
-  "financehub",
-  "quintoandar-precificacao",
-  "portal-tecna",
-  "wraeclast",
-  "commerce-nda",
-  "sentinel",
-] as const;
+// A lista mora em lib/projects.ts (FEATURED_ORDER): a barra de menu, o terminal
+// e o "Próximo projeto" dos cases percorrem a mesma ordem.
+const ORDER = FEATURED_ORDER;
 
 function destaques(lang: Lang): LocalizedProject[] {
   const todos = getProjects(lang);

@@ -1,0 +1,52 @@
+/*
+ * A entrada em cascata do hero do case — em CSS, e não em Framer Motion.
+ *
+ * O hero está acima da dobra. Com o padrão do <Reveal> (servidor visível, o
+ * cliente remonta escondido e anima), o visitante veria o título pintado pelo
+ * HTML do servidor, sumir na hidratação e voltar em fade: um piscar no primeiro
+ * segundo da página. Uma animação CSS com `both` roda já no primeiro paint, sem
+ * esperar JS, e termina no estado final mesmo com JS desligado — que é o que
+ * "o HTML do servidor sai visível" quer dizer aqui.
+ *
+ * O atraso de cada degrau vem inline (`--atraso`) do componente.
+ */
+.entrada {
+  animation: subir 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+/* A janela da capa entra um pouco depois e de mais longe: é o objeto que
+   "pousa" na fronteira entre a mesa e o papel. */
+.pouso {
+  animation: pousar 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pousar {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrada,
+  .pouso {
+    animation: none;
+  }
+}
