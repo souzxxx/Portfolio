@@ -1119,27 +1119,6 @@ export const projects: Project[] = [
     year: "2025",
   },
   {
-    slug: "universe-project",
-    name: {
-      pt: "Universe",
-      en: "Universe",
-    },
-    tagline: {
-      pt: "Aplicação full-stack em Next.js e TypeScript",
-      en: "Full-stack application in Next.js and TypeScript",
-    },
-    description: {
-      pt: "Aplicação full-stack em TypeScript sobre Next.js, com App Router, tipagem estrita de ponta a ponta e otimizações de desempenho. O repositório é privado.",
-      en: "Full-stack TypeScript application on Next.js, with the App Router, end-to-end strict typing and performance optimizations. The repository is private.",
-    },
-    category: "more",
-    status: "shipped",
-    isPrivate: true,
-    stack: ["Next.js", "TypeScript", "React", "Vercel"],
-    cover: "/projects/universe-project/cover.png",
-    year: "2026",
-  },
-  {
     slug: "soli",
     name: {
       pt: "Soli",
