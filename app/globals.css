@@ -144,6 +144,77 @@
   }
 }
 
+/* ── souzxxx OS ─────────────────────────────────────────────────────────── */
+
+:root {
+  /* Quanto as janelas do hero esperam antes de entrar: o tempo do boot. Zera
+     quando a sessão já viu o boot (data-boot="pular") ou sem movimento. */
+  --boot: 1.15s;
+}
+:root[data-boot="pular"] {
+  --boot: 0s;
+}
+:root[data-boot="pular"] .boot {
+  display: none;
+}
+
+.boot {
+  animation: boot-sai 0.42s cubic-bezier(0.7, 0, 0.84, 0) 0.95s both;
+}
+.boot-caixa {
+  animation: boot-caixa 0.3s steps(3) both;
+}
+.boot-barra {
+  animation: boot-barra 0.8s steps(12) 0.12s both;
+}
+@keyframes boot-sai {
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+@keyframes boot-caixa {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes boot-barra {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Entrada das janelas: abrem como no Mac, de um retângulo menor, em degraus. */
+.janela-entra {
+  animation: janela-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--boot) + var(--ordem, 0) * 90ms);
+}
+@keyframes janela-entra {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+
+@keyframes piscar {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot {
+    display: none;
+  }
+  :root {
+    --boot: 0s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

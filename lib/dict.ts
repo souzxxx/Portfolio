@@ -60,6 +60,56 @@ export interface Dict {
     ogAlt: string;
   };
 
+  /** O souzxxx OS: barra de menu, boot, janelas, ícones e terminal do hero. */
+  os: {
+    menu: {
+      /** Rótulo do menu suspenso de projetos na barra. */
+      projetos: string;
+      /** Último item do menu: âncora para a vitrine na home. */
+      todos: string;
+      disponivel: string;
+      /** aria-label do relógio. */
+      relogio: string;
+    };
+    boot: { bemVindo: string; iniciando: string };
+    janelas: {
+      leiame: string;
+      terminal: string;
+      render: string;
+      agora: string;
+      lixeira: string;
+      fechar: string;
+      reabrir: string;
+    };
+    icones: {
+      rotulo: string;
+      projetos: string;
+      tecna: string;
+      financehub: string;
+      quintoandar: string;
+      curriculo: string;
+      contato: string;
+      github: string;
+      lixeira: string;
+    };
+    agora: { rotulo: string; valor: string }[];
+    lixeira: string[];
+    terminal: {
+      rotulo: string;
+      dica: string;
+      ajuda: [comando: string, descricao: string][];
+      whoami: string;
+      sobre: string;
+      naoEncontrado: string;
+      abrindo: string;
+      sudo: string;
+      rm: string;
+      projetos: string;
+      limpo: string;
+    };
+    rolar: string;
+  };
+
   nav: {
     /** aria-label da <nav> do cabeçalho. */
     principal: string;

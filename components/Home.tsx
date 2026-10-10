@@ -1,5 +1,6 @@
-import { NavBar } from "@/components/nav/NavBar";
-import { Hero } from "@/components/hero/Hero";
+import { Boot } from "@/components/os/Boot";
+import { MenuBar } from "@/components/os/MenuBar";
+import { Desktop } from "@/components/os/Desktop";
 import { CutWordmark } from "@/components/ui/CutWordmark";
 import { FeaturedShowcase } from "@/components/projects/FeaturedShowcase";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
@@ -9,70 +10,73 @@ import { About } from "@/components/about/About";
 import { Footer } from "@/components/Footer";
 import type { Lang } from "@/lib/i18n";
 import { dict } from "@/lib/dict";
+import { getProjects } from "@/lib/projects";
+import { hrefHome, outro } from "@/lib/i18n";
 
 /**
- * Home — a página inicial das DUAS línguas, escrita uma vez.
+ * Home — a página inicial das DUAS línguas, escrita uma vez (as rotas "/" e
+ * "/en" só passam `lang`).
  *
- * POR QUE ELA SAIU DE app/page.tsx. Com route group por idioma existem duas
- * rotas de home (app/(pt)/page.tsx para "/" e app/(en)/en/page.tsx para
- * "/en"), e as duas montam exatamente os mesmos nove blocos na mesma ordem.
- * Se a ordem morasse nas rotas, ela existiria em dois arquivos — e a partitura
- * de cor abaixo é justamente o tipo de regra que quebra sem ninguém notar:
- * quem acrescentar uma seção nova vai editar a rota que estava aberta, e o
- * outro idioma sai com dois campos escuros encostados. Aqui a ordem é uma só e
- * a língua é um parâmetro.
+ * A PARTITURA — o souzxxx OS abre e o site editorial desliza por cima dele:
  *
- * ESTE COMPONENTE É DE SERVIDOR, e continua sendo depois de bilíngue: `lang`
- * chega como prop da rota e desce como prop. Nenhum bloco precisou virar
- * `"use client"` por causa do idioma — que é a razão inteira de o idioma ser
- * rota e não estado (ver o cabeçalho de lib/i18n.ts).
+ *   MESA     MenuBar (fixa, papel) + Desktop (carvão pontilhado, sticky)
+ *   PAPEL    CutWordmark — a cortina que sobe sobre a mesa
+ *   …        vitrine de projetos, formação, stack e contato
  *
- * RITMO DE BLOCOS — a partitura de cor da home, fixada aqui e em nenhum outro
- * lugar. Cada componente pinta o proprio campo; esta pagina so define a ordem:
+ * O Boot (CSS puro) cobre a primeira visita da sessão e se recolhe sozinho.
+ * Tudo depois da mesa vive em `relative z-10` com fundo próprio: é o que faz
+ * as seções passarem POR CIMA da mesa presa, em vez de por trás dela.
  *
- *   CARVAO  NavBar + Hero        (um unico campo continuo)
- *   PAPEL   CutWordmark
- *   PAPEL   FeaturedShowcase
- *   CARVAO  ProjectGrid (indice)
- *   PAPEL   AcademicTimeline
- *   PAPEL   StackMarquee (tabela)
- *   CARVAO  About + Footer       (um unico campo continuo)
- *
- * A REGRA DA PARTITURA: nenhum par de escuros pode encostar. So existe UM
- * escuro no sistema (carvao #1C1A17) — o "breu" #141414 saiu porque dava
- * 1.06:1 contra ele, ou seja, duas secoes escuras vizinhas nao leriam como duas
- * secoes, leriam como uma so com uma emenda no meio. Papel encostando em papel
- * e diferente: ali a virada e feita pelo filete tracejado que abre cada
- * <SectionHeader>, e o par existe de proposito para o site nao virar zebra.
- *
- * Foi por essa regra que a FORMACAO trocou de campo. Ela era o segundo bloco
- * azul da pagina; sem o azul, mante-la escura colaria carvao (indice) em
- * carvao (formacao). Em papel a partitura fecha alternada, com os tres blocos
- * de carvao ancorando a abertura, o meio e o fechamento.
- *
- * NavBar e Hero sao IRMAOS e ambos pintam `bg-carvao`, sem gap e sem margem
- * entre eles — leem como um campo unico, e isso desacopla os itens que
- * reescrevem a nav e o hero: nenhum dos dois precisa saber a altura do outro.
- *
- * Sem `relative isolate` no wrapper: nao ha mais nenhuma camada `-z-10` (nem
- * gradiente, nem grade, nem orbe) a isolar.
- *
- * O `id="top"` é a âncora do "voltar ao topo" do rodapé e NÃO muda de língua:
- * ele é endereço, não texto (ver a nota dos `href` em lib/dict.pt.ts).
+ * Este componente é de servidor: `lang` desce como prop, e os componentes de
+ * cliente (MenuBar, Desktop) recebem só a fatia do dicionário que pintam.
  */
+/** A ordem curada dos destaques — a mesma do menu da barra e do `ls` do terminal. */
+const DESTAQUES = [
+  "tecna-site",
+  "financehub",
+  "quintoandar-precificacao",
+  "portal-tecna",
+  "wraeclast",
+  "commerce-nda",
+  "sentinel",
+];
+
 export function Home({ lang }: { lang: Lang }) {
   const d = dict[lang];
+  const todos = getProjects(lang);
+  const destaques = DESTAQUES.flatMap((slug) => {
+    const p = todos.find((x) => x.slug === slug);
+    return p ? [{ slug: p.slug, name: p.name, apelido: slug.split("-")[0] }] : [];
+  });
+
   return (
     <div id="top">
-      <NavBar lang={lang} d={d.nav} />
+      <Boot d={d.os.boot} />
+      <MenuBar
+        lang={lang}
+        nav={d.nav}
+        os={d.os.menu}
+        projetos={destaques}
+        outroIdioma={hrefHome(outro(lang))}
+      />
       <main>
-        <Hero lang={lang} d={d.hero} />
-        <CutWordmark />
-        <FeaturedShowcase lang={lang} />
-        <ProjectGrid lang={lang} />
-        <AcademicTimeline lang={lang} />
-        <StackMarquee lang={lang} />
-        <About lang={lang} />
+        {/* A mesa fica presa no topo (sticky, só em tela larga e alta) enquanto
+            o wordmark de papel sobe por cima dela, como uma cortina. O wrapper
+            limita o sticky: passado o wordmark, a mesa vai embora com o scroll
+            em vez de continuar renderizando atrás do site inteiro. */}
+        <div className="relative">
+          <Desktop lang={lang} hero={d.hero} os={d.os} projetos={destaques} />
+          <div className="relative z-10">
+            <CutWordmark />
+          </div>
+        </div>
+        <div className="relative z-10">
+          <FeaturedShowcase lang={lang} />
+          <ProjectGrid lang={lang} />
+          <AcademicTimeline lang={lang} />
+          <StackMarquee lang={lang} />
+          <About lang={lang} />
+        </div>
       </main>
       <Footer lang={lang} />
     </div>

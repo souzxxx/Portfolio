@@ -48,6 +48,70 @@ export const en: Dict = {
     ogAlt: "Leonardo Souza — Backend, Web & AI",
   },
 
+  os: {
+    menu: {
+      projetos: "Projects",
+      todos: "See all projects ↓",
+      disponivel: "Open to work",
+      relogio: "Time in São Paulo",
+    },
+    boot: { bemVindo: "Welcome to souzxxx", iniciando: "Starting up…" },
+    janelas: {
+      leiame: "README.txt",
+      terminal: "Terminal",
+      render: "render.glsl",
+      agora: "Now",
+      lixeira: "Trash",
+      fechar: "Close",
+      reabrir: "Open",
+    },
+    icones: {
+      rotulo: "Desktop",
+      projetos: "Projects",
+      tecna: "TECNA",
+      financehub: "FinanceHub",
+      quintoandar: "QuintoAndar",
+      curriculo: "Resume.pdf",
+      contato: "Contact",
+      github: "GitHub",
+      lixeira: "Trash",
+    },
+    agora: [
+      { rotulo: "Live", valor: "TECNA's commercial website" },
+      { rotulo: "Building", valor: "TECNA Portal · internal apps" },
+      { rotulo: "Studying", valor: "Insper · CS · 5th semester" },
+    ],
+    lixeira: [
+      "production-bugs.log — 0 KB",
+      "secrets-in-code.env — emptied",
+      "todo-later.txt — emptied",
+    ],
+    terminal: {
+      rotulo: "Terminal command",
+      dica: "type help and press enter",
+      ajuda: [
+        ["whoami", "who Leonardo is"],
+        ["projects", "lists the projects, linking each case study"],
+        ["open <project>", "opens a case study (e.g. open tecna)"],
+        ["about", "the one-line summary"],
+        ["contact", "email, GitHub and LinkedIn"],
+        ["cv", "downloads the resume as PDF"],
+        ["clear", "clears the screen"],
+      ],
+      whoami:
+        "leonardo souza — backend, web & ai · computer science at insper (5th sem) · são paulo, brazil",
+      sobre:
+        "I build systems that hold up in production: APIs, queues with retries and idempotency, LLMs over real data, and Next.js front-ends with real users.",
+      naoEncontrado: "command not found:",
+      abrindo: "opening",
+      sudo: "Permission granted. Opening an email to hire Leonardo…",
+      rm: "Permission denied. Nice try.",
+      projetos: "projects/",
+      limpo: "",
+    },
+    rolar: "Scroll to see the work",
+  },
+
   nav: {
     principal: "Main",
     atalhos: "Shortcuts",

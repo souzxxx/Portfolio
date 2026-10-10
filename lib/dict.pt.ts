@@ -44,6 +44,70 @@ export const pt: Dict = {
     ogAlt: "Leonardo Souza — Backend, Web & IA",
   },
 
+  os: {
+    menu: {
+      projetos: "Projetos",
+      todos: "Ver todos os projetos ↓",
+      disponivel: "Disponível para vagas",
+      relogio: "Hora em São Paulo",
+    },
+    boot: { bemVindo: "Bem-vindo ao souzxxx", iniciando: "Iniciando o sistema…" },
+    janelas: {
+      leiame: "LEIA-ME.txt",
+      terminal: "Terminal",
+      render: "render.glsl",
+      agora: "Agora",
+      lixeira: "Lixeira",
+      fechar: "Fechar",
+      reabrir: "Abrir",
+    },
+    icones: {
+      rotulo: "Mesa",
+      projetos: "Projetos",
+      tecna: "TECNA",
+      financehub: "FinanceHub",
+      quintoandar: "QuintoAndar",
+      curriculo: "Currículo.pdf",
+      contato: "Contato",
+      github: "GitHub",
+      lixeira: "Lixeira",
+    },
+    agora: [
+      { rotulo: "No ar", valor: "Site comercial da TECNA" },
+      { rotulo: "Construindo", valor: "Portal TECNA · apps internos" },
+      { rotulo: "Estudando", valor: "Insper · BCC · 5º semestre" },
+    ],
+    lixeira: [
+      "bugs-de-producao.log — 0 KB",
+      "senhas-no-codigo.env — esvaziado",
+      "todo-depois.txt — esvaziado",
+    ],
+    terminal: {
+      rotulo: "Comando do terminal",
+      dica: "digite help e aperte enter",
+      ajuda: [
+        ["whoami", "quem é o Leonardo"],
+        ["projetos", "lista os projetos, com link para cada case"],
+        ["open <projeto>", "abre o case (ex.: open tecna)"],
+        ["sobre", "o resumo em uma frase"],
+        ["contato", "e-mail, GitHub e LinkedIn"],
+        ["cv", "baixa o currículo em PDF"],
+        ["clear", "limpa a tela"],
+      ],
+      whoami:
+        "leonardo souza — backend, web & ia · ciência da computação no insper (5º sem) · são paulo",
+      sobre:
+        "Construo sistemas que se sustentam em produção: APIs, filas com retry e idempotência, LLM sobre dados reais e front-end Next.js com usuário de verdade.",
+      naoEncontrado: "comando não encontrado:",
+      abrindo: "abrindo",
+      sudo: "Permissão concedida. Abrindo um e-mail para contratar o Leonardo…",
+      rm: "Permissão negada. Boa tentativa.",
+      projetos: "projetos/",
+      limpo: "",
+    },
+    rolar: "Role para ver os projetos",
+  },
+
   nav: {
     principal: "Principal",
     atalhos: "Atalhos",
