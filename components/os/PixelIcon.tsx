@@ -261,6 +261,11 @@ const PATHS = Object.fromEntries(
   ]),
 ) as Record<NomeIcone, { tinta: string; miolo: string }>;
 
+/** Os dois paths de um ícone, para quem desenha fora do DOM (o cartão OG). */
+export function pixelPaths(nome: NomeIcone) {
+  return PATHS[nome];
+}
+
 export function PixelIcon({
   nome,
   tamanho = 32,

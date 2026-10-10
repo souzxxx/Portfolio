@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 
 import { dict } from "@/lib/dict";
 import { SITE_URL, type Lang } from "@/lib/i18n";
+import { pixelPaths, type NomeIcone } from "@/components/os/PixelIcon";
 
 /**
  * og — a ARTE do Open Graph, uma só para as duas línguas.
@@ -39,8 +40,6 @@ export const OG_CONTENT_TYPE = "image/png";
 // Tailwind: satori nao enxerga nem as classes nem as variaveis do next/font.
 const CARVAO = "#1C1A17";
 const CREME = "#F5F3EE"; // 15.66:1 sobre o carvao
-const CREME_600 = "#D8D4C8"; // 11.72:1 sobre o carvao
-const FILETE = "rgba(245,243,238,0.45)";
 
 type Fonte = {
   name: string;
@@ -64,6 +63,13 @@ export async function quadroOg(lang: Lang): Promise<ImageResponse> {
     fonts = undefined;
   }
 
+  // O cartão é a própria mesa do souzxxx OS: barra de menu de papel, mesa
+  // carvão e a janela LEIA-ME com o nome. Os filetes da barra de título são
+  // seis <div> de 1 px — o satori não garante `repeating-linear-gradient`.
+  const filetes = Array.from({ length: 6 }, (_, i) => (
+    <div key={i} style={{ display: "flex", height: 2, backgroundColor: CARVAO, marginTop: i ? 3 : 0 }} />
+  ));
+
   return new ImageResponse(
     (
       <div
@@ -72,81 +78,148 @@ export async function quadroOg(lang: Lang): Promise<ImageResponse> {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
           backgroundColor: CARVAO,
-          padding: "0 84px",
         }}
       >
         <div
           style={{
             display: "flex",
-            fontSize: 22,
-            letterSpacing: "0.16em",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: 44,
+            padding: "0 28px",
+            backgroundColor: CREME,
+            borderBottom: `2px solid ${CARVAO}`,
+            color: CARVAO,
+            fontSize: 18,
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: CREME_600,
           }}
         >
-          {d.meta.ogSelo}
+          <div style={{ display: "flex", gap: 34 }}>
+            <div style={{ display: "flex", fontWeight: 700 }}>souzxxx</div>
+            {d.nav.links.map((l) => (
+              <div key={l.href} style={{ display: "flex" }}>
+                {l.label}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex" }}>{d.os.menu.disponivel}</div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            width: 220,
-            borderTop: `2px dashed ${FILETE}`,
-            marginTop: 24,
-            marginBottom: 36,
-          }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            fontFamily: "Instrument Serif",
-            fontSize: 132,
-            textTransform: "uppercase",
-            letterSpacing: "2px",
-            lineHeight: 0.88,
-            color: CREME,
-          }}
-        >
-          {/* Nome proprio: as duas linhas sao iguais nas duas linguas, mas vem
-              do dicionario mesmo assim — a quebra "Leonardo / Souza" e uma
-              decisao de composicao que ja esta escrita em hero.nome, e uma
-              terceira copia dela aqui seria a que ficaria para tras. */}
-          {d.hero.nome.map((linha) => (
-            <div key={linha} style={{ display: "flex" }}>
-              {linha}
+        <div style={{ display: "flex", flex: 1, padding: "46px 64px", alignItems: "flex-start" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: 820,
+              backgroundColor: CREME,
+              border: `2px solid ${CARVAO}`,
+              boxShadow: "12px 12px 0 0 #0F0E0C",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                position: "relative",
+                height: 40,
+                padding: "8px 10px",
+                borderBottom: `2px solid ${CARVAO}`,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>{filetes}</div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    backgroundColor: CREME,
+                    padding: "0 16px",
+                    fontSize: 18,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: CARVAO,
+                  }}
+                >
+                  {d.os.janelas.leiame}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            fontSize: 34,
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: CREME,
-            marginTop: 36,
-          }}
-        >
-          {d.hero.subtitulo}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            width: 220,
-            borderTop: `2px dashed ${FILETE}`,
-            marginTop: 40,
-            marginBottom: 24,
-          }}
-        />
-
-        <div style={{ display: "flex", fontSize: 24, color: CREME_600 }}>
-          {d.meta.ogStack}
+            <div style={{ display: "flex", flexDirection: "column", padding: "30px 44px 40px" }}>
+              <div style={{ display: "flex", fontSize: 18, letterSpacing: "0.16em", textTransform: "uppercase", color: "#5A5750" }}>
+                {d.meta.ogSelo}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  fontFamily: "Instrument Serif",
+                  fontSize: 150,
+                  textTransform: "uppercase",
+                  lineHeight: 0.84,
+                  marginTop: 20,
+                  color: CARVAO,
+                }}
+              >
+                {d.hero.nome.map((linha) => (
+                  <div key={linha} style={{ display: "flex" }}>
+                    {linha}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 28 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    backgroundColor: CARVAO,
+                    color: CREME,
+                    padding: "6px 12px",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    fontSize: 20,
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {d.hero.subtitulo}
+                </div>
+                <div style={{ display: "flex", fontSize: 20, color: "#3C3A34" }}>{d.meta.ogStack}</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 26, marginLeft: "auto", marginTop: 4 }}>
+            {(
+              [
+                ["pasta", d.os.icones.projetos],
+                ["predio", d.os.icones.tecna],
+                ["grafico", d.os.icones.financehub],
+                ["documento", d.os.icones.curriculo],
+              ] as [NomeIcone, string][]
+            ).map(([nome, rotulo]) => {
+              const p = pixelPaths(nome);
+              return (
+                <div key={nome} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                  <svg width={64} height={64} viewBox="0 0 16 16" shapeRendering="crispEdges">
+                    <path d={p.miolo} fill={CREME} />
+                    <path d={p.tinta} fill={CARVAO} />
+                  </svg>
+                  <div style={{ display: "flex", fontSize: 16, letterSpacing: "0.12em", textTransform: "uppercase", color: CREME }}>
+                    {rotulo}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     ),
