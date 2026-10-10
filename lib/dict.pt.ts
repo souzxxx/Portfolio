@@ -291,4 +291,75 @@ export const pt: Dict = {
       "São Paulo",
     ],
   },
+
+  contato: {
+    atividade: {
+      eyebrow: "GITHUB · SOUZXXX",
+      titulo: "Um ano em blocos",
+      totalSufixo: "contribuições nos últimos 12 meses",
+      aria: "Mapa de contribuições no GitHub",
+      menos: "Menos",
+      mais: "Mais",
+      maiorSequencia: "Maior sequência",
+      melhorDia: "Melhor dia",
+      diasAtivos: "Dias ativos",
+      dias: "dias",
+      de: "de",
+      contribuicao: ["contribuição", "contribuições"],
+      leituraVazia: "Passe o cursor sobre um bloco",
+      perfil: "Ver no GitHub ↗",
+      locale: "pt-BR",
+    },
+    formacao: {
+      janela: "Copiando…",
+      copiando: "Copiando conhecimento…",
+      origem: "Insper · Ciência da Computação",
+      destino: "souzxxx",
+      semestre: "Semestre",
+      de: "de",
+      restante: "Restam {n} semestres",
+      concluido: "Concluído",
+      emCurso: "Em curso",
+      naFila: "Na fila",
+    },
+    stack: {
+      janela: "Sobre este computador",
+      sistema: "souzxxx OS",
+      versao: "Versão 2026 · São Paulo",
+      // A brincadeira e a do "Sobre este Mac", mas cada valor e verdade: o que
+      // ele processa, quanto curso ja tem na memoria e de onde ele inicia.
+      ficha: [
+        ["Processador", "Backend · web · IA"],
+        ["Memória", "5º semestre de BCC no Insper"],
+        ["Disco de inicialização", "São Paulo, BR"],
+      ],
+      armazenamento: "Armazenamento",
+      ferramentas: "ferramentas",
+    },
+    fim: {
+      eyebrow: "#06 · CONTATO",
+      cta: "Vamos conversar",
+      disponivel: "Disponível para vagas",
+      cidade: "São Paulo",
+      // A versao curta do paragrafo de `sobre.prosa`: o que nao pode cair e
+      // curso, semestre, cidade e as tres frentes. O detalhe de cada sistema
+      // ja esta nos cards de projeto, logo acima.
+      prosa: [
+        "Sou ",
+        { em: "Leonardo Souza" },
+        ", estudante de Ciência da Computação no ",
+        { em: "Insper" },
+        " (5º semestre), em São Paulo. Trabalho com backend, web e IA aplicada: fila outbox com idempotência, busca vetorial com pgvector e front-end Next.js em sistema com usuário real. Prefiro ",
+        { em: "medir a supor" },
+        ".",
+      ],
+      copiar: "Copiar",
+      copiado: "Copiado",
+      copiarAria: "Copiar e-mail",
+    },
+    rodape: {
+      linha: ["Feito com Next.js", "deploy na Vercel"],
+      topo: "Voltar ao topo ↑",
+    },
+  },
 };

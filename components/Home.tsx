@@ -5,6 +5,7 @@ import { CutWordmark } from "@/components/ui/CutWordmark";
 import { FeaturedShowcase } from "@/components/projects/FeaturedShowcase";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { AcademicTimeline } from "@/components/academic/AcademicTimeline";
+import { UmAnoEmBlocos } from "@/components/fim/UmAnoEmBlocos";
 import { StackMarquee } from "@/components/stack/StackMarquee";
 import { About } from "@/components/about/About";
 import { Footer } from "@/components/Footer";
@@ -21,7 +22,9 @@ import { hrefHome, outro } from "@/lib/i18n";
  *
  *   MESA     MenuBar (fixa, papel) + Desktop (carvão pontilhado, sticky)
  *   PAPEL    CutWordmark — a cortina que sobe sobre a mesa
- *   …        vitrine de projetos, formação, stack e contato
+ *   PAPEL    vitrine de projetos (pastas empilhadas)
+ *   CARVÃO   índice · PAPEL formação · CARVÃO um ano em blocos (some se a
+ *            API do GitHub falhar) · PAPEL stack · CARVÃO contato + rodapé
  *
  * O Boot (CSS puro) cobre a primeira visita da sessão e se recolhe sozinho.
  * Tudo depois da mesa vive em `relative z-10` com fundo próprio: é o que faz
@@ -74,6 +77,7 @@ export function Home({ lang }: { lang: Lang }) {
           <FeaturedShowcase lang={lang} />
           <ProjectGrid lang={lang} />
           <AcademicTimeline lang={lang} />
+          <UmAnoEmBlocos lang={lang} />
           <StackMarquee lang={lang} />
           <About lang={lang} />
         </div>
