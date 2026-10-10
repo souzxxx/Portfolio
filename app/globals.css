@@ -126,6 +126,22 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* O padrão de mesa do souzxxx OS: o pontilhado 1-bit do Macintosh, aqui em
+     creme a 7% sobre carvão. É textura, não informação — some a 1 metro da
+     tela e só aparece quando o olho para. */
+  .mesa {
+    background-color: #1c1a17;
+    background-image: radial-gradient(rgba(245, 243, 238, 0.075) 0.75px, transparent 1px);
+    background-size: 4px 4px;
+  }
+
+  /* A mesma trama em carvão sobre papel, para os campos claros. */
+  .papel-trama {
+    background-color: #f5f3ee;
+    background-image: radial-gradient(rgba(28, 26, 23, 0.06) 0.75px, transparent 1px);
+    background-size: 4px 4px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

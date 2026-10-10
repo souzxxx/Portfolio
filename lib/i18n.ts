@@ -116,3 +116,11 @@ export const LANG_LABEL: Record<Lang, string> = {
 };
 
 export const SITE_URL = "https://portfolio-souzxxxs-projects.vercel.app";
+
+/**
+ * Endereço da página de case de um projeto. pt mora em `/projetos/<slug>`, en em
+ * `/en/projects/<slug>`. O slug não traduz: ele é endereço, não texto.
+ */
+export function hrefProjeto(lang: Lang, slug: string): string {
+  return lang === "pt" ? `/projetos/${slug}` : `/en/projects/${slug}`;
+}
