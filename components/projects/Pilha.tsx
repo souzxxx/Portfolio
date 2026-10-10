@@ -132,7 +132,7 @@ export function Pilha({
           // barra fixa da nav (44px) e mais um respiro; `--pilha-passo` é o
           // degrau entre uma pasta e a seguinte — a fatia da pasta de baixo
           // que continua aparecendo, além da aba.
-          "--pilha-topo": "4.25rem",
+          "--pilha-topo": "3rem",
           "--pilha-passo": "0.625rem",
           "--aba-h": "2.125rem",
           // Altura do corpo de cada pasta enquanto empilhada: a tela menos a
