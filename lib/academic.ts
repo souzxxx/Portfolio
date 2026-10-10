@@ -223,6 +223,13 @@ const SEMESTRES: Semester[] = [
   },
 ];
 
+/**
+ * Quantos semestres o bacharelado tem (BCC do Insper: quatro anos). O semestre
+ * ATUAL não mora aqui: é o último de `SEMESTRES`, e a barra de progresso da
+ * formação lê os dois — acrescentar o 6º semestre acima move a barra sozinha.
+ */
+export const TOTAL_SEMESTRES = 8;
+
 /** Achata a linha do tempo no idioma pedido, na ordem em que ela é exibida. */
 export function getSemestres(lang: Lang): LocalizedSemester[] {
   return SEMESTRES.map((sem) => ({

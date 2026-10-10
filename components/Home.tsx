@@ -4,6 +4,7 @@ import { CutWordmark } from "@/components/ui/CutWordmark";
 import { FeaturedShowcase } from "@/components/projects/FeaturedShowcase";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { AcademicTimeline } from "@/components/academic/AcademicTimeline";
+import { UmAnoEmBlocos } from "@/components/fim/UmAnoEmBlocos";
 import { StackMarquee } from "@/components/stack/StackMarquee";
 import { About } from "@/components/about/About";
 import { Footer } from "@/components/Footer";
@@ -35,7 +36,8 @@ import { dict } from "@/lib/dict";
  *   PAPEL   FeaturedShowcase
  *   CARVAO  ProjectGrid (indice)
  *   PAPEL   AcademicTimeline
- *   PAPEL   StackMarquee (tabela)
+ *   CARVAO  UmAnoEmBlocos (heatmap do GitHub; some se a API falhar)
+ *   PAPEL   StackMarquee (janela "Sobre este computador")
  *   CARVAO  About + Footer       (um unico campo continuo)
  *
  * A REGRA DA PARTITURA: nenhum par de escuros pode encostar. So existe UM
@@ -71,6 +73,7 @@ export function Home({ lang }: { lang: Lang }) {
         <FeaturedShowcase lang={lang} />
         <ProjectGrid lang={lang} />
         <AcademicTimeline lang={lang} />
+        <UmAnoEmBlocos lang={lang} />
         <StackMarquee lang={lang} />
         <About lang={lang} />
       </main>

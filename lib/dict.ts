@@ -183,6 +183,81 @@ export interface Dict {
     /** A linha técnica da direita. */
     tecnica: string[];
   };
+
+  /**
+   * O fim da home no idioma do souzxxx OS: o heatmap do GitHub, a formação
+   * como diálogo de cópia, a stack como "Sobre este computador", o contato e
+   * o rodapé. Chave nova (e não remendo em `sobre`/`rodape`) para o trabalho
+   * paralelo das outras seções fundir sem conflito.
+   */
+  contato: {
+    atividade: {
+      eyebrow: string;
+      titulo: string;
+      /** "2662 {totalSufixo}" — o número vem da API, o resto daqui. */
+      totalSufixo: string;
+      /** aria-label do mapa: "{aria}: 2662 {totalSufixo}". */
+      aria: string;
+      menos: string;
+      mais: string;
+      maiorSequencia: string;
+      melhorDia: string;
+      diasAtivos: string;
+      dias: string;
+      de: string;
+      /** Singular e plural da leitura de um bloco no hover. */
+      contribuicao: [string, string];
+      /** Estado de repouso da barra de leitura. */
+      leituraVazia: string;
+      perfil: string;
+      /** Locale do Intl para mês e data ("pt-BR" / "en-US"). */
+      locale: string;
+    };
+    formacao: {
+      janela: string;
+      copiando: string;
+      origem: string;
+      destino: string;
+      /** "Semestre" + " 5 " + "de" + " 8". */
+      semestre: string;
+      de: string;
+      /** Modelo com "{n}": "Restam {n} semestres" / "{n} semesters left". */
+      restante: string;
+      concluido: string;
+      emCurso: string;
+      naFila: string;
+    };
+    stack: {
+      janela: string;
+      sistema: string;
+      versao: string;
+      /** Pares rótulo/valor da ficha técnica. */
+      ficha: [string, string][];
+      armazenamento: string;
+      ferramentas: string;
+    };
+    fim: {
+      eyebrow: string;
+      /**
+       * O CTA gigante. String única, quebra natural: o corpo é medido para
+       * "CONVERSAR" encher a medida, então o pt quebra em duas linhas e o
+       * "LET’S TALK" do en cabe numa só, no mesmo corpo.
+       */
+      cta: string;
+      disponivel: string;
+      /** Prefixo do relógio: "SÃO PAULO". */
+      cidade: string;
+      prosa: Trecho[];
+      copiar: string;
+      copiado: string;
+      /** aria-label do botão: "Copiar e-mail". */
+      copiarAria: string;
+    };
+    rodape: {
+      linha: string[];
+      topo: string;
+    };
+  };
 }
 
 export interface Secao {
