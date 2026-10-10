@@ -1,7 +1,11 @@
 import { Bloco } from "../ui/Bloco";
 import { SectionHeader } from "../ui/SectionHeader";
 import { FeaturedCard } from "./FeaturedCard";
-import { getProjects, type LocalizedProject } from "@/lib/projects";
+import {
+  FEATURED_ORDER,
+  getProjects,
+  type LocalizedProject,
+} from "@/lib/projects";
 import { dict } from "@/lib/dict";
 import type { Lang } from "@/lib/i18n";
 
@@ -16,14 +20,11 @@ import type { Lang } from "@/lib/i18n";
 // A ordem é a MESMA nos dois idiomas, e de propósito: `slug` não é prosa, não
 // passa por `I18n`, e uma curadoria que divergisse entre "/" e "/en" seria duas
 // seções diferentes se fazendo passar por uma.
-const ORDER = [
-  "financehub",
-  "quintoandar-precificacao",
-  "commerce-nda",
-  "portal-construtora",
-  "sentinel",
-  "wraeclast",
-] as const;
+//
+// A lista em si mora em lib/projects.ts (FEATURED_ORDER) desde as páginas de
+// case: o "Próximo projeto" delas percorre a mesma ordem, e duas cópias dela
+// divergiriam no primeiro projeto novo.
+const ORDER = FEATURED_ORDER;
 
 /**
  * Os destaques já no idioma pedido. A lista CRUA (`projects`) não é mais

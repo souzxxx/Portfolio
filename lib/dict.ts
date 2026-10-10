@@ -183,6 +183,56 @@ export interface Dict {
     /** A linha técnica da direita. */
     tecnica: string[];
   };
+
+  /**
+   * A página de case de cada projeto (components/case/CasePage.tsx). As
+   * strings de projeto (nome, prosa, capturas) vêm de lib/projects.ts; aqui só
+   * mora a moldura: trilha, rótulos da faixa de metadados, títulos de seção,
+   * os rótulos de janela do souzxxx OS e o "Próximo projeto".
+   */
+  caso: {
+    /** Trilha no topo: "souzxxx OS / Projetos / <nome>". */
+    trilha: { rotulo: string; os: string; projetos: string };
+    /** "Nº" antes do número do projeto e o "de" de "Nº 01 de 23". */
+    numero: string;
+    de: string;
+    destaque: string;
+    indice: string;
+    rotulos: {
+      ano: string;
+      status: string;
+      papel: string;
+      stack: string;
+      repo: string;
+      noAr: string;
+    };
+    privado: string;
+    publico: string;
+    verNoAr: string;
+    codigo: string;
+    secoes: {
+      projeto: string;
+      feito: string;
+      decisoes: string;
+      capturas: string;
+      stack: string;
+    };
+    /** Título da janela "Get Info" da coluna lateral. */
+    ficha: string;
+    decisao: string;
+    /** O botão OK das caixas de decisão — decorativo, fora da árvore de acessibilidade. */
+    ok: string;
+    pergunta: string;
+    resposta: string;
+    /** Contagem da barra de status das janelas: "1 captura" / "6 capturas". */
+    capturas: { uma: string; varias: string };
+    ampliar: string;
+    capaGerada: string;
+    proximo: string;
+    proximoAria: string;
+    /** O link para a mesma página na outra língua. */
+    outraLingua: { sigla: string; aria: string };
+  };
 }
 
 export interface Secao {
