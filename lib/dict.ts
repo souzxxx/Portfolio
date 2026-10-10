@@ -183,6 +183,40 @@ export interface Dict {
     /** A linha técnica da direita. */
     tecnica: string[];
   };
+
+  /**
+   * A vitrine de projetos da home: a pilha de pastas dos destaques e o índice
+   * com espiada no hover. Os textos longos (decisões, galeria) moram nas
+   * páginas de case; aqui só sobra rótulo e o cabeçalho das duas seções.
+   */
+  vitrine: {
+    destaques: CabecalhoVitrine;
+    indice: CabecalhoVitrine;
+    /** "{n} ITENS" — o `{n}` é trocado pelo número com dois dígitos. */
+    itens: string;
+    /** Prefixo do número na aba da pasta: "Nº". */
+    numero: string;
+    /** CTA primário do card — leva à página de case (interna). */
+    abrirCase: string;
+    /** CTA secundário, só quando há demo no ar. */
+    verNoAr: string;
+    /** A etiqueta que segue o cursor no índice. */
+    espiar: string;
+    /** Sufixo do alt da captura: "FinanceHub — captura de tela". */
+    captura: string;
+    /** aria-label da lista de destaques e do índice. */
+    listaDestaques: string;
+    listaIndice: string;
+  };
+}
+
+export interface CabecalhoVitrine {
+  /** Caminho em bitmap na barra de título: "~/projetos/selecionados". */
+  caminho: string;
+  /** Número da seção, igual nos dois idiomas mas viaja junto do rótulo. */
+  secao: string;
+  titulo: string;
+  descricao: string;
 }
 
 export interface Secao {

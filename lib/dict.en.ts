@@ -236,4 +236,29 @@ export const en: Dict = {
       "São Paulo",
     ],
   },
+
+  vitrine: {
+    destaques: {
+      caminho: "~/projects/selected",
+      secao: "#02",
+      titulo: "Selected work",
+      descricao:
+        "The folders I would open first in a technical conversation: a product with real users, AI in production, a backend that defends itself. Each one leads to the full case study, with decisions, architecture and screenshots.",
+    },
+    indice: {
+      caminho: "~/projects/index",
+      secao: "#03",
+      titulo: "More projects",
+      descricao:
+        "The rest of the drawer: languages, paradigms and domains — from Prolog to Python, from a compiler to embedded firmware. Every row opens its case study.",
+    },
+    itens: "{n} ITEMS",
+    numero: "Nº",
+    abrirCase: "Open case study →",
+    verNoAr: "View live ↗",
+    espiar: "OPEN →",
+    captura: "screenshot",
+    listaDestaques: "Featured projects",
+    listaIndice: "Project index",
+  },
 };

@@ -227,4 +227,29 @@ export const pt: Dict = {
       "São Paulo",
     ],
   },
+
+  vitrine: {
+    destaques: {
+      caminho: "~/projetos/selecionados",
+      secao: "#02",
+      titulo: "Trabalho selecionado",
+      descricao:
+        "As pastas que eu abriria primeiro numa conversa técnica: produto com usuário real, IA em produção, backend que se defende sozinho. Cada uma leva ao case completo, com decisões, arquitetura e capturas.",
+    },
+    indice: {
+      caminho: "~/projetos/indice",
+      secao: "#03",
+      titulo: "Mais projetos",
+      descricao:
+        "O resto da gaveta: linguagens, paradigmas e domínios — de Prolog a Python, de compilador a firmware embarcado. Cada linha abre o case.",
+    },
+    itens: "{n} ITENS",
+    numero: "Nº",
+    abrirCase: "Abrir case →",
+    verNoAr: "Ver no ar ↗",
+    espiar: "ABRIR →",
+    captura: "captura de tela",
+    listaDestaques: "Projetos em destaque",
+    listaIndice: "Índice de projetos",
+  },
 };
