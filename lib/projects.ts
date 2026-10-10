@@ -126,13 +126,6 @@ export const projects: Project[] = [
         },
       },
       {
-        src: "/projects/tecna/quem-somos.webp",
-        label: {
-          pt: "Quem Somos — índice lateral fixo e sete tópicos editáveis no CMS",
-          en: "About — sticky side index and seven topics editable in the CMS",
-        },
-      },
-      {
         src: "/projects/tecna/hub.webp",
         label: {
           pt: "HUB em repouso, sem nenhum card em foco",
