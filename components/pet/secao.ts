@@ -38,12 +38,17 @@ export function rotaDoPet(pathname: string): Rota {
 
 /**
  * A seção com mais pixels visíveis; "top" quando nenhuma tem altura > 0.
- * Pura, para o teste: o hook só alimenta o mapa.
+ * Alturas abaixo de `minimo` não contam: uma faixa fina de #projects no pé da
+ * mesa não deve roubar a dica dela. Pura, para o teste: o hook só alimenta o mapa.
  */
-export function escolherSecao(visivel: ReadonlyMap<string, number>): ChaveDica {
+export function escolherSecao(
+  visivel: ReadonlyMap<string, number>,
+  minimo = 0,
+): ChaveDica {
   let melhor: ChaveDica = "top";
   let maior = 0;
   for (const [id, altura] of visivel) {
+    if (altura < minimo) continue;
     if (altura > maior) {
       maior = altura;
       melhor = id as ChaveDica;
@@ -66,7 +71,8 @@ export function useSecaoAtual(pathname: string): ChaveDica {
         for (const e of entradas) {
           visivel.set(e.target.id, e.isIntersecting ? e.intersectionRect.height : 0);
         }
-        setSecao(escolherSecao(visivel));
+        // 20% da janela, lido a cada callback para acompanhar um resize.
+        setSecao(escolherSecao(visivel, window.innerHeight * 0.2));
       },
       { threshold: LIMIARES },
     );

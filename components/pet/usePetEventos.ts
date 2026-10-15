@@ -59,11 +59,15 @@ export function usePetEventos(
         ? { x: r.left + r.width / 2, y: r.top + r.height / 2 }
         : { x: window.innerWidth, y: window.innerHeight };
     };
+    // Uma escala só para os dois eixos, meia diagonal da janela (spec §3).
+    // Dividir cada eixo pela metade da própria dimensão saturava o olhar em
+    // -1 em mais da metade da tela, porque o pet mora no canto.
     const direcao = (x: number, y: number) => {
       const c = centro();
+      const escala = Math.hypot(window.innerWidth, window.innerHeight) / 2;
       return {
-        x: limitar((x - c.x) / (window.innerWidth / 2)),
-        y: limitar((y - c.y) / (window.innerHeight / 2)),
+        x: limitar((x - c.x) / escala),
+        y: limitar((y - c.y) / escala),
       };
     };
     const espelhar = () => {
@@ -104,6 +108,9 @@ export function usePetEventos(
     const armarPiscada = () => {
       clearTimeout(tPiscada);
       tPiscada = setTimeout(() => {
+        // Sem mexer o mouse depois de clicar num link que navega, só o relógio
+        // percebe que o alvo saiu do DOM.
+        conferirAlvo();
         despachar({ tipo: "piscar" });
         armarPiscada();
       }, intervaloPiscada(Math.random()));
@@ -114,6 +121,7 @@ export function usePetEventos(
     };
 
     const onMove = (e: PointerEvent) => {
+      conferirAlvo(e.target);
       const d = direcao(e.clientX, e.clientY);
       estado.olhar.x = d.x;
       estado.olhar.y = d.y;
@@ -135,6 +143,7 @@ export function usePetEventos(
         estado.rolagem = 0;
         estado.invalidar();
       }, FIM_ROLAGEM_MS);
+      conferirAlvo();
       atividade();
       estado.invalidar();
     };
@@ -143,9 +152,32 @@ export function usePetEventos(
       const el = (t as Element | null)?.closest?.(ALVOS_HOVER) ?? null;
       return el && !raiz.current?.contains(el) ? el : null;
     };
+
+    /**
+     * O alvo do hover atual, guardado como ELEMENTO. Um link que navega some do
+     * DOM sem `pointerout` nenhum; sem isto o pet ficava `atento`, inclinado
+     * para o nada e sem piscar até dormir.
+     */
+    let alvoAtual: Element | null = null;
+    const soltarHover = () => {
+      alvoAtual = null;
+      estado.alvoHover = null;
+      despachar({ tipo: "hover", ativo: false });
+      estado.invalidar();
+    };
+    /** Sem `sob`, confere só se o alvo ainda está no DOM. */
+    const conferirAlvo = (sob?: EventTarget | null) => {
+      if (!alvoAtual) return;
+      const fora =
+        sob !== undefined && !(sob instanceof Node && alvoAtual.contains(sob));
+      if (!alvoAtual.isConnected || fora) soltarHover();
+    };
+
     const onOver = (e: PointerEvent) => {
+      conferirAlvo(e.target);
       const alvo = alvoDe(e.target);
       if (!alvo) return;
+      alvoAtual = alvo;
       const r = alvo.getBoundingClientRect();
       estado.alvoHover = direcao(r.left + r.width / 2, r.top + r.height / 2);
       despachar({ tipo: "hover", ativo: true });
@@ -155,9 +187,7 @@ export function usePetEventos(
       const alvo = alvoDe(e.target);
       if (!alvo) return;
       if (alvoDe(e.relatedTarget) === alvo) return;
-      estado.alvoHover = null;
-      despachar({ tipo: "hover", ativo: false });
-      estado.invalidar();
+      soltarHover();
     };
 
     const pararTimers = () => {
@@ -202,6 +232,7 @@ export function usePetEventos(
 
     return () => {
       pararTimers();
+      alvoAtual = null;
       despacharRef.current = () => {};
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("scroll", onScroll);

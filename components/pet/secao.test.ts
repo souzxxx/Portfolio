@@ -29,3 +29,8 @@ test("sem seção visível, a dica é a da mesa (topo)", () => {
 test("vence a seção com mais pixels visíveis", () => {
   assert.equal(escolherSecao(new Map([["academic", 300], ["stack", 600]])), "stack");
 });
+
+test("uma faixa fina abaixo do mínimo não tira a dica da mesa", () => {
+  assert.equal(escolherSecao(new Map([["projects", 50]]), 180), "top");
+  assert.equal(escolherSecao(new Map([["projects", 400]]), 180), "projects");
+});
