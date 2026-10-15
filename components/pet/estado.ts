@@ -5,8 +5,11 @@ import type { Expressao } from "./maquina";
  *
  * Quem escreve: usePetEventos (mouse, scroll, hover, timers).
  * Quem lê: o useFrame da PetCena. Depois de escrever, chama `invalidar()`,
- * que a PetCena liga ao `invalidate` do R3F — com `frameloop="demand"` é o
- * único jeito de um quadro novo existir. Mover o mouse nunca re-renderiza
+ * que a PetCena liga ao `invalidate` do R3F. Com movimento permitido o canvas
+ * já desenha sem parar enquanto a aba está visível (ruling do Leonardo:
+ * animação viva), e `invalidar()` só adianta um quadro que viria de qualquer
+ * jeito. Com movimento reduzido a cena volta ao sob demanda, e aí é ele que
+ * faz a tela trocar (piscar, dormir, hover). Mover o mouse nunca re-renderiza
  * componente nenhum.
  */
 export interface EstadoPet {

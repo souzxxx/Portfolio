@@ -208,10 +208,13 @@ export function Desktop({
   const cta =
     "inline-flex min-h-[2.75rem] items-center border border-carvao px-4 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors duration-150";
 
+  // `isolate`: o z das janelas (até 70) e da Lixeira (90) vale só dentro da
+  // mesa. Abaixo de 760 px de altura a mesa não é sticky, não criava contexto
+  // de empilhamento, e uma janela arrastada para o canto cobria o pet (z-60).
   return (
     <section
       aria-labelledby="hero-nome"
-      className="mesa relative overflow-hidden pt-7 text-cream [@media(min-width:1024px)_and_(min-height:760px)]:sticky [@media(min-width:1024px)_and_(min-height:760px)]:top-0 [@media(min-width:1024px)_and_(min-height:760px)]:h-[100svh]"
+      className="mesa relative isolate overflow-hidden pt-7 text-cream [@media(min-width:1024px)_and_(min-height:760px)]:sticky [@media(min-width:1024px)_and_(min-height:760px)]:top-0 [@media(min-width:1024px)_and_(min-height:760px)]:h-[100svh]"
     >
       <div
         ref={mesa}

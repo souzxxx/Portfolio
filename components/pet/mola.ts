@@ -5,13 +5,18 @@
  * (EspiaIndice.tsx usa stiffness 170): ζ ≈ 0.54, então ela passa um pouco do
  * alvo e volta — o quique pedido — e assenta em ~1 s.
  *
- * Por que integrar à mão e não usar o useSpring do framer: a PetCena roda em
- * `frameloop="demand"` e precisa saber, a cada quadro, se a mola JÁ PAROU para
- * decidir se pede outro quadro. Com a física aqui, isso é um `assentou()`.
+ * Por que integrar à mão e não usar o useSpring do framer: a PetCena avança
+ * sete molas por quadro dentro de um único useFrame, cada uma com a própria
+ * rigidez, e LÊ a velocidade delas (o squash usa a velocidade vertical; o
+ * "deitar na curva", a do giro). O useSpring vive fora do laço do R3F e não
+ * entrega isso quadro a quadro. `assentou()` é do tempo em que a cena só
+ * desenhava sob demanda e precisava saber se a mola parou; hoje só os testes
+ * o usam.
  *
- * O `dt` tem teto de 0.1 s e é quebrado em subpassos de 1/120 s: depois de uma
- * pausa longa (o canvas não desenha quando nada muda), o primeiro quadro chega
- * com `delta` de segundos, e Euler com dt grande explode.
+ * O `dt` tem teto de 0.1 s e é quebrado em subpassos de 1/120 s. A PetCena
+ * desenha sem parar enquanto a aba está visível (ruling do Leonardo: animação
+ * viva), mas o navegador suspende o rAF com a aba escondida, e o primeiro
+ * quadro na volta chega com `delta` de segundos. Euler com dt grande explode.
  */
 export interface Mola {
   x: number;

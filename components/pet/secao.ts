@@ -59,12 +59,17 @@ export function escolherSecao(
 
 const LIMIARES = Array.from({ length: 21 }, (_, i) => i / 20);
 
-export function useSecaoAtual(pathname: string): ChaveDica {
+/**
+ * `ativo` é o pet estar na tela. Sem ele (celular, tela estreita, /cv, sem
+ * WebGL) ninguém lê a dica, e o observer de 21 limiares não tem por que
+ * rodar a cada rolagem.
+ */
+export function useSecaoAtual(pathname: string, ativo: boolean): ChaveDica {
   const rota = rotaDoPet(pathname);
   const [secao, setSecao] = useState<ChaveDica>("top");
 
   useEffect(() => {
-    if (rota !== "home") return;
+    if (rota !== "home" || !ativo) return;
     const visivel = new Map<string, number>();
     const observer = new IntersectionObserver(
       (entradas) => {
@@ -81,7 +86,7 @@ export function useSecaoAtual(pathname: string): ChaveDica {
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, [rota]);
+  }, [rota, ativo]);
 
   if (rota === "caso") return "caso";
   if (rota === "home") return secao;

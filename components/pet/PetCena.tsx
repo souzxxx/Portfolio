@@ -338,12 +338,13 @@ function criarAnimacao(estado: EstadoPet): Animacao {
   };
 }
 
-function MacGravado({ estado }: { estado: EstadoPet }) {
+function MacGravado({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => void }) {
   const corpo = useRef<Group>(null);
   const molde = useRef<Group>(null);
   const invalidate = useThree((s) => s.invalidate);
   const dpr = useThree((s) => s.viewport.dpr);
   const [a] = useState(() => criarAnimacao(estado));
+  const avisou = useRef(false);
 
   const r = useMemo(() => {
     const hachura = new ShaderMaterial({
@@ -422,6 +423,15 @@ function MacGravado({ estado }: { estado: EstadoPet }) {
     const p = molde.current;
     if (!g || !p) return;
     const dt = limitarDt(delta);
+
+    // Primeiro quadro: o R3F desenha logo depois dos useFrame, no mesmo tick,
+    // e o setState que isto dispara no Pet só vira commit depois. Então
+    // quando o botão aparece e a entrada começa, o Mac já está na tela. Vem
+    // antes do retorno do movimento reduzido, que também desenha.
+    if (!avisou.current) {
+      avisou.current = true;
+      onPronto?.();
+    }
 
     // ── Tela ──────────────────────────────────────────────────────────────
     // Os olhos usam o olhar CRU, sem filtro: mudam neste quadro, antes do
@@ -650,17 +660,28 @@ function Contorno({
   );
 }
 
-export function PetCena({ estado }: { estado: EstadoPet }) {
+/**
+ * `onPronto` é chamado uma vez, no primeiro quadro desenhado: o Pet só mostra
+ * o botão e só toca a entrada depois dele (antes, um botão invisível e
+ * clicável ficava no canto enquanto o chunk do three baixava).
+ */
+export function PetCena({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => void }) {
   return (
     <Canvas
       dpr={[1, 2]}
       frameloop="demand"
+      // O R3F mede o canvas por getBoundingClientRect, que inclui a escala
+      // da entrada `.pet-entra` (0.6 → 1) no wrapper. Medido no meio dela, o
+      // canvas ficava em 130 px dentro da caixa de 150 até a primeira
+      // rolagem: o ResizeObserver não dispara quando só o transform muda.
+      // offsetWidth/offsetHeight ignoram transform.
+      resize={{ offsetSize: true }}
       // Mesmo raciocínio do hero: o shader faz o próprio AA por fwidth.
       gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
       camera={{ position: [0, 0, 6], fov: 30 }}
       style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
     >
-      <MacGravado estado={estado} />
+      <MacGravado estado={estado} onPronto={onPronto} />
     </Canvas>
   );
 }
