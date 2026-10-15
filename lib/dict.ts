@@ -383,6 +383,17 @@ export interface Dict {
     /** O link para a mesma página na outra língua. */
     outraLingua: { sigla: string; aria: string };
   };
+  /**
+   * O pet do canto (components/pet/). As dicas do balão são uma por seção da
+   * home, mais uma para página de case e uma para a página de erro. A chave é
+   * o `id` da seção — é por ele que o IntersectionObserver sabe onde a pessoa
+   * está —, por isso o tipo `ChaveDica` mora aqui, junto do texto.
+   */
+  pet: {
+    ariaLabel: string;
+    titulos: Record<ChaveDica, string>;
+    dicas: Record<ChaveDica, string>;
+  };
 }
 
 export interface CabecalhoVitrine {
@@ -440,3 +451,18 @@ export const dict: Record<Lang, Dict> = { pt, en };
  * abre (`lupa`) e o selo de estado que ele renderiza (`status`).
  */
 export type DictCard = Pick<Dict, "card" | "lupa" | "status">;
+
+/** As chaves das dicas do pet: o id de cada seção da home + case + erro. */
+export type ChaveDica =
+  | "top"
+  | "projects"
+  | "more"
+  | "atividade"
+  | "academic"
+  | "stack"
+  | "about"
+  | "caso"
+  | "erro";
+
+/** A fatia do <Pet>: só os textos dele, numa língua. */
+export type DictPet = Dict["pet"];

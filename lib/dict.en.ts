@@ -429,4 +429,30 @@ export const en: Dict = {
     proximoAria: "Next project:",
     outraLingua: { sigla: "PT", aria: "PT — ler este case em português" },
   },
+
+  pet: {
+    ariaLabel: "souzxxx OS assistant",
+    titulos: {
+      top: "Desktop",
+      projects: "Projects",
+      more: "Index",
+      atividade: "Activity",
+      academic: "Education",
+      stack: "Stack",
+      about: "Contact",
+      caso: "Case study",
+      erro: "Error",
+    },
+    dicas: {
+      top: "The desktop windows can be dragged. The Terminal takes commands: try help.",
+      projects: "Each folder is a project. Click it to open the full case study.",
+      more: "Hover a row to peek at the cover; click to open it.",
+      atividade: "Each little square is a day of commits on GitHub.",
+      academic: "The degree has 8 semesters, and the bar shows which one I'm on.",
+      stack: "The storage bar shows how much each category takes up.",
+      about: "Want to talk? The PDF résumé is right down here.",
+      caso: "The next project is at the end of the page →.",
+      erro: "This page blew up. The menu up top takes you back.",
+    },
+  },
 };

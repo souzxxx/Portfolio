@@ -425,4 +425,30 @@ export const pt: Dict = {
     proximoAria: "Próximo projeto:",
     outraLingua: { sigla: "EN", aria: "EN — ler este case em inglês" },
   },
+
+  pet: {
+    ariaLabel: "Assistente do souzxxx OS",
+    titulos: {
+      top: "Mesa",
+      projects: "Projetos",
+      more: "Índice",
+      atividade: "Atividade",
+      academic: "Formação",
+      stack: "Stack",
+      about: "Contato",
+      caso: "Case",
+      erro: "Erro",
+    },
+    dicas: {
+      top: "As janelas da mesa se arrastam. O Terminal aceita comandos: tente ajuda.",
+      projects: "Cada pasta é um projeto. Clique nela para abrir o case completo.",
+      more: "Passe o mouse numa linha para espiar a capa; clique para abrir.",
+      atividade: "Cada quadradinho é um dia de commits no GitHub.",
+      academic: "O curso tem 8 semestres e a barra mostra em qual eu estou.",
+      stack: "A barra de armazenamento mostra quanto cada categoria pesa.",
+      about: "Quer conversar? O currículo em PDF está aqui embaixo.",
+      caso: "No fim da página tem o próximo projeto →.",
+      erro: "Essa página explodiu. O menu lá em cima te leva de volta.",
+    },
+  },
 };
