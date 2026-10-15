@@ -5,8 +5,22 @@
  *
  * Duas cores e hachura ancorada na tela (ver hatch.glsl.ts): o Mac gira por
  * baixo das linhas e o volume aparece pelo degrau de densidade de uma face
- * para a vizinha. A TELA é a exceção: um plano com textura de 16×12 em
- * Nearest, fora do shader, para os olhos continuarem pixel nítido.
+ * para a vizinha.
+ *
+ * ── POR QUE A FRENTE NÃO É HACHURA ────────────────────────────────────────
+ * OBSERVADO no build de produção: com as seis faces gravadas, o pet lia como
+ * um bloco de listras com um rostinho, não como um Macintosh. Num objeto de
+ * ~70 px a trama engolia tudo o que diz "Mac": moldura, tela clara, fenda do
+ * disquete. A frente agora é PIXEL ART — o ícone `computador` do PixelIcon
+ * virado face de caixa: uma textura 1-bit em Nearest, creme, com contorno,
+ * moldura, a tela (onde o rosto de tela.ts entra em escala 2) e a fenda. As
+ * outras cinco faces continuam no shader e são elas que dão o VOLUME. É a
+ * divisão de um ícone do OS: a forma lida de frente, a profundidade no resto.
+ *
+ * A trama ficou fina (~2.6 px de CSS em qualquer DPR, via `uPasso`) e o Mac
+ * ganhou contorno de casco invertido: carvão por dentro e um fio creme por
+ * fora, o mesmo truque do ponteiro do Mac clássico (seta preta de borda
+ * branca), que separa a figura tanto do papel quanto do carvão.
  *
  * ── VIVO, NÃO ÍCONE ───────────────────────────────────────────────────────
  * O pedido do Leonardo foi "bem animado, fluido, tipo o bot do Grok ou o
@@ -40,7 +54,9 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  BackSide,
   CanvasTexture,
+  MeshBasicMaterial,
   NearestFilter,
   SRGBColorSpace,
   ShaderMaterial,
@@ -62,22 +78,123 @@ import {
 import type { EstadoPet } from "./estado";
 import type { Expressao } from "./maquina";
 import { AMORTECIMENTO, RIGIDEZ, passoMola, type Mola } from "./mola";
-import { COLUNAS, LINHAS, chaveDaGrade, desenharGrade } from "./tela";
+import { COLUNAS, LINHAS, chaveDaGrade, desenharGrade, type Grade } from "./tela";
 
 const GRAU = Math.PI / 180;
 /** fov 30 com a câmera a 6 unidades: 3.215 unidades visíveis em 150 px. */
 const UNIDADE_POR_PX = 3.215 / 150;
-/** Pose de repouso: um pouco de cima e de três-quartos, para o topo e a lateral
- *  (as faces de trama mais densa) aparecerem mesmo parado. */
-const BASE_RX = 6 * GRAU;
-const BASE_RY = -10 * GRAU;
-/** A sola do pé (centro do pé em -0.7, meia altura 0.05). É o pivô do squash e
- *  da inclinação: o Mac achata CONTRA o chão e tomba a partir dos pés, em vez
- *  de encolher para o próprio centro como um balão. */
-const SOLA_Y = -0.75;
+/** Pose de repouso: de cima e de três-quartos o bastante para o topo e a
+ *  lateral (as faces gravadas) lerem como volume, com a frente ainda
+ *  dominante. ry negativo vira a frente para a esquerda — para a página, já
+ *  que o pet mora no canto direito.
+ *
+ *  rx é 18° e não 12° por causa da PERSPECTIVA: a câmera está na altura do
+ *  centro, então já olha a aresta de cima ~8° de baixo para cima. Com 12° o
+ *  topo virava um fio de 3 px e sumia de vez quando o olhar subia (o cursor
+ *  quase sempre está acima do pet). 18° dá ~10° efetivos. */
+const BASE_RX = 18 * GRAU;
+const BASE_RY = -20 * GRAU;
 
 const CARVAO = "#1C1A17";
 const CREME = "#F5F3EE";
+
+// ── Modelo ─────────────────────────────────────────────────────────────────
+// A frente é uma textura de 48×62 pixels; um pixel dela mede 0.025 unidade
+// (~1.2 px de CSS), então as linhas finas do desenho têm a espessura das bordas
+// de 1 px do site e os pixels do rosto (escala 2) ficam com ~2.3 px.
+const FRENTE_L = 48;
+const FRENTE_A = 62;
+const PIXEL = 0.025;
+const GAB_L = FRENTE_L * PIXEL; // 1.2
+const GAB_A = FRENTE_A * PIXEL; // 1.55
+/** Fundo do gabinete. Um Mac clássico é mais fundo que largo. */
+const GAB_P = 1.25;
+const GAB_Y = 0.04;
+const PE_L = 1.1;
+const PE_A = 0.09;
+const PE_P = 1.15;
+const PE_Y = GAB_Y - GAB_A / 2 - PE_A / 2;
+/** A sola do pé: pivô do squash e da inclinação. O Mac achata CONTRA o chão e
+ *  tomba a partir dos pés, em vez de encolher para o próprio centro como um
+ *  balão. */
+const SOLA_Y = PE_Y - PE_A / 2;
+
+/** Rosto de tela.ts em escala inteira: 16×12 vira 32×24 pixels da frente. */
+const ESCALA_ROSTO = 2;
+/** Canto superior esquerdo do miolo da tela, em pixels da frente. */
+const TELA_X = 8;
+const TELA_Y = 8;
+
+/** Espessura do contorno de casco: carvão (~1.6 px de CSS) e o fio creme por
+ *  fora dele (~1.2 px a mais). Medido no print, não no escuro. */
+const CASCO_CARVAO = 0.035;
+const CASCO_CREME = 0.06;
+
+/** Passo da trama em px de CSS. O shader mede em px de BUFFER (11 px na
+ *  camada 1); multiplicar pelo dpr deixa a linha do mesmo tamanho em DPR 1
+ *  e 2. Com o passo do hero, 6 listras atravessavam o Mac inteiro. */
+const PASSO_CSS = 2.6;
+
+/**
+ * A frente do Mac, pixel a pixel, no vocabulário do ícone `computador`:
+ * contorno, moldura de cantos arredondados, tela com borda de 2 px e cantos
+ * de CRT, e a fenda do disquete no queixo. O rosto vem pronto da grade.
+ *
+ *   x: contorno 0 · margem 1–3 · moldura 4 · folga 5 · borda 6–7 ·
+ *      tela 8–39 · borda 40–41 · folga 42 · moldura 43 · margem 44–46 ·
+ *      contorno 47
+ *   y: contorno 0 · margem 1–3 · moldura 4 · folga 5 · borda 6–7 ·
+ *      tela 8–31 · borda 32–33 · folga 34 · moldura 35 · queixo 36–60 ·
+ *      contorno 61
+ */
+function pintarFrente(ctx: CanvasRenderingContext2D, grade: Grade) {
+  const L = FRENTE_L;
+  const A = FRENTE_A;
+  ctx.fillStyle = CREME;
+  ctx.fillRect(0, 0, L, A);
+  ctx.fillStyle = CARVAO;
+  const r = (x: number, y: number, w: number, h: number) => ctx.fillRect(x, y, w, h);
+
+  // Contorno do gabinete.
+  r(0, 0, L, 1);
+  r(0, A - 1, L, 1);
+  r(0, 0, 1, A);
+  r(L - 1, 0, 1, A);
+
+  // Moldura: retângulo de 1 px sem os quatro cantos (canto arredondado).
+  r(5, 4, 38, 1);
+  r(5, 35, 38, 1);
+  r(4, 5, 1, 30);
+  r(43, 5, 1, 30);
+
+  // Borda da tela, 2 px: é ela que destaca a tela creme do creme do gabinete.
+  r(6, 6, 36, 2);
+  r(6, 32, 36, 2);
+  r(6, 8, 2, 24);
+  r(40, 8, 2, 24);
+  // Cantos de CRT: um pixel para dentro em cada canto do miolo.
+  r(TELA_X, TELA_Y, 1, 1);
+  r(TELA_X + 31, TELA_Y, 1, 1);
+  r(TELA_X, TELA_Y + 23, 1, 1);
+  r(TELA_X + 31, TELA_Y + 23, 1, 1);
+
+  // Fenda do disquete, onde o ícone põe: no queixo, à esquerda do centro.
+  r(12, 45, 16, 2);
+
+  // Rosto.
+  for (let l = 0; l < LINHAS; l++) {
+    for (let c = 0; c < COLUNAS; c++) {
+      if (grade[l][c]) {
+        r(
+          TELA_X + c * ESCALA_ROSTO,
+          TELA_Y + l * ESCALA_ROSTO,
+          ESCALA_ROSTO,
+          ESCALA_ROSTO,
+        );
+      }
+    }
+  }
+}
 
 // ── Olhar ──────────────────────────────────────────────────────────────────
 // Medido em simulação (degrau de 0 a 1): só a mola do mola.ts chega a 50% em
@@ -225,35 +342,51 @@ function MacGravado({ estado }: { estado: EstadoPet }) {
   const corpo = useRef<Group>(null);
   const molde = useRef<Group>(null);
   const invalidate = useThree((s) => s.invalidate);
+  const dpr = useThree((s) => s.viewport.dpr);
   const [a] = useState(() => criarAnimacao(estado));
 
-  const material = useMemo(
-    () =>
-      new ShaderMaterial({
-        vertexShader: vertex,
-        fragmentShader: fragment,
-        uniforms: {
-          uTime: { value: 0 },
-          uRespira: { value: 0 },
-          uPasso: { value: 1 },
-          uCarvao: { value: new Vector3(0.11, 0.102, 0.09) },
-          uCream: { value: new Vector3(0.961, 0.953, 0.933) },
-        },
-      }),
-    [],
-  );
+  const r = useMemo(() => {
+    const hachura = new ShaderMaterial({
+      vertexShader: vertex,
+      fragmentShader: fragment,
+      uniforms: {
+        uTime: { value: 0 },
+        uRespira: { value: 0 },
+        uPasso: { value: 1 },
+        uCarvao: { value: new Vector3(0.11, 0.102, 0.09) },
+        uCream: { value: new Vector3(0.961, 0.953, 0.933) },
+      },
+    });
 
-  const { ctx, textura } = useMemo(() => {
     const canvas = document.createElement("canvas");
-    canvas.width = COLUNAS;
-    canvas.height = LINHAS;
+    canvas.width = FRENTE_L;
+    canvas.height = FRENTE_A;
     const ctx = canvas.getContext("2d")!;
     const textura = new CanvasTexture(canvas);
     textura.magFilter = NearestFilter;
     textura.minFilter = NearestFilter;
     textura.generateMipmaps = false;
     textura.colorSpace = SRGBColorSpace;
-    return { ctx, textura };
+    const frente = new MeshBasicMaterial({ map: textura, toneMapped: false });
+
+    // Casco invertido: a cópia maior da caixa só mostra as faces de TRÁS, que
+    // aparecem apenas em volta da silhueta — vira contorno sem pós-processo.
+    const cascoCarvao = new MeshBasicMaterial({
+      color: CARVAO,
+      side: BackSide,
+      toneMapped: false,
+    });
+    const cascoCreme = new MeshBasicMaterial({
+      color: CREME,
+      side: BackSide,
+      toneMapped: false,
+    });
+    const pe = new MeshBasicMaterial({ color: CARVAO, toneMapped: false });
+
+    // Ordem das faces do boxGeometry: +x, −x, +y, −y, +z, −z. Só a +z (a
+    // frente) é pixel art; as outras cinco são gravura.
+    const gabinete = [hachura, hachura, hachura, hachura, frente, hachura];
+    return { hachura, ctx, textura, frente, cascoCarvao, cascoCreme, pe, gabinete };
   }, []);
 
   useEffect(() => {
@@ -264,14 +397,24 @@ function MacGravado({ estado }: { estado: EstadoPet }) {
     };
   }, [estado, invalidate]);
 
-  // As geometrias e o meshBasicMaterial são do JSX e o R3F descarta sozinho;
-  // o ShaderMaterial e a textura entram por prop/memo e são nossos.
+  // Linha da trama com o mesmo tamanho em CSS em qualquer DPR (ver PASSO_CSS).
+  useEffect(() => {
+    r.hachura.uniforms.uPasso.value = (PASSO_CSS * dpr) / 11;
+    invalidate();
+  }, [r, dpr, invalidate]);
+
+  // As geometrias são do JSX e o R3F as descarta sozinho; materiais e
+  // textura entram por prop/memo e são nossos.
   useEffect(
     () => () => {
-      textura.dispose();
-      material.dispose();
+      r.textura.dispose();
+      r.frente.dispose();
+      r.hachura.dispose();
+      r.cascoCarvao.dispose();
+      r.cascoCreme.dispose();
+      r.pe.dispose();
     },
-    [textura, material],
+    [r],
   );
 
   useFrame((_, delta) => {
@@ -304,15 +447,11 @@ function MacGravado({ estado }: { estado: EstadoPet }) {
       const grade = desenharGrade(estado.expressao, a.olharTela, estado.zFase);
       const chave = chaveDaGrade(grade);
       if (chave !== a.chave) {
-        ctx.fillStyle = CREME;
-        ctx.fillRect(0, 0, COLUNAS, LINHAS);
-        ctx.fillStyle = CARVAO;
-        for (let l = 0; l < LINHAS; l++) {
-          for (let c = 0; c < COLUNAS; c++) {
-            if (grade[l][c]) ctx.fillRect(c, l, 1, 1);
-          }
-        }
-        textura.needsUpdate = true;
+        // A frente inteira é repintada (48×62, alguns fillRect): mais simples
+        // que guardar a base num canvas à parte, e só acontece quando o rosto
+        // muda.
+        pintarFrente(r.ctx, grade);
+        r.textura.needsUpdate = true;
         a.chave = chave;
       }
     }
@@ -455,30 +594,59 @@ function MacGravado({ estado }: { estado: EstadoPet }) {
           dentro devolve o modelo à posição original. */}
       <group ref={molde} position={[0, SOLA_Y, 0]}>
         <group position={[0, -SOLA_Y, 0]}>
-          {/* Gabinete */}
-          <mesh material={material} position={[0, 0.08, 0]}>
-            <boxGeometry args={[1.25, 1.42, 1.15]} />
+          {/* Gabinete: frente em pixel art, o resto gravado */}
+          <mesh material={r.gabinete} position={[0, GAB_Y, 0]}>
+            <boxGeometry args={[GAB_L, GAB_A, GAB_P]} />
           </mesh>
-          {/* Moldura da tela, saltada 3 cm da frente */}
-          <mesh material={material} position={[0, 0.3, 0.6]}>
-            <boxGeometry args={[1.0, 0.78, 0.06]} />
+          <Contorno
+            tamanho={[GAB_L, GAB_A, GAB_P]}
+            y={GAB_Y}
+            carvao={r.cascoCarvao}
+            creme={r.cascoCreme}
+          />
+          {/* Pé: um degrau mais estreito e CHAPADO em carvão, como as duas
+              linhas de base do ícone. Gravado, uma faixa de 4 px virava um
+              tracejado sem leitura. */}
+          <mesh material={r.pe} position={[0, PE_Y, 0]}>
+            <boxGeometry args={[PE_L, PE_A, PE_P]} />
           </mesh>
-          {/* Tela 4:3 (16×12), fora do shader */}
-          <mesh position={[0, 0.3, 0.635]}>
-            <planeGeometry args={[0.8, 0.6]} />
-            <meshBasicMaterial map={textura} toneMapped={false} />
-          </mesh>
-          {/* Fenda do disquete */}
-          <mesh material={material} position={[0.28, -0.36, 0.585]}>
-            <boxGeometry args={[0.38, 0.05, 0.04]} />
-          </mesh>
-          {/* Pé */}
-          <mesh material={material} position={[0, -0.7, -0.05]}>
-            <boxGeometry args={[1.05, 0.1, 1.0]} />
-          </mesh>
+          <Contorno
+            tamanho={[PE_L, PE_A, PE_P]}
+            y={PE_Y}
+            carvao={r.cascoCarvao}
+            creme={r.cascoCreme}
+          />
         </group>
       </group>
     </group>
+  );
+}
+
+/** Os dois cascos de uma caixa: carvão rente à forma, creme por fora dele. */
+function Contorno({
+  tamanho: [l, a, p],
+  y,
+  carvao,
+  creme,
+}: {
+  tamanho: [number, number, number];
+  y: number;
+  carvao: MeshBasicMaterial;
+  creme: MeshBasicMaterial;
+}) {
+  return (
+    <>
+      <mesh material={carvao} position={[0, y, 0]}>
+        <boxGeometry
+          args={[l + 2 * CASCO_CARVAO, a + 2 * CASCO_CARVAO, p + 2 * CASCO_CARVAO]}
+        />
+      </mesh>
+      <mesh material={creme} position={[0, y, 0]}>
+        <boxGeometry
+          args={[l + 2 * CASCO_CREME, a + 2 * CASCO_CREME, p + 2 * CASCO_CREME]}
+        />
+      </mesh>
+    </>
   );
 }
 
