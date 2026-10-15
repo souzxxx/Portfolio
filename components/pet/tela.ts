@@ -51,6 +51,13 @@ function bloco(g: Grade, col: number, lin: number, w: number, h: number) {
   }
 }
 
+/**
+ * O z encosta na borda direita (colunas 13–15) e não na 12: o olho direito
+ * fechado ocupa a 10–11, e colado nele o z virava um "–=" em duas das seis
+ * fases. Uma coluna vazia no meio basta para separar os dois em toda subida.
+ */
+const Z_COLUNA = 13;
+
 /** Um "z" de 3×3: topo, diagonal pelo centro, base. */
 const Z: [number, number][] = [
   [0, 0], [1, 0], [2, 0],
@@ -97,7 +104,7 @@ export function desenharGrade(
       // Fase fracionária viraria índice de linha não inteiro; o z anda em degraus.
       const fase = Math.floor(zFase);
       const zLinha = 6 - (((fase % 6) + 6) % 6);
-      for (const [x, y] of Z) bloco(g, 12 + x, zLinha + y, 1, 1);
+      for (const [x, y] of Z) bloco(g, Z_COLUNA + x, zLinha + y, 1, 1);
       break;
     }
     default: {

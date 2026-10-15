@@ -128,3 +128,23 @@ test("a boca segue o olhar nos dois sentidos com o mesmo passo", () => {
   assert.equal(centro - esq, dir - centro);
   assert.ok(dir - centro > 0);
 });
+
+test("dormindo: nenhum pixel do z é vizinho (8 lados) do olho direito fechado", () => {
+  const olho = [[4, 10], [4, 11]];
+  for (let fase = 0; fase < 6; fase++) {
+    const sozinho = desenharGrade("dormindo", { x: 0, y: 0 }, fase);
+    // o z é tudo que acende à direita da coluna 11 (olhos e boca ficam em 4–11)
+    const z: [number, number][] = [];
+    for (let l = 0; l < LINHAS; l++) {
+      for (let c = 12; c < COLUNAS; c++) if (sozinho[l][c]) z.push([l, c]);
+    }
+    assert.equal(z.length, 7, `fase ${fase}: o z inteiro, 7 px, dentro da grade`);
+    for (const [l, c] of z) {
+      assert.ok(l >= 0 && l < LINHAS && c >= 0 && c < COLUNAS);
+      for (const [ol, oc] of olho) {
+        const vizinho = Math.abs(l - ol) <= 1 && Math.abs(c - oc) <= 1;
+        assert.ok(!vizinho, `fase ${fase}: z em ${l},${c} encosta no olho ${ol},${oc}`);
+      }
+    }
+  }
+});
