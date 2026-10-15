@@ -188,6 +188,27 @@
   }
 }
 
+/* O pet entra como o Boot: um degrau curto, sem easing contínuo, esperando a
+   mesma --boot das janelas (zero quando a sessão já viu o boot). */
+.pet-entra {
+  animation: pet-entra 0.3s steps(3) var(--boot) both;
+}
+@keyframes pet-entra {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-entra {
+    animation: none;
+  }
+}
+
 /* Entrada das janelas: abrem como no Mac, de um retângulo menor, em degraus. */
 .janela-entra {
   animation: janela-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
