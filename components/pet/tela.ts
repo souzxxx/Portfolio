@@ -20,7 +20,7 @@ export const LINHAS = 12;
 export type Grade = boolean[][];
 
 const OLHO_ESQ = 5;
-const OLHO_DIR = 10;
+const OLHO_DIR = 11;
 const OLHO_LINHA = 4;
 const BOCA_LINHA = 8;
 
@@ -65,7 +65,9 @@ export function desenharGrade(
 ): Grade {
   const g = vazia();
   const { dx, dy } = olharEmPixels(olhar);
-  const bocaX = Math.round(dx / 2);
+  // Simétrico de propósito: `Math.round(-0.5)` dá -0, e a boca só seguiria o
+  // olhar para a direita. Arredonda o módulo e devolve o sinal.
+  const bocaX = Math.sign(dx) * Math.round(Math.abs(dx) / 2) + 0;
 
   switch (expressao) {
     case "normal":
@@ -92,9 +94,16 @@ export function desenharGrade(
       bloco(g, OLHO_ESQ - 1, OLHO_LINHA, 2, 1);
       bloco(g, OLHO_DIR - 1, OLHO_LINHA, 2, 1);
       bloco(g, 7, BOCA_LINHA, 2, 1);
-      const zLinha = 6 - (((zFase % 6) + 6) % 6);
+      // Fase fracionária viraria índice de linha não inteiro; o z anda em degraus.
+      const fase = Math.floor(zFase);
+      const zLinha = 6 - (((fase % 6) + 6) % 6);
       for (const [x, y] of Z) bloco(g, 12 + x, zLinha + y, 1, 1);
       break;
+    }
+    default: {
+      // Expressão nova sem desenho aqui vira erro de tipo, não tela vazia.
+      const nunca: never = expressao;
+      return nunca;
     }
   }
   return g;
