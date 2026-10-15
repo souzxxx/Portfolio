@@ -215,17 +215,17 @@ const texto: CvTexto = {
     anteriores: {
       pt:
         "Projeto de Software e Gestão Ágil; Machine Learning; Inteligência " +
-        "Artificial e Robótica (Q-Learning, SARSA).",
+        "Artificial e Robótica.",
       en:
         "Software Design and Agile Management; Machine Learning; Artificial " +
-        "Intelligence and Robotics (Q-Learning, SARSA).",
+        "Intelligence and Robotics.",
     },
   },
 
   stack: [
     {
       rotulo: { pt: "Linguagens", en: "Languages" },
-      itens: igual("TypeScript, Python, Java, JavaScript, C, Prolog"),
+      itens: igual("TypeScript, Python, Java, JavaScript, C, C# (Unity), Prolog"),
     },
     {
       rotulo: igual("Backend & web"),
@@ -240,13 +240,15 @@ const texto: CvTexto = {
     },
     {
       rotulo: { pt: "Infra & qualidade", en: "Infra & quality" },
-      itens: igual("Docker, Vercel, GitHub Actions, Testcontainers, Flyway"),
+      itens: igual(
+        "Docker, Vercel, Railway, GitHub Actions, Testcontainers, Flyway",
+      ),
     },
   ],
 
   atualizado: {
-    pt: "Atualizado em setembro de 2026",
-    en: "Updated September 2026",
+    pt: "Atualizado em outubro de 2026",
+    en: "Updated October 2026",
   },
 };
 
