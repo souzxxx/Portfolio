@@ -205,17 +205,20 @@ const texto: CvTexto = {
     rotuloAtual: { pt: "Semestre atual:", en: "Current semester:" },
     atual: {
       pt:
-        "Plataformas, Microsserviços e APIs; Startup em Inteligência " +
-        "Artificial; Megadados; Análise de Algoritmos e Entrevistas " +
-        "Técnicas; Jogos e Interação.",
+        "Plataformas, Microsserviços e APIs; AI Startup; Megadados; " +
+        "Análise de Algoritmos e Entrevistas Técnicas; Jogos e Interação.",
       en:
         "Platforms, Microservices and APIs; AI Startup; Big Data; Algorithm " +
         "Analysis and Technical Interviews; Games and Interaction.",
     },
     rotuloAnteriores: { pt: "Anteriores:", en: "Earlier:" },
     anteriores: {
-      pt: "Projeto de Software; Machine Learning; Inteligência Artificial (Q-Learning, SARSA).",
-      en: "Software Design; Machine Learning; Artificial Intelligence (Q-Learning, SARSA).",
+      pt:
+        "Projeto de Software e Gestão Ágil; Machine Learning; Inteligência " +
+        "Artificial e Robótica (Q-Learning, SARSA).",
+      en:
+        "Software Design and Agile Management; Machine Learning; Artificial " +
+        "Intelligence and Robotics (Q-Learning, SARSA).",
     },
   },
 
@@ -455,9 +458,9 @@ export function CvDocument({ lang }: { lang: Lang }) {
             {pick(texto.formacao.grau, lang)}
           </p>
           {/* Nome de disciplina sai exato como consta em lib/academic.ts, NOS
-              DOIS idiomas — inclusive "AI Startup" e "Software Design", que é
-              como a linha do tempo do site já traduz "Startup em Inteligência
-              Artificial" e "Projeto de Software". Título de matéria não é nome
+              DOIS idiomas — em português, o nome da grade oficial do Insper
+              ("AI Startup", "Projeto de Software e Gestão Ágil"); em inglês, a
+              tradução que a linha do tempo do site usa. Título de matéria não é nome
               próprio (um recrutador de fora não tem como pesar "Megadados"),
               mas a mesma matéria não pode aparecer com dois nomes diferentes no
               mesmo site. Abreviar também não: cortar "Análise de Algoritmos e

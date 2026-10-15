@@ -11,11 +11,16 @@ import { pick, type I18n, type Lang } from "./i18n";
  * pintar cinco rótulos.
  *
  * NOME PRÓPRIO NÃO TRADUZ, esteja ele no `name` ou dentro da descrição: nome
- * de projeto (PhishingApp, PredictFlow, MD-Project, NQueens, Frozen Lake), de
- * instituição, empresa ou entidade (Insper, QuintoAndar, SPFC, CCA) e a sigla
- * de disciplina do Insper (ARQOBJ) saem idênticos nos dois idiomas. Nome de
- * DISCIPLINA traduz pelo sentido: quem lê em inglês precisa saber que
- * "Megadados" é Big Data, não decorar o rótulo do boletim.
+ * de projeto (PredictFlow, MD-Project, NQueens, Frozen Lake) e de instituição,
+ * empresa ou entidade (Insper, QuintoAndar, SPFC, CCA) saem idênticos nos dois
+ * idiomas. Nome de DISCIPLINA em português é o da grade oficial do Insper, por
+ * extenso e sem sigla (nada de "ARQOBJ"); em inglês traduz pelo sentido: quem
+ * lê precisa saber que "Megadados" é Big Data, não decorar o rótulo do boletim.
+ *
+ * SPRINT segue sempre o formato da grade: "Sprint N — Tema" (a do 1º semestre
+ * não tem tema; ela roda dentro de Developer Life). Nada de "SPRINT" em caixa
+ * alta nem "Sprint" solto. O `name` vira `key` no componente, então dois itens
+ * do mesmo semestre não podem ter o mesmo nome.
  */
 export interface Semester {
   number: number;
@@ -36,24 +41,24 @@ const SEMESTRES: Semester[] = [
     label: { pt: "1º Semestre", en: "1st Semester" },
     highlights: [
       {
-        name: { pt: "Insper Intro", en: "Insper Intro" },
+        name: { pt: "Developer Life", en: "Developer Life" },
         description: {
           pt: "Fundamentos de programação e lógica",
           en: "Programming and logic fundamentals",
         },
       },
       {
-        name: { pt: "Aulas Base", en: "Core Courses" },
+        name: { pt: "Ética, Computação e Sociedade", en: "Ethics, Computing and Society" },
         description: {
-          pt: "Matemática, algoritmos e estruturas iniciais",
-          en: "Math, algorithms and basic data structures",
+          pt: "Impacto ético e social da tecnologia",
+          en: "Ethical and social impact of technology",
         },
       },
       {
-        name: { pt: "Sprint", en: "Sprint" },
+        name: { pt: "Sprint 1", en: "Sprint 1" },
         description: {
-          pt: "Rede social em Django 5 + PostgreSQL com login Google; comentários, curtidas, denúncias e perfil",
-          en: "Social network in Django 5 + PostgreSQL with Google sign-in; comments, likes, content reporting and profile",
+          pt: "Dentro de Developer Life: rede social em Django 5 + PostgreSQL com login Google; comentários, curtidas, denúncias e perfil",
+          en: "Part of Developer Life: social network in Django 5 + PostgreSQL with Google sign-in; comments, likes, content reporting and profile",
         },
       },
     ],
@@ -63,17 +68,10 @@ const SEMESTRES: Semester[] = [
     label: { pt: "2º Semestre", en: "2nd Semester" },
     highlights: [
       {
-        name: { pt: "Bits e Processadores", en: "Bits and Processors" },
+        name: { pt: "Projeto Ágil", en: "Agile Project" },
         description: {
-          pt: "Arquitetura de computadores: ALU, datapath e linguagem de montagem",
-          en: "Computer architecture: ALU, datapath and assembly language",
-        },
-      },
-      {
-        name: { pt: "PhishingApp", en: "PhishingApp" },
-        description: {
-          pt: "Aplicação de segurança para detecção de phishing",
-          en: "Security application for phishing detection",
+          pt: "Scrum, ciclos curtos e entrega em time",
+          en: "Scrum, short cycles and team delivery",
         },
       },
       {
@@ -84,7 +82,28 @@ const SEMESTRES: Semester[] = [
         },
       },
       {
-        name: { pt: "Sprint", en: "Sprint" },
+        name: { pt: "Bits e Processadores", en: "Bits and Processors" },
+        description: {
+          pt: "Arquitetura de computadores: ALU, datapath e linguagem de montagem",
+          en: "Computer architecture: ALU, datapath and assembly language",
+        },
+      },
+      {
+        name: { pt: "Matemática do Contínuo", en: "Continuous Mathematics" },
+        description: {
+          pt: "Cálculo e modelagem matemática",
+          en: "Calculus and mathematical modeling",
+        },
+      },
+      {
+        name: { pt: "Ciência dos Dados", en: "Data Science" },
+        description: {
+          pt: "Estatística, análise exploratória e modelos preditivos",
+          en: "Statistics, exploratory analysis and predictive models",
+        },
+      },
+      {
+        name: { pt: "Sprint 2 — Backend de Dados", en: "Sprint 2 — Data Backend" },
         description: {
           pt: "PredictFlow: painel de pipeline de vendas em Next.js sobre API FastAPI/MongoDB; autenticação JWT e dashboards",
           en: "PredictFlow: sales pipeline front end in Next.js over a FastAPI/MongoDB API; JWT authentication and dashboards",
@@ -97,35 +116,42 @@ const SEMESTRES: Semester[] = [
     label: { pt: "3º Semestre", en: "3rd Semester" },
     highlights: [
       {
-        name: { pt: "ARQOBJ", en: "ARQOBJ" },
+        name: { pt: "Arquitetura de Objetos e Times Ágeis", en: "Object Architecture and Agile Teams" },
         description: {
-          pt: "Arquitetura orientada a objetos avançada",
-          en: "Advanced object-oriented architecture",
+          pt: "Arquitetura orientada a objetos e trabalho em times ágeis",
+          en: "Object-oriented architecture and agile teamwork",
         },
       },
       {
-        name: { pt: "Álgebra Linear", en: "Linear Algebra" },
+        name: { pt: "Técnicas de Programação", en: "Programming Techniques" },
+        description: {
+          pt: "Técnicas e boas práticas de programação",
+          en: "Programming techniques and good practices",
+        },
+      },
+      {
+        name: { pt: "Álgebra Linear e Teoria da Informação", en: "Linear Algebra and Information Theory" },
         description: {
           pt: "Fundamentos matemáticos para computação gráfica e ML",
           en: "Mathematical foundations for computer graphics and ML",
         },
       },
       {
-        name: { pt: "Discreta", en: "Discrete Math" },
+        name: { pt: "Lógica e Matemática Discreta", en: "Logic and Discrete Mathematics" },
         description: {
           pt: "Matemática discreta — implementação em Prolog (MD-Project)",
           en: "Discrete mathematics — implemented in Prolog (MD-Project)",
         },
       },
       {
-        name: { pt: "Inteligência Artificial", en: "Artificial Intelligence" },
+        name: { pt: "Inteligência Artificial e Robótica", en: "Artificial Intelligence and Robotics" },
         description: {
           pt: "Q-Learning, SARSA e agentes para NQueens, Frozen Lake e SPFC",
           en: "Q-Learning, SARSA and agents for NQueens, Frozen Lake and SPFC",
         },
       },
       {
-        name: { pt: "SPRINT", en: "SPRINT" },
+        name: { pt: "Sprint 3 — Inovação Social", en: "Sprint 3 — Social Innovation" },
         description: {
           pt: "Gestão de núcleos CCA em Spring Boot/Java 21 + React; módulos de inscrição e fila de espera",
           en: "CCA student group management in Spring Boot/Java 21 + React; enrollment and waitlist modules",
@@ -138,10 +164,31 @@ const SEMESTRES: Semester[] = [
     label: { pt: "4º Semestre", en: "4th Semester" },
     highlights: [
       {
-        name: { pt: "Projeto de Software", en: "Software Design" },
+        name: { pt: "Projeto de Software e Gestão Ágil", en: "Software Design and Agile Management" },
         description: {
           pt: "Arquitetura de microsserviços com Docker (Java Gateway + Python User Service + JS Front)",
           en: "Microservice architecture with Docker (Java Gateway + Python User Service + JS Front)",
+        },
+      },
+      {
+        name: { pt: "Sistemas Hardware-Software", en: "Hardware-Software Systems" },
+        description: {
+          pt: "Interface com o sistema operacional, syscalls e programação de baixo nível",
+          en: "Operating system interface, syscalls and low-level programming",
+        },
+      },
+      {
+        name: { pt: "Algoritmos e Estruturas de Dados", en: "Algorithms and Data Structures" },
+        description: {
+          pt: "Estruturas de dados, complexidade e algoritmos clássicos",
+          en: "Data structures, complexity and classic algorithms",
+        },
+      },
+      {
+        name: { pt: "Linguagens e Paradigmas", en: "Languages and Paradigms" },
+        description: {
+          pt: "Estudo formal de paradigmas além do imperativo e da orientação a objetos",
+          en: "Formal study of paradigms beyond imperative and object-oriented",
         },
       },
       {
@@ -152,21 +199,7 @@ const SEMESTRES: Semester[] = [
         },
       },
       {
-        name: { pt: "Linguagens & Paradigmas", en: "Languages & Paradigms" },
-        description: {
-          pt: "Estudo formal de paradigmas além do imperativo e da orientação a objetos",
-          en: "Formal study of paradigms beyond imperative and object-oriented",
-        },
-      },
-      {
-        name: { pt: "Sistemas Hardware/Software", en: "Hardware/Software Systems" },
-        description: {
-          pt: "Interface com o sistema operacional, syscalls e programação de baixo nível",
-          en: "Operating system interface, syscalls and low-level programming",
-        },
-      },
-      {
-        name: { pt: "Sprint", en: "Sprint" },
+        name: { pt: "Sprint 4 — AI e Machine Learning", en: "Sprint 4 — AI and Machine Learning" },
         description: {
           pt: "Precificação de imóveis com QuintoAndar: API FastAPI + Gradient Boosting em produção na AWS, CI/CD e 36 testes",
           en: "Real estate pricing with QuintoAndar: API in FastAPI + Gradient Boosting in production on AWS, CI/CD and 36 tests",
@@ -179,20 +212,24 @@ const SEMESTRES: Semester[] = [
     label: { pt: "5º Semestre (atual)", en: "5th Semester (current)" },
     highlights: [
       {
-        name: {
-          pt: "Plataformas, Microsserviços e APIs",
-          en: "Platforms, Microservices and APIs",
-        },
+        name: { pt: "Plataformas, Microsserviços e APIs", en: "Platforms, Microservices and APIs" },
         description: {
           pt: "Design de APIs, comunicação entre serviços, plataformas escaláveis",
           en: "API design, service-to-service communication, scalable platforms",
         },
       },
       {
-        name: { pt: "Startup em Inteligência Artificial", en: "AI Startup" },
+        name: { pt: "Jogos e Interação", en: "Games and Interaction" },
         description: {
-          pt: "Produto de IA do zero: validação, LLMs aplicados e entrada no mercado",
-          en: "AI product from scratch: validation, applied LLMs and go-to-market",
+          pt: "Loops de jogo, interação em tempo real e experiência do usuário",
+          en: "Game loops, real-time interaction and user experience",
+        },
+      },
+      {
+        name: { pt: "Análise de Algoritmos e Entrevistas Técnicas", en: "Algorithm Analysis and Technical Interviews" },
+        description: {
+          pt: "Complexidade, estruturas de dados e resolução de problemas sob pressão",
+          en: "Complexity, data structures and problem solving under pressure",
         },
       },
       {
@@ -203,20 +240,10 @@ const SEMESTRES: Semester[] = [
         },
       },
       {
-        name: {
-          pt: "Análise de Algoritmos e Entrevistas Técnicas",
-          en: "Algorithm Analysis and Technical Interviews",
-        },
+        name: { pt: "AI Startup", en: "AI Startup" },
         description: {
-          pt: "Complexidade, estruturas de dados e resolução de problemas sob pressão",
-          en: "Complexity, data structures and problem solving under pressure",
-        },
-      },
-      {
-        name: { pt: "Jogos e Interação", en: "Games and Interaction" },
-        description: {
-          pt: "Loops de jogo, interação em tempo real e experiência do usuário",
-          en: "Game loops, real-time interaction and user experience",
+          pt: "Produto de IA do zero: validação, LLMs aplicados e entrada no mercado",
+          en: "AI product from scratch: validation, applied LLMs and go-to-market",
         },
       },
     ],
