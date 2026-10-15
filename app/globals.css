@@ -188,10 +188,13 @@
   }
 }
 
-/* O pet entra como o Boot: um degrau curto, sem easing contínuo, esperando a
-   mesma --boot das janelas (zero quando a sessão já viu o boot). */
+/* O pet entra como o Boot: um degrau curto, sem easing contínuo. SEM --boot:
+   ele só monta depois do requestIdleCallback, então esperar a --boot somaria
+   ~1.15 s depois de a cortina já ter saído — e atrasaria o pet também no case
+   e no 404, que nem têm Boot. Se ele montar durante o boot, a cortina
+   (z-[100]) já o cobre (z-[60]). */
 .pet-entra {
-  animation: pet-entra 0.3s steps(3) var(--boot) both;
+  animation: pet-entra 0.3s steps(3) both;
 }
 @keyframes pet-entra {
   from {

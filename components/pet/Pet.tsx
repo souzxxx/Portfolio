@@ -144,7 +144,7 @@ export function Pet({ textos }: { textos: DictPet }) {
           despachar({ tipo: "atividade" });
           estado.invalidar();
         }}
-        className="pointer-events-auto absolute left-1/2 top-1/2 h-[104px] w-[88px] -translate-x-1/2 -translate-y-1/2 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-carvao"
+        className="pointer-events-auto absolute left-1/2 top-1/2 h-[104px] w-[88px] -translate-x-1/2 -translate-y-1/2 cursor-pointer focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#F5F3EE,0_0_0_4px_#1C1A17]"
       />
     </div>
   );
