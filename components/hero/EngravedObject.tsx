@@ -56,6 +56,8 @@ function EngravedIcosahedron() {
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
+      uRespira: { value: 1 },
+      uPasso: { value: 1 },
       uCarvao: { value: new Vector3(0.11, 0.102, 0.09) },
       uCream: { value: new Vector3(0.961, 0.953, 0.933) },
     }),
