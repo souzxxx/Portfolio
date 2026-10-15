@@ -1179,25 +1179,6 @@ export const projects: Project[] = [
     year: "2026",
   },
   {
-    slug: "rfq-automation",
-    name: {
-      pt: "RFQ Automation",
-      en: "RFQ Automation",
-    },
-    tagline: {
-      pt: "Automação de Request-For-Quote",
-      en: "Request-For-Quote automation",
-    },
-    description: {
-      pt: "Pipeline em Python para Request-For-Quote (RFQ): recebe o pedido de cotação, classifica e responde automaticamente.",
-      en: "Python pipeline for Request-For-Quote (RFQ): it receives the quote request, classifies it and replies automatically.",
-    },
-    category: "more",
-    status: "shipped",
-    stack: ["Python", "Automation"],
-    year: "2024",
-  },
-  {
     slug: "md-project",
     name: {
       pt: "MD-Project",
@@ -1256,26 +1237,6 @@ export const projects: Project[] = [
     stack: ["HTML", "JavaScript"],
     github: "https://github.com/souzxxx/pokemon-showdown-ps",
     year: "2026",
-  },
-  {
-    slug: "projeto-calculo",
-    name: {
-      pt: "Projeto Cálculo",
-      en: "Calculus Project",
-    },
-    tagline: {
-      pt: "Cálculo resolvido e visualizado em Python",
-      en: "Calculus solved and visualized in Python",
-    },
-    description: {
-      pt: "Projeto da disciplina de Cálculo: Python para resolver e visualizar problemas matemáticos.",
-      en: "Calculus course project: Python to solve and visualize math problems.",
-    },
-    category: "more",
-    status: "shipped",
-    stack: ["Python", "Math"],
-    github: "https://github.com/souzxxx/projeto-calculo",
-    year: "2025",
   },
 ];
 

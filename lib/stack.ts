@@ -21,6 +21,7 @@ export const stack: Tech[] = [
   { name: "Prolog", category: "language", color: "#74283c" },
   { name: "C", category: "language", color: "#a8b9cc" },
   { name: "C++", category: "language", color: "#00599c" },
+  { name: "C#", category: "language", color: "#68217a" },
 
   { name: "Next.js", category: "frontend", color: "#ffffff" },
   { name: "React", category: "frontend", color: "#61dafb" },
@@ -31,6 +32,7 @@ export const stack: Tech[] = [
   { name: "GLSL Shaders", category: "frontend", color: "#5586a4" },
   { name: "Vite", category: "frontend", color: "#646cff" },
   { name: "LVGL", category: "frontend", color: "#4c9aff" },
+  { name: "Unity", category: "frontend", color: "#ffffff" },
 
   // Node.js abre a coluna de back-end por ser o runtime embaixo do resto dela:
   // Next.js, Drizzle e praticamente todo o TypeScript deste portfólio rodam
@@ -56,4 +58,5 @@ export const stack: Tech[] = [
   { name: "Turbo", category: "infra", color: "#ff1e56" },
   { name: "GitHub Actions", category: "infra", color: "#2088ff" },
   { name: "Render", category: "infra", color: "#46e3b7" },
+  { name: "Railway", category: "infra", color: "#ffffff" },
 ];
