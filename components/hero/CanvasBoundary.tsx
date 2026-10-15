@@ -14,7 +14,7 @@ import { Component, type ReactNode } from "react";
  * identidade e o bloco de cor + a serifa, nao o objeto. Custa ~0.4KB.
  */
 export class CanvasBoundary extends Component<
-  { children: ReactNode },
+  { children: ReactNode; onFalha?: () => void },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -24,8 +24,10 @@ export class CanvasBoundary extends Component<
   }
 
   componentDidCatch() {
-    // Silencioso de proposito: o usuario nao perdeu informacao nenhuma.
+    // Silencioso de proposito: o usuario nao perdeu informacao nenhuma. Quem
+    // precisa sumir junto com o canvas (o botao do pet) fica sabendo por aqui.
     this.setState({ failed: true });
+    this.props.onFalha?.();
   }
 
   render() {

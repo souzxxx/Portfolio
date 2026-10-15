@@ -6,6 +6,8 @@ import "../globals.css";
 import { fontVariables } from "../fonts";
 import { VIEWPORT, metadataDaHome, personJsonLd } from "../metadata";
 import { ZoomLinks } from "@/components/os/ZoomLinks";
+import { Pet } from "@/components/pet/Pet";
+import { dict } from "@/lib/dict";
 
 /**
  * O layout-raiz do INGLÊS — a língua que mora em "/en".
@@ -42,6 +44,7 @@ export default function EnRootLayout({
         />
         {children}
         <ZoomLinks />
+        <Pet textos={dict.en.pet} />
       </body>
     </html>
   );

@@ -30,9 +30,13 @@
  * faces e abriria fendas de ~0.06 unidade nas arestas, com o carvao do bloco
  * vazando por dentro da figura. `normalize(position)` e continuo entre faces —
  * o mesmo canto tem a mesma posicao —, entao o solido respira inteiro.
+ *
+ * `uRespira` liga e desliga essa respiracao: 1.0 no solido do hero, 0.0 no
+ * pet — nas caixas do Mac o deslocamento entortaria as arestas retas.
  */
 export const vertex = /* glsl */ `
   uniform float uTime;
+  uniform float uRespira;
 
   varying vec3 vNormal;
   varying vec3 vView;
@@ -41,7 +45,7 @@ export const vertex = /* glsl */ `
     vNormal = normalize(normalMatrix * normal);
 
     vec3 pos = position;
-    pos += normalize(position) * sin(pos.y * 5.0 + uTime * 0.35) * 0.03;
+    pos += normalize(position) * sin(pos.y * 5.0 + uTime * 0.35) * 0.03 * uRespira;
 
     // Posicao em view space: base tanto da projecao quanto do contorno, que
     // precisa saber para onde a camera esta olhando naquele fragmento.
@@ -102,6 +106,9 @@ export const vertex = /* glsl */ `
 export const fragment = /* glsl */ `
   uniform vec3 uCarvao;
   uniform vec3 uCream;
+  // Multiplica o passo medido (1.0 no hero). Existe para o pet, que tem 1/5
+  // do tamanho, poder afinar a trama sem mudar o hero.
+  uniform float uPasso;
 
   varying vec3 vNormal;
   varying vec3 vView;
@@ -135,12 +142,12 @@ export const fragment = /* glsl */ `
     // Onda triangular: continua nas bordas do fract, entao fwidth() se comporta
     // e a AA nao pisca na virada de periodo.
     vec2 p1 = rot(0.62) * gl_FragCoord.xy;
-    float line1 = abs(fract(p1.x / 11.0) - 0.5) * 2.0;
+    float line1 = abs(fract(p1.x / (11.0 * uPasso)) - 0.5) * 2.0;
     float w1 = fwidth(line1) * 0.9;
     float ink = 1.0 - smoothstep(-w1, w1, line1 - tone);
 
     vec2 p2 = rot(-0.35) * gl_FragCoord.xy;
-    float line2 = abs(fract(p2.x / 16.0) - 0.5) * 2.0;
+    float line2 = abs(fract(p2.x / (16.0 * uPasso)) - 0.5) * 2.0;
     float w2 = fwidth(line2) * 0.9;
     float ink2 = 1.0 - smoothstep(-w2, w2, line2 - tone);
 

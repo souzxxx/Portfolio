@@ -6,6 +6,8 @@ import "../globals.css";
 import { fontVariables } from "../fonts";
 import { VIEWPORT, metadataDaHome, personJsonLd } from "../metadata";
 import { ZoomLinks } from "@/components/os/ZoomLinks";
+import { Pet } from "@/components/pet/Pet";
+import { dict } from "@/lib/dict";
 
 /**
  * O layout-raiz do PORTUGUÊS — a língua que mora na raiz, "/".
@@ -56,6 +58,7 @@ export default function PtRootLayout({
         />
         {children}
         <ZoomLinks />
+        <Pet textos={dict.pt.pet} />
       </body>
     </html>
   );
