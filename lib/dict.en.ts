@@ -452,7 +452,7 @@ export const en: Dict = {
       stack: "The storage bar shows how much each category takes up.",
       about: "Want to talk? The PDF résumé is right down here.",
       caso: "The next project is at the end of the page →.",
-      erro: "This page blew up. The menu up top takes you back.",
+      erro: "This page doesn't exist. The Restart button takes you back to the desktop.",
     },
   },
 };

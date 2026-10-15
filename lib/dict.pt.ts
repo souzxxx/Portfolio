@@ -448,7 +448,7 @@ export const pt: Dict = {
       stack: "A barra de armazenamento mostra quanto cada categoria pesa.",
       about: "Quer conversar? O currículo em PDF está aqui embaixo.",
       caso: "No fim da página tem o próximo projeto →.",
-      erro: "Essa página explodiu. O menu lá em cima te leva de volta.",
+      erro: "Essa página não existe. O botão Reiniciar te leva de volta à mesa.",
     },
   },
 };
