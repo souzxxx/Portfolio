@@ -13,8 +13,13 @@ import type { ChaveDica } from "@/lib/dict";
  */
 export type Rota = "home" | "caso" | "cv" | "erro";
 
+/**
+ * As seções da home que o observer mede. "top" NÃO entra: `#top` é o wrapper
+ * da página inteira (Home.tsx), mais alto que qualquer seção, e venceria
+ * sempre. "top" é o que sobra — nenhuma destas visível = o visitante está na
+ * mesa, acima de #projects.
+ */
 export const SECOES_DA_HOME: readonly ChaveDica[] = [
-  "top",
   "projects",
   "more",
   "atividade",
@@ -31,6 +36,22 @@ export function rotaDoPet(pathname: string): Rota {
   return "erro";
 }
 
+/**
+ * A seção com mais pixels visíveis; "top" quando nenhuma tem altura > 0.
+ * Pura, para o teste: o hook só alimenta o mapa.
+ */
+export function escolherSecao(visivel: ReadonlyMap<string, number>): ChaveDica {
+  let melhor: ChaveDica = "top";
+  let maior = 0;
+  for (const [id, altura] of visivel) {
+    if (altura > maior) {
+      maior = altura;
+      melhor = id as ChaveDica;
+    }
+  }
+  return melhor;
+}
+
 const LIMIARES = Array.from({ length: 21 }, (_, i) => i / 20);
 
 export function useSecaoAtual(pathname: string): ChaveDica {
@@ -45,15 +66,7 @@ export function useSecaoAtual(pathname: string): ChaveDica {
         for (const e of entradas) {
           visivel.set(e.target.id, e.isIntersecting ? e.intersectionRect.height : 0);
         }
-        let melhor: string | null = null;
-        let maior = 0;
-        for (const [id, altura] of visivel) {
-          if (altura > maior) {
-            maior = altura;
-            melhor = id;
-          }
-        }
-        if (melhor) setSecao(melhor as ChaveDica);
+        setSecao(escolherSecao(visivel));
       },
       { threshold: LIMIARES },
     );
