@@ -10,6 +10,8 @@ import { criarEstado } from "./estado";
 import { rotaDoPet, useSecaoAtual } from "./secao";
 import { useDesvio } from "./useDesvio";
 import { usePetEventos } from "./usePetEventos";
+import type { FaseTeleporte } from "./teleporte";
+import { useTeleporte } from "./useTeleporte";
 
 /**
  * Pet — o Mac que acompanha o visitante no canto da tela.
@@ -30,6 +32,25 @@ import { usePetEventos } from "./usePetEventos";
  * Até lá o wrapper fica transparente e sem botão: nada de alvo invisível
  * enquanto o chunk do three baixa, e o canvas mede a caixa sem escala.
  *
+ * NA HOME (spec §5) o pet não divide a tela com a mesa: enquanto ela está à
+ * vista, ele fica fora de cena, e entra com o teletransporte quando a borda
+ * de cima do SOUZXXX encosta na MenuBar; rolando de volta, sai do mesmo
+ * jeito. Quem decide e toca é o useTeleporte (regra e quadros em
+ * teleporte.ts). Fora de cena a cena continua MONTADA e pronta, para o
+ * primeiro teletransporte não esperar download nem shader, mas escondida:
+ * `visibility: hidden`, `inert`, sem botão e sem pedir quadro
+ * (`estado.oculto`). O botão, o balão e o desvio só existem com ele
+ * `dentro`; se o balão estava aberto quando ele saiu, fecha. Nas outras
+ * rotas a fase é sempre `dentro` e a entrada é a `.pet-entra` de antes, que
+ * só toca quando ele chega invisível (ver `ultimaNaHome`).
+ *
+ * O EFEITO é DOM em volta do canvas, sem tocar no shader: o corpo (o canvas)
+ * estica e pisca, e ao lado dele um risco, quatro linhas de velocidade e
+ * duas silhuetas chapadas (as imagens residuais). As silhuetas ficam ATRÁS do
+ * corpo, para só a borda deslocada aparecer; o risco e as linhas, na frente.
+ * Todos se posicionam por `left`/`top`, nunca por `transform`, que é o que a
+ * animação escreve.
+ *
  * DESVIO: quando um controle fica embaixo do botão, o pet sai de cima (sobe;
  * sem lugar em cima, vai para a esquerda). Ver desvio.ts e useDesvio.ts. Anda
  * por `translate` e não por `transform`, porque a `.pet-entra` tem fill
@@ -45,6 +66,13 @@ const PetCena = dynamic(() => import("./PetCena").then((m) => m.PetCena), {
 
 const MIDIA = "(hover: hover) and (pointer: fine) and (min-width: 1024px)";
 
+/** As peças do teletransporte, paradas: invisíveis e sem clique (o `aria-hidden` vai em cada uma). */
+const EFEITO = "pointer-events-none absolute opacity-0";
+/** Risco e linhas: traço creme com um filete carvão, que lê sobre papel e sobre carvão. */
+const TRACO = "bg-cream shadow-[0_0_0_1px_#1C1A17]";
+/** Imagem residual: a silhueta chapada do Mac (o retângulo do botão). */
+const RESIDUO = "left-[31px] top-[23px] h-[104px] w-[88px] border border-carvao bg-cream";
+
 type JanelaDeTeste = Window & { __sxPetSonoMs?: number; __sxPet?: unknown };
 
 export function Pet({ textos }: { textos: DictPet }) {
@@ -58,18 +86,54 @@ export function Pet({ textos }: { textos: DictPet }) {
   const raiz = useRef<HTMLDivElement>(null);
   const estado = useRef(criarEstado()).current;
 
+  const rota = rotaDoPet(pathname);
+  const naHome = rota === "home";
+  const mostrar = cabe && pronto && !falhou && rota !== "cv";
+  const fase = useTeleporte(raiz, { ativo: naHome && mostrar, pronto: cenaPronta, reduzido });
+  const dentro = fase === "dentro";
   estado.reduzido = reduzido;
-  const mostrar = cabe && pronto && !falhou && rotaDoPet(pathname) !== "cv";
+  estado.oculto = fase === "fora";
   const despachar = usePetEventos(estado, raiz, mostrar);
   const chave = useSecaoAtual(pathname, mostrar);
-  const desvio = useDesvio(raiz, mostrar && cenaPronta);
+  const desvio = useDesvio(raiz, mostrar && cenaPronta && dentro);
   const aoFicarPronta = useCallback(() => setCenaPronta(true), []);
+
+  // Fora da home, a `.pet-entra` só toca para quem CHEGA invisível: carga
+  // direta do case (ou do 404), ou vindo da home com o pet fora de cena. O Pet
+  // mora no layout e não desmonta numa troca de rota client-side; com ele
+  // visível na home, pôr a classe de novo reiniciaria a animação do zero
+  // (opacidade 0) e o pet piscaria. A última fase da home é guardada no
+  // render, e não num efeito, para o primeiro render fora dela já sair com a
+  // classe certa.
+  const ultimaNaHome = useRef<FaseTeleporte>("fora");
+  if (!mostrar) ultimaNaHome.current = "fora";
+  else if (naHome) ultimaNaHome.current = fase;
+  const entra = cenaPronta && !naHome && ultimaNaHome.current === "fora";
 
   // Sem pet, sem cena: a próxima montagem (voltar do /cv, por exemplo) é um
   // canvas novo e espera o primeiro quadro DELE.
   useEffect(() => {
     if (!mostrar) setCenaPronta(false);
   }, [mostrar]);
+
+  // Saiu de cena: o balão vai junto, para não ficar falando sozinho no canto.
+  useEffect(() => {
+    if (!dentro) setAberto(false);
+  }, [dentro]);
+
+  // Fora de cena a PetCena para de pedir quadro; ao sair de `fora` ela
+  // precisa de um empurrão para voltar a desenhar. E quem chega se assusta.
+  useEffect(() => {
+    if (fase === "fora") return;
+    estado.invalidar();
+    if (fase === "entrando") despachar({ tipo: "teleporte" });
+  }, [fase, estado, despachar]);
+
+  // `inert` pelo DOM: o @types/react 18 ainda não conhece o atributo. Sem
+  // estar dentro, nada do pet recebe foco nem clique.
+  useEffect(() => {
+    if (raiz.current) raiz.current.inert = !dentro;
+  }, [dentro, mostrar]);
 
   useEffect(() => {
     const q = window.matchMedia(MIDIA);
@@ -130,9 +194,11 @@ export function Pet({ textos }: { textos: DictPet }) {
       ref={raiz}
       data-pet=""
       data-expressao="normal"
-      className={`${cenaPronta ? "pet-entra " : ""}pet-desvio pointer-events-none fixed bottom-6 right-6 z-[60] h-[150px] w-[150px]`}
+      data-teleporte={fase}
+      className={`${entra ? "pet-entra " : ""}pet-desvio pointer-events-none fixed bottom-6 right-6 z-[60] h-[150px] w-[150px]`}
       style={{
         opacity: cenaPronta ? undefined : 0,
+        visibility: fase === "fora" ? "hidden" : undefined,
         translate: `${-desvio.x}px ${-desvio.y}px`,
       }}
     >
@@ -153,11 +219,27 @@ export function Pet({ textos }: { textos: DictPet }) {
         </div>
       ) : null}
 
-      <CanvasBoundary onFalha={() => setFalhou(true)}>
-        <PetCena estado={estado} onPronto={aoFicarPronta} />
-      </CanvasBoundary>
+      {/* Atrás do corpo: só a borda deslocada da silhueta aparece. */}
+      <span aria-hidden data-teleporte-parte="residuo-esq" className={`${EFEITO} ${RESIDUO}`} />
+      <span aria-hidden data-teleporte-parte="residuo-dir" className={`${EFEITO} ${RESIDUO}`} />
 
-      {cenaPronta ? (
+      {/* O corpo é o que estica e pisca. A animação escreve `transform` aqui
+          e não no wrapper: o desvio anda por `translate` no wrapper, e o R3F
+          mede por offsetSize, que ignora transform (canvas fica 150×150). */}
+      <div data-teleporte-parte="corpo" className="absolute inset-0">
+        <CanvasBoundary onFalha={() => setFalhou(true)}>
+          <PetCena estado={estado} onPronto={aoFicarPronta} />
+        </CanvasBoundary>
+      </div>
+
+      {/* Na frente: o risco no eixo do Mac e as linhas de velocidade. */}
+      <span aria-hidden data-teleporte-parte="risco" className={`${EFEITO} ${TRACO} left-[73px] top-[23px] h-[104px] w-[3px]`} />
+      <span aria-hidden data-teleporte-parte="linha-esq" className={`${EFEITO} ${TRACO} left-[22px] top-[52px] h-px w-5`} />
+      <span aria-hidden data-teleporte-parte="linha-esq" className={`${EFEITO} ${TRACO} left-[22px] top-[88px] h-px w-7`} />
+      <span aria-hidden data-teleporte-parte="linha-dir" className={`${EFEITO} ${TRACO} right-[22px] top-[52px] h-px w-5`} />
+      <span aria-hidden data-teleporte-parte="linha-dir" className={`${EFEITO} ${TRACO} right-[22px] top-[88px] h-px w-7`} />
+
+      {cenaPronta && dentro ? (
         <button
           type="button"
           aria-label={textos.ariaLabel}

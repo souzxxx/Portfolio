@@ -16,3 +16,6 @@ credentials.json
 
 # Local screenshot script artifacts that may contain personal data
 public/projects/financehub/private/
+
+# Visual companion do brainstorming
+.superpowers/

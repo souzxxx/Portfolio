@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mac em ASCII — protótipos</title>
+<style>
+:root{--carvao:#1C1A17;--breu:#0F0E0C;--cream:#F5F3EE;--cream6:#D8D4C8;--cream7:#A8A49B;--gold:#D4A017;--ink6:#3C3A34;--ink7:#5A5750}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#121110;color:var(--cream)}
+body{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;padding:36px 24px 96px}
+.wrap{max-width:1180px;margin:0 auto}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+h1{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream7);font-weight:400}
+.lead{margin-top:12px;font-size:18px;line-height:1.55;color:var(--cream6);max-width:72ch}
+.lead b{color:var(--cream);font-weight:600}
+.proto{margin-top:56px}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.cab .t{max-width:78ch}
+.cab .linha{display:flex;gap:12px;align-items:center}
+.letra{font-size:12px;background:var(--cream);color:var(--carvao);padding:3px 8px}
+.cab h2{font-size:22px;font-weight:500}
+.cab p{color:var(--cream7);font-size:14.5px;margin-top:8px;line-height:1.55}
+.acoes{display:flex;gap:8px}
+button{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:transparent;color:var(--cream);border:1px solid var(--cream7);padding:9px 12px;cursor:pointer}
+button:hover{background:var(--cream);color:var(--carvao)}
+button.escolher.sel{background:var(--gold);color:var(--carvao);border-color:var(--gold)}
+.dica{margin-top:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream7)}
+.nota{margin-top:56px;color:var(--cream7);font-size:14px;line-height:1.6;max-width:75ch}
+
+/* a mesa */
+.mesa{position:relative;width:100%;aspect-ratio:1.64;overflow:hidden;container-type:inline-size;
+  background-color:#1c1a17;background-image:radial-gradient(rgba(245,243,238,.075) .75px,transparent 1px);background-size:4px 4px;border:1px solid #2c2a26}
+.mesa canvas{position:absolute;inset:0;display:block}
+.jan{position:absolute;border:1px solid var(--carvao);box-shadow:.5cqw .5cqw 0 var(--breu);background:var(--carvao);pointer-events:none;transition:opacity .35s;display:flex;flex-direction:column;overflow:hidden}
+.translucido .jan,.translucido .icones{opacity:.14}
+.barra{height:1.75cqw;flex:none;background:var(--cream);border-bottom:1px solid var(--carvao);display:flex;align-items:center;justify-content:center;position:relative;font-family:ui-monospace,Menlo,monospace;font-size:.72cqw;letter-spacing:.3em;color:var(--carvao);text-transform:uppercase}
+.barra::before{content:"";position:absolute;left:.7cqw;top:.38cqw;width:.85cqw;height:.85cqw;border:1px solid var(--carvao);background:var(--cream)}
+.barra.listras{background:repeating-linear-gradient(var(--cream) 0 2px,var(--carvao) 2px 3px)}
+.barra.listras span{background:var(--cream);padding:0 .6cqw}
+.leiame{left:3.3%;top:3.7%;width:49.8%;height:81%;background:var(--cream);color:var(--carvao)}
+.leiame .corpo{padding:2.2cqw 2.6cqw 0;flex:1}
+.selo{font-family:ui-monospace,Menlo,monospace;font-size:.62cqw;letter-spacing:.2em;color:var(--ink7)}
+.nome{margin-top:1.4cqw;font-family:"Times New Roman",Times,serif;font-size:7.2cqw;line-height:.84;letter-spacing:-.01em;transform:scaleX(.82);transform-origin:left}
+.faixa{margin-top:1.4cqw;border-top:1px dashed rgba(28,26,23,.4);border-bottom:1px dashed rgba(28,26,23,.4);padding:.7cqw 0;display:flex;gap:1.1cqw;font-family:ui-monospace,Menlo,monospace;font-size:.6cqw;letter-spacing:.16em;color:var(--ink6)}
+.faixa span:first-child{background:var(--carvao);color:var(--cream);padding:.2cqw .5cqw}
+.prosa{margin-top:1.3cqw;font-size:1.02cqw;line-height:1.6;color:var(--ink6);max-width:44cqw}
+.prosa u{color:var(--carvao);text-decoration-color:rgba(28,26,23,.35);text-underline-offset:.3cqw}
+.ctas{margin-top:1.5cqw;display:flex;gap:.6cqw}
+.ctas i{font-style:normal;border:1px solid var(--carvao);padding:.75cqw 1.1cqw;font-family:ui-monospace,Menlo,monospace;font-size:.62cqw;letter-spacing:.14em}
+.ctas i:first-child{background:var(--carvao);color:var(--cream);box-shadow:.25cqw .25cqw 0 #A8A49B}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--carvao)}
+.stats div{padding:.8cqw 2cqw;border-left:1px dashed rgba(28,26,23,.4);font-family:ui-monospace,Menlo,monospace;font-size:.55cqw;letter-spacing:.12em;color:var(--ink7)}
+.stats div:first-child{border-left:0}
+.stats b{display:block;font-family:"Times New Roman",serif;font-weight:400;font-size:1.9cqw;letter-spacing:0;color:var(--carvao)}
+.render{left:66.5%;top:3.7%;width:20.9%;height:36.7%}
+.render .corpo{flex:1;position:relative;display:grid;place-items:center}
+.render svg{width:62%;height:auto}
+.render p{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:.6cqw .9cqw;font-family:ui-monospace,Menlo,monospace;font-size:.55cqw;letter-spacing:.14em;color:var(--cream7)}
+.terminal{left:55.8%;top:51.9%;width:32.1%;height:27.3%}
+.terminal .corpo{padding:1cqw 1.1cqw;font-family:ui-monospace,Menlo,monospace;font-size:.78cqw;line-height:1.7;color:var(--cream6)}
+.terminal .corpo span{color:var(--cream7)}
+.agora{left:67.6%;top:79.8%;width:20.3%;height:17.5%}
+.agora .corpo{padding:.3cqw 1cqw}
+.agora .corpo div{display:flex;gap:1cqw;align-items:baseline;padding:.75cqw 0;border-top:1px dashed rgba(245,243,238,.2)}
+.agora .corpo div:first-child{border-top:0}
+.agora .corpo em{font-style:normal;width:6.4cqw;flex:none;font-family:ui-monospace,Menlo,monospace;font-size:.5cqw;letter-spacing:.12em;color:var(--cream7)}
+.agora .corpo span{font-size:.95cqw;color:var(--cream)}
+.icones{position:absolute;left:90.6%;top:4%;width:6.5%;display:flex;flex-direction:column;align-items:center;gap:1.45cqw;pointer-events:none;transition:opacity .35s}
+.icones div{display:flex;flex-direction:column;align-items:center;gap:.5cqw}
+.icones i{width:2.6cqw;height:2.2cqw;background:var(--cream);box-shadow:.15cqw .15cqw 0 var(--breu)}
+.icones span{font-family:ui-monospace,Menlo,monospace;font-size:.5cqw;letter-spacing:.14em;color:var(--cream)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="mono">souzxxx OS · Mac em ASCII · protótipos</h1>
+  <p class="lead">Três jeitos do Mac em ASCII se mexer <b>atrás das janelas</b>, com as janelas na disposição do seu print. <b>Passe o mouse e clique na mesa.</b> O botão “ver o Mac inteiro” deixa as janelas quase transparentes pra você ver o desenho todo.</p>
+
+  <section class="proto" id="A">
+    <div class="cab">
+      <div class="t">
+        <div class="linha"><span class="letra mono">A</span><h2>Gira em 3D</h2></div>
+        <p>Um Mac sólido desenhado com caracteres, no espírito do “donut em ASCII”: balança de um lado pro outro, inclina na direção do mouse e os olhos te seguem. Clique e ele dá uma volta inteira com um pulinho.</p>
+      </div>
+      <div class="acoes"><button class="ver">ver o Mac inteiro</button><button class="escolher" data-choice="a-gira-3d">escolher este</button></div>
+    </div>
+    <div class="mesa" data-cena="giro"></div>
+    <p class="dica mono">passe o mouse · clique na mesa</p>
+  </section>
+
+  <section class="proto" id="B">
+    <div class="cab">
+      <div class="t">
+        <div class="linha"><span class="letra mono">B</span><h2>Passeia como as carpas</h2></div>
+        <p>Um Mac de traço ASCII anda sozinho pela metade direita da mesa, aos pulinhos, deixando pegadas e sumindo atrás das janelas. Clique e cai um bit dourado: ele vai até lá comer e fica feliz.</p>
+      </div>
+      <div class="acoes"><button class="ver">ver o Mac inteiro</button><button class="escolher" data-choice="b-passeia">escolher este</button></div>
+    </div>
+    <div class="mesa" data-cena="passeio"></div>
+    <p class="dica mono">passe o mouse · clique na mesa pra jogar um bit</p>
+  </section>
+
+  <section class="proto" id="C">
+    <div class="cab">
+      <div class="t">
+        <div class="linha"><span class="letra mono">C</span><h2>Mosaico vivo</h2></div>
+        <p>Um Mac gigante feito de células, com a textura das carpas do daoho. Ele fica no lugar e respira, a textura escorre devagar, a lateral é hachurada como no pet e os olhos te seguem. Clique e ele pula.</p>
+      </div>
+      <div class="acoes"><button class="ver">ver o Mac inteiro</button><button class="escolher" data-choice="c-mosaico">escolher este</button></div>
+    </div>
+    <div class="mesa" data-cena="mosaico"></div>
+    <p class="dica mono">passe o mouse · clique na mesa · chegue perto do Mac</p>
+  </section>
+
+  <p class="nota">Nos três, o mouse abre ondas em ASCII como no daoho; o que muda é o Mac. Dá pra misturar, por exemplo o corpo do C com o passeio do B. Os protótipos são descartáveis e servem só pra escolher a direção.</p>
+</div>
+
+<template id="janelas">
+  <div class="jan leiame">
+    <div class="barra">leia-me.txt</div>
+    <div class="corpo">
+      <p class="selo">SÃO PAULO, BR · DISPONÍVEL PARA VAGAS · BACKEND, WEB &amp; IA</p>
+      <p class="nome">LEONARDO<br>SOUZA</p>
+      <div class="faixa"><span>BACKEND, WEB &amp; IA</span><span>CIÊNCIA DA COMPUTAÇÃO</span><span>INSPER</span><span>5º SEMESTRE</span><span>SÃO PAULO</span></div>
+      <p class="prosa">Construo backend, web e IA que rodam em produção: <u>assistente LLM sobre os dados do próprio usuário</u>, <u>busca vetorial com pgvector</u> para respostas ancoradas no contexto recuperado, <u>outbox com retry exponencial e idempotência</u> e <u>front-end Next.js em sistema com usuário real</u>.</p>
+      <div class="ctas"><i>VER PROJETOS ↓</i><i>GITHUB ↗</i><i>LINKEDIN ↗</i><i>CURRÍCULO ↓</i></div>
+    </div>
+    <div class="stats"><div><b>49k</b>PARTIDAS NO PIPELINE</div><div><b>218</b>ARQUIVOS DE TESTE</div><div><b>12</b>MÓDULOS DE DOMÍNIO</div><div><b>4</b>SERVIÇOS DISTRIBUÍDOS</div></div>
+  </div>
+  <div class="jan render">
+    <div class="barra">render.glsl</div>
+    <div class="corpo">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs><pattern id="hx" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-55)"><rect width="5" height="5" fill="#1C1A17"/><rect width="2.2" height="5" fill="#F5F3EE"/></pattern>
+        <pattern id="hx2" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(60)"><rect width="4" height="4" fill="#F5F3EE"/><rect width="1.6" height="4" fill="#1C1A17"/></pattern></defs>
+        <polygon points="50,6 88,27 88,72 50,94 12,72 12,27" fill="url(#hx)"/>
+        <polygon points="50,6 88,27 88,50 12,50 12,27" fill="url(#hx2)"/>
+      </svg>
+      <p><span>ICOSAEDRO · GLSL</span><span>THREE.JS</span></p>
+    </div>
+  </div>
+  <div class="jan terminal">
+    <div class="barra listras"><span>terminal</span></div>
+    <div class="corpo">
+      <div><span>leonardo@souzxxx ~ %</span> whoami</div>
+      <div>leonardo souza — backend, web &amp; ia · ciência da computação</div>
+      <div>no insper (5º sem) · são paulo</div>
+      <div><span>leonardo@souzxxx ~ % digite help e aperte enter</span></div>
+    </div>
+  </div>
+  <div class="jan agora">
+    <div class="barra">agora</div>
+    <div class="corpo">
+      <div><em>NO AR</em><span>Site comercial da TECNA</span></div>
+      <div><em>CONSTRUINDO</em><span>Portal TECNA · apps internos</span></div>
+      <div><em>ESTUDANDO</em><span>Insper · BCC · 5º semestre</span></div>
+    </div>
+  </div>
+  <div class="icones">
+    <div><i></i><span>PROJETOS</span></div><div><i></i><span>TECNA</span></div><div><i></i><span>FINANCEHUB</span></div><div><i></i><span>QUINTOANDAR</span></div>
+    <div><i></i><span>CURRÍCULO</span></div><div><i></i><span>CONTATO</span></div><div><i></i><span>GITHUB</span></div><div><i></i><span>LIXEIRA</span></div>
+  </div>
+</template>
+
+<script>
+(() => {
+  const CW = 9, CH = 11;
+  const CREME = "#F5F3EE", OURO = "#D4A017", CARVAO = "#1C1A17";
+  const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
+
+  function hash(x, y) {
+    let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263);
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+  }
+  function ruido(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+    const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  }
+
+  // Tela do Mac: grade de 16×12 "pixels". Devolve se o pixel (px, py) está aceso.
+  function acesa(px, py, gx, gy, modo) {
+    const ey = 4 + gy;
+    for (const ex of [4 + gx, 10 + gx]) {
+      if (modo === "piscando") { if (py === ey + 1 && (px === ex || px === ex + 1)) return true; }
+      else if (modo === "atento" || modo === "surpreso") { if (px >= ex && px <= ex + 2 && py >= ey - 1 && py <= ey + 1) return true; }
+      else if (px >= ex && px <= ex + 1 && py >= ey && py <= ey + 1) return true;
+    }
+    if (modo === "surpreso") return (px === 7 || px === 8) && (py === 8 || py === 9);
+    if (py === 8 && px >= 6 && px <= 9) return true;
+    if (py === 7 && (px === 5 || px === 10)) return true;
+    return false;
+  }
+
+  // ── motor comum: grade de células + ondas do mouse ───────────────────────
+  function criarMesa(el, cena) {
+    el.appendChild(document.getElementById("janelas").content.cloneNode(true));
+    const cv = document.createElement("canvas");
+    el.prepend(cv);
+    const ctx = cv.getContext("2d");
+    const s = { W: 0, H: 0, cols: 0, rows: 0, t: 0, dt: 0.016, mouse: { x: 0, y: 0, dentro: false }, ondas: [] };
+    let C, A, F, K;
+
+    function resize() {
+      const r = el.getBoundingClientRect();
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      s.W = r.width; s.H = r.height;
+      cv.width = Math.round(s.W * dpr); cv.height = Math.round(s.H * dpr);
+      cv.style.width = s.W + "px"; cv.style.height = s.H + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      s.cols = Math.ceil(s.W / CW); s.rows = Math.ceil(s.H / CH);
+      const n = s.cols * s.rows;
+      C = new Uint16Array(n); A = new Float32Array(n); F = new Float32Array(n); K = new Uint8Array(n);
+      cena.resize && cena.resize(s);
+    }
+    // k: 0 creme · 1 dourado · 2 glifo carvão sobre célula creme
+    s.put = (i, j, c, a, f = 0, k = 0) => {
+      if (i < 0 || j < 0 || i >= s.cols || j >= s.rows) return;
+      const id = j * s.cols + i;
+      C[id] = c.charCodeAt(0); A[id] = a; F[id] = f; K[id] = k;
+    };
+    s.putFraco = (i, j, c, a) => {
+      if (i < 0 || j < 0 || i >= s.cols || j >= s.rows) return;
+      const id = j * s.cols + i;
+      if (A[id] >= a && C[id] !== 32 && C[id] !== 0) return;
+      C[id] = c.charCodeAt(0); A[id] = a;
+    };
+    s.onda = (x, y, f) => { s.ondas.push({ x, y, t0: s.t, f }); if (s.ondas.length > 10) s.ondas.shift(); };
+
+    function desenharOndas() {
+      const VIDA = 2.3, VEL = 150, ACH = 0.8;
+      s.ondas = s.ondas.filter((o) => s.t - o.t0 < VIDA);
+      for (const o of s.ondas) {
+        const idade = s.t - o.t0, fade = 1 - idade / VIDA;
+        for (let anel = 0; anel < 2; anel++) {
+          const R = idade * VEL * (0.55 + 0.45 * o.f) + 8 - anel * 18;
+          const a = o.f * fade * (anel ? 0.4 : 0.75);
+          if (R < 6 || a < 0.02) continue;
+          const i0 = Math.max(0, Math.floor((o.x - R) / CW) - 1), i1 = Math.min(s.cols - 1, Math.ceil((o.x + R) / CW) + 1);
+          const j0 = Math.max(0, Math.floor((o.y - R * ACH) / CH) - 1), j1 = Math.min(s.rows - 1, Math.ceil((o.y + R * ACH) / CH) + 1);
+          for (let j = j0; j <= j1; j++) {
+            const dy = (j * CH + CH / 2 - o.y) / ACH;
+            for (let i = i0; i <= i1; i++) {
+              const dx = i * CW + CW / 2 - o.x;
+              const d = Math.hypot(dx, dy);
+              if (Math.abs(d - R) < 6) {
+                let phi = (Math.atan2(dy, dx) + Math.PI / 2) % Math.PI;
+                if (phi < 0) phi += Math.PI;
+                s.putFraco(i, j, "-\\|/"[Math.round(phi / (Math.PI / 4)) % 4], a);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function desenhar() {
+      ctx.clearRect(0, 0, s.W, s.H);
+      ctx.font = '600 10px ui-monospace, "SF Mono", Menlo, monospace';
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const { cols, rows } = s;
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const id = j * cols + i, f = F[id], a = A[id], c = C[id];
+        const temGlifo = a > 0.01 && c !== 32 && c !== 0;
+        if (f <= 0.004 && !temGlifo) continue;
+        const x = i * CW, y = j * CH, k = K[id];
+        if (f > 0.004) { ctx.globalAlpha = f; ctx.fillStyle = k === 1 ? OURO : CREME; ctx.fillRect(x + 0.5, y + 0.5, CW - 1, CH - 1); }
+        if (temGlifo) { ctx.globalAlpha = a; ctx.fillStyle = k === 2 ? CARVAO : k === 1 ? OURO : CREME; ctx.fillText(String.fromCharCode(c), x + CW / 2, y + CH / 2 + 0.5); }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    const local = (e) => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    let ult = null;
+    el.addEventListener("pointermove", (e) => {
+      const [x, y] = local(e);
+      s.mouse.x = x; s.mouse.y = y; s.mouse.dentro = true;
+      if (!ult || (Math.hypot(x - ult.x, y - ult.y) > 50 && s.t - ult.t > 0.08)) { s.onda(x, y, 0.32); ult = { x, y, t: s.t }; }
+    });
+    el.addEventListener("pointerleave", () => { s.mouse.dentro = false; });
+    el.addEventListener("pointerdown", (e) => { const [x, y] = local(e); s.onda(x, y, 1); cena.clique && cena.clique(s, x, y); });
+
+    let visivel = false, antes = performance.now();
+    new IntersectionObserver(([en]) => { visivel = en.isIntersecting; }).observe(el);
+    new ResizeObserver(resize).observe(el);
+    resize();
+    (function quadro(agora) {
+      const dt = Math.min(0.05, (agora - antes) / 1000 || 0.016); antes = agora;
+      if (visivel) {
+        s.t += dt; s.dt = dt;
+        C.fill(0); A.fill(0); F.fill(0); K.fill(0);
+        desenharOndas();
+        cena.quadro(s);
+        desenhar();
+      }
+      requestAnimationFrame(quadro);
+    })(performance.now());
+  }
+
+  // ── A · gira em 3D (ray casting de duas caixas, sombreado em rampa ASCII) ──
+  function cenaGiro() {
+    const CAIXAS = [
+      { mn: [-0.5, -0.52, -0.46], mx: [0.5, 0.62, 0.46], corpo: true },
+      { mn: [-0.4, -0.64, -0.38], mx: [0.4, -0.52, 0.38], corpo: false },
+    ];
+    const RAMPA = " .,:;-=+*%";
+    let L = [0.35, 0.5, 0.8]; const nl = Math.hypot(...L); L = L.map((v) => v / nl);
+    let yaw = 0, pitch = -0.1, giro = 0, giroAlvo = 0, pulo = 0, piscaFim = 0, proxPisca = 2.2, surpresa = 0;
+    const o = [0, 0, 0], d = [0, 0, 0], HIT = { t: 0, ax: 0, sg: 0 };
+    function corta(b) {
+      let tn = -1e9, tf = 1e9, ax = -1, sg = 0;
+      for (let k = 0; k < 3; k++) {
+        const dk = d[k], ok = o[k];
+        if (Math.abs(dk) < 1e-9) { if (ok < b.mn[k] || ok > b.mx[k]) return false; continue; }
+        let t1 = (b.mn[k] - ok) / dk, t2 = (b.mx[k] - ok) / dk, s1 = -1;
+        if (t1 > t2) { const tt = t1; t1 = t2; t2 = tt; s1 = 1; }
+        if (t1 > tn) { tn = t1; ax = k; sg = s1; }
+        if (t2 < tf) tf = t2;
+        if (tn > tf) return false;
+      }
+      if (tf < 0 || tn < 0) return false;
+      HIT.t = tn; HIT.ax = ax; HIT.sg = sg; return true;
+    }
+    return {
+      clique() { giroAlvo += Math.PI * 2; pulo = 1; surpresa = 0.9; },
+      quadro(s) {
+        const { W, H, t, dt } = s;
+        const cx = W * 0.6, S = H * 0.55;
+        pulo = Math.max(0, pulo - dt * 1.5);
+        const salto = pulo > 0 ? Math.sin((1 - pulo) * Math.PI) * H * 0.06 : 0;
+        const cy = H * 0.47 + Math.sin(t * 1.4) * H * 0.008 - salto;
+        const mx = s.mouse.dentro ? clamp((s.mouse.x - cx) / (W * 0.35), -1, 1) : 0;
+        const my = s.mouse.dentro ? clamp((s.mouse.y - cy) / (H * 0.5), -1, 1) : 0;
+        giro += (giroAlvo - giro) * Math.min(1, dt * 2.2);
+        yaw += (Math.sin(t * 0.5) * 0.5 + mx * 0.4 - yaw) * Math.min(1, dt * 2.5);
+        pitch += (-0.12 + Math.sin(t * 0.8) * 0.04 + my * 0.18 - pitch) * Math.min(1, dt * 2.5);
+        const Y = yaw + giro, cY = Math.cos(Y), sY = Math.sin(Y), cP = Math.cos(pitch), sP = Math.sin(pitch);
+        if (t > proxPisca) { piscaFim = t + 0.13; proxPisca = t + 2.4 + Math.random() * 3; }
+        surpresa = Math.max(0, surpresa - dt);
+        const modo = surpresa > 0 ? "surpreso" : t < piscaFim ? "piscando" : "normal";
+        const gx = Math.round(clamp(mx * 2.2, -2, 2)), gy = Math.round(clamp(my * 1.4, -1, 1));
+
+        // sombra no chão
+        const sy0 = H * 0.47 + 0.7 * S, rx = 0.55 * S * (1 - salto / (H * 0.15)), ry = 0.05 * S;
+        for (let j = Math.floor((sy0 - ry) / CH); j <= Math.ceil((sy0 + ry) / CH); j++)
+          for (let i = Math.floor((cx - rx) / CW); i <= Math.ceil((cx + rx) / CW); i++) {
+            const ex = (i * CW + CW / 2 - cx) / rx, ey = (j * CH + CH / 2 - sy0) / ry;
+            if (ex * ex + ey * ey < 1) s.put(i, j, ".", 0.22);
+          }
+
+        const FOCO = 4.2, eps = (0.85 * CW) / S, R = 0.95 * S;
+        const i0 = Math.max(0, Math.floor((cx - R) / CW)), i1 = Math.min(s.cols - 1, Math.ceil((cx + R) / CW));
+        const j0 = Math.max(0, Math.floor((cy - R) / CH)), j1 = Math.min(s.rows - 1, Math.ceil((cy + R) / CH));
+        for (let j = j0; j <= j1; j++) {
+          const Yw = -(j * CH + CH / 2 - cy) / S;
+          for (let i = i0; i <= i1; i++) {
+            const Xw = (i * CW + CW / 2 - cx) / S;
+            // raio do mundo para o espaço do objeto: Rx(-pitch) e depois Ry(-yaw)
+            const oy = FOCO * sP, oz = FOCO * cP;
+            o[0] = -oz * sY; o[1] = oy; o[2] = oz * cY;
+            const dy_ = Yw * cP - FOCO * sP, dz_ = -Yw * sP - FOCO * cP;
+            d[0] = Xw * cY - dz_ * sY; d[1] = dy_; d[2] = Xw * sY + dz_ * cY;
+            let melhor = Infinity, ax = -1, sg = 0, caixa = null;
+            for (const b of CAIXAS) if (corta(b) && HIT.t < melhor) { melhor = HIT.t; ax = HIT.ax; sg = HIT.sg; caixa = b; }
+            if (!caixa) continue;
+            const p = [o[0] + d[0] * melhor, o[1] + d[1] * melhor, o[2] + d[2] * melhor];
+            let nx = 0, ny = 0, nz = 0;
+            if (ax === 0) nx = sg; else if (ax === 1) ny = sg; else nz = sg;
+            const nx1 = nx * cY + nz * sY, nz1 = -nx * sY + nz * cY;
+            const ny2 = ny * cP - nz1 * sP, nz2 = ny * sP + nz1 * cP;
+            let b = 0.1 + 0.9 * Math.max(0, nx1 * L[0] + ny2 * L[1] + nz2 * L[2]);
+
+            let borda = false;
+            for (let k = 0; k < 3; k++) {
+              if (k === ax) continue;
+              if (p[k] - caixa.mn[k] < eps || caixa.mx[k] - p[k] < eps) { borda = true; break; }
+            }
+            if (borda) { s.put(i, j, "#", 0.8, 0.12); continue; }
+
+            if (caixa.corpo && ax === 2 && sg === 1) {
+              const x = p[0], y = p[1];
+              if (x > -0.31 && x < 0.31 && y > 0.08 && y < 0.5) {
+                const spx = Math.floor(((x + 0.31) / 0.62) * 16), spy = Math.floor(((0.5 - y) / 0.42) * 12);
+                if (acesa(spx, spy, gx, gy, modo)) s.put(i, j, " ", 0, 0.95);
+                else { const scan = spy === Math.floor(t * 6) % 12; s.put(i, j, scan ? "-" : (i + j) % 3 ? " " : ".", scan ? 0.3 : 0.12, 0); }
+                continue;
+              }
+              if (x > -0.31 - eps && x < 0.31 + eps && y > 0.08 - eps && y < 0.5 + eps) { s.put(i, j, "#", 0.8, 0.12); continue; }
+              if (x > 0.08 && x < 0.36 && y > -0.29 && y < -0.23) { s.put(i, j, "_", 0.85, 0); continue; }
+              if (x > -0.38 && x < 0.38 && y > 0.01 && y < 0.57) b *= 0.82;
+            }
+            const bb = clamp(b + (hash(i, j) - 0.5) * 0.1, 0, 1);
+            s.put(i, j, RAMPA[1 + Math.min(8, Math.floor(bb * 9))], 0.22 + 0.55 * bb, 0.02 + 0.07 * bb);
+          }
+        }
+      },
+    };
+  }
+
+  // ── B · passeia como as carpas (sprite de traço, pulinhos, pegadas, bit) ──
+  function cenaPasseio() {
+    const SP = [
+      ".----------------.",
+      "|  ____________  |",
+      "| |            | |",
+      "| |            | |",
+      "| |            | |",
+      "| |            | |",
+      "| |            | |",
+      "| |            | |",
+      "| |____________| |",
+      "|                |",
+      "|                |",
+      "|                |",
+      "|  ==     [____] |",
+      "|                |",
+      "|                |",
+      "|                |",
+      "'----------------'",
+      "  |____________|  ",
+    ];
+    const SW = 18, SH = 18, PE = 17, AMASSA = 10;
+    let p = null, v = { x: 26, y: 8 }, rumo = 0.3, fase = 0, comida = [], feliz = 0, piscaFim = 0, proxPisca = 2, energia = null, puloAntes = 0;
+    return {
+      resize(s) { energia = new Float32Array(s.cols * s.rows); if (!p) p = { x: s.W * 0.56, y: s.H * 0.3 }; },
+      clique(s, x, y) {
+        comida.push({ x: clamp(x, s.W * 0.47 + 30, s.W * 0.93 - 30), y: clamp(y, s.H * 0.1, s.H * 0.92), t: s.t });
+        if (comida.length > 4) comida.shift();
+      },
+      quadro(s) {
+        const { W, H, t, dt } = s, w = SW * CW, h = SH * CH;
+        const x0 = W * 0.47, x1 = W * 0.93 - w, y0 = H * 0.03, y1 = H * 0.97 - h;
+        const cx = p.x + w / 2, cy = p.y + h * 0.45;
+        comida = comida.filter((c) => t - c.t < 9);
+        let alvo = null, dmin = 1e9;
+        for (const c of comida) { const dd = Math.hypot(c.x - cx, c.y - cy); if (dd < dmin) { dmin = dd; alvo = c; } }
+        let dvx, dvy;
+        if (alvo) {
+          const dx = alvo.x - cx, dy = alvo.y - cy, dd = Math.hypot(dx, dy) || 1, vel = dd > 60 ? 120 : 60;
+          dvx = (dx / dd) * vel; dvy = (dy / dd) * vel;
+          if (dd < 28) { comida.splice(comida.indexOf(alvo), 1); feliz = 1.5; s.onda(alvo.x, alvo.y, 0.7); }
+        } else {
+          rumo += (Math.sin(t * 0.63) * 0.9 + Math.sin(t * 1.7 + 2) * 0.5) * dt;
+          dvx = Math.cos(rumo) * 36; dvy = Math.sin(rumo) * 24;
+        }
+        const m = 50; let naParede = false;
+        if (p.x < x0 + m) { dvx += (x0 + m - p.x) * 1.5; naParede = true; }
+        if (p.x > x1 - m) { dvx -= (p.x - (x1 - m)) * 1.5; naParede = true; }
+        if (p.y < y0 + m) { dvy += (y0 + m - p.y) * 1.5; naParede = true; }
+        if (p.y > y1 - m) { dvy -= (p.y - (y1 - m)) * 1.5; naParede = true; }
+        if (!alvo && naParede) rumo = Math.atan2(dvy, dvx);
+        const k = Math.min(1, dt * (alvo ? 3 : 1.2));
+        v.x += (dvx - v.x) * k; v.y += (dvy - v.y) * k;
+        p.x = clamp(p.x + v.x * dt, x0, x1); p.y = clamp(p.y + v.y * dt, y0, y1);
+        const vel = Math.hypot(v.x, v.y);
+        feliz = Math.max(0, feliz - dt);
+        fase += dt * (2.4 + vel / 24) * (feliz > 0 ? 1.5 : 1);
+        const sinf = Math.abs(Math.sin(fase));
+        const pulo = Math.round(sinf * (feliz > 0 ? 2.4 : 1.1));
+        const amassa = sinf < 0.12;
+        const ci = Math.round(p.x / CW), cj = Math.round(p.y / CH);
+
+        // pegadas: cada pouso deixa duas marcas que somem devagar
+        const dec = Math.exp(-dt * 0.5);
+        for (let n = 0; n < energia.length; n++) energia[n] *= dec;
+        if (pulo === 0 && puloAntes > 0) {
+          for (const ii of [ci + 3, ci + 4, ci + SW - 5, ci + SW - 4]) {
+            const jj = cj + SH - 1;
+            if (ii >= 0 && jj >= 0 && ii < s.cols && jj < s.rows) energia[jj * s.cols + ii] = 1;
+          }
+        }
+        puloAntes = pulo;
+        for (let n = 0; n < energia.length; n++) {
+          const e = energia[n];
+          if (e > 0.05) s.put(n % s.cols, Math.floor(n / s.cols), e > 0.55 ? ":" : ".", Math.min(0.55, e * 0.6));
+        }
+        // bits
+        for (const c of comida) {
+          const idade = t - c.t, ii = Math.floor(c.x / CW), jj = Math.floor(c.y / CH);
+          s.put(ii, jj, idade < 0.25 ? "*" : "o", 1, 0.2, 1);
+          if (idade < 0.7 && Math.floor(idade * 10) % 2) { s.put(ii - 1, jj, ".", 0.7, 0, 1); s.put(ii + 1, jj, ".", 0.7, 0, 1); }
+        }
+        // olhar
+        let olhar = null;
+        if (alvo) olhar = alvo;
+        else if (s.mouse.dentro && Math.hypot(s.mouse.x - cx, s.mouse.y - cy) < 320) olhar = s.mouse;
+        const gx = Math.round(clamp(olhar ? (olhar.x - cx) / 90 : v.x / 30, -2, 2));
+        const gy = Math.round(clamp(olhar ? (olhar.y - cy) / 90 : v.y / 40, -1, 1));
+        if (t > proxPisca) { piscaFim = t + 0.13; proxPisca = t + 2 + Math.random() * 3.5; }
+        const piscando = t < piscaFim;
+
+        // o Mac
+        const topo = cj - pulo + (amassa ? 1 : 0);
+        const linhas = [...SP.keys()].filter((r) => !(amassa && r === AMASSA));
+        linhas.forEach((r, ri) => {
+          const linha = SP[r], jj = topo + ri;
+          for (let c = 0; c < SW; c++) {
+            const ch = linha[c], ii = ci + c;
+            if (r === PE) { if (ch !== " ") s.put(ii, jj, ch, 0.85, 0.05); continue; }
+            if (r >= 2 && r <= 7 && c >= 3 && c <= 14) { s.put(ii, jj, " ", 0, 0); continue; }
+            if (ch === " ") s.put(ii, jj, " ", 0, 0.06); else s.put(ii, jj, ch, 0.9, 0.08);
+          }
+        });
+        const ey = topo + 3 + gy;
+        for (const ex of [ci + 5 + gx, ci + 10 + gx]) {
+          if (piscando) { s.put(ex, ey + 1, "-", 0.95); s.put(ex + 1, ey + 1, "-", 0.95); }
+          else if (feliz > 0) { s.put(ex, ey + 1, "/", 1); s.put(ex + 1, ey + 1, "\\", 1); }
+          else for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) s.put(ex + a, ey + b, " ", 0, 0.95);
+        }
+        const boca = feliz > 0 ? "\\____/" : "\\__/";
+        for (let c = 0; c < boca.length; c++) s.put(ci + (feliz > 0 ? 6 : 7) + c, topo + 7, boca[c], 0.9);
+      },
+    };
+  }
+
+  // ── C · mosaico vivo (silhueta em células, textura que escorre, hachura) ──
+  function cenaMosaico() {
+    let pulo = 0, susto = 0, piscaFim = 0, proxPisca = 1.8, lado = 0.1, cls = null, U = null, V = null;
+    function classe(u, v, lado) {
+      const dv = lado * 0.6;
+      if (u >= -0.36 && u <= 0.26 && v >= -0.46 && v <= 0.36) {
+        if (u >= -0.25 && u <= 0.15 && v >= -0.355 && v <= -0.025) return 5;
+        if (u >= -0.29 && u <= 0.19 && v >= -0.395 && v <= 0.015) return 4;
+        if (u >= -0.01 && u <= 0.18 && v >= 0.13 && v <= 0.16) return 6;
+        if (u >= -0.315 && u <= -0.28 && v >= 0.25 && v <= 0.28) return 8;
+        return 1;
+      }
+      if (u > 0.26 && u <= 0.26 + lado) { const k = (u - 0.26) / lado; if (v >= -0.46 - dv * k && v <= 0.36 - dv * k) return 2; }
+      if (v < -0.46 && v >= -0.46 - dv) { const k = (-0.46 - v) / dv; if (u >= -0.36 + lado * k && u <= 0.26 + lado * k) return 3; }
+      if (u >= -0.29 && u <= 0.19 && v > 0.36 && v <= 0.43) return 7;
+      return 0;
+    }
+    return {
+      resize(s) { const n = s.cols * s.rows; cls = new Int8Array(n); U = new Float32Array(n); V = new Float32Array(n); },
+      clique(s, x, y) {
+        pulo = 1;
+        const cx = s.W * 0.62, cy = s.H * 0.45;
+        if (Math.abs(x - cx) < s.H * 0.35 && Math.abs(y - cy) < s.H * 0.45) susto = 1;
+      },
+      quadro(s) {
+        const { W, H, t, dt, cols, rows } = s;
+        const Hm = H * 0.78, cx = W * 0.62;
+        pulo = Math.max(0, pulo - dt * 1.8); susto = Math.max(0, susto - dt);
+        const fasePulo = 1 - pulo;
+        const salto = pulo > 0 ? Math.sin(fasePulo * Math.PI) * H * 0.07 : 0;
+        const pouso = pulo > 0 && fasePulo > 0.86;
+        const resp = Math.sin(t * 1.7);
+        const sy = 1 + resp * 0.018 - (pouso ? 0.06 : 0) + (pulo > 0 && !pouso ? 0.03 : 0);
+        const sx = 1 - resp * 0.01 + (pouso ? 0.045 : 0);
+        const baseY = H * 0.49 + 0.43 * Hm - salto;
+        const cy = baseY - 0.43 * Hm;
+        const mx = s.mouse.dentro ? clamp((s.mouse.x - cx) / (W * 0.3), -1, 1) : 0;
+        const my = s.mouse.dentro ? clamp((s.mouse.y - (cy - 0.19 * Hm)) / (H * 0.4), -1, 1) : 0;
+        lado += (0.1 - mx * 0.05 - lado) * Math.min(1, dt * 3);
+        const inclina = Math.sin(t * 0.8) * 0.035 + mx * 0.03;
+        if (t > proxPisca) { piscaFim = t + 0.13; proxPisca = t + 2.2 + Math.random() * 3; }
+        const perto = s.mouse.dentro && Math.abs(s.mouse.x - cx) < Hm * 0.4 && Math.abs(s.mouse.y - cy) < Hm * 0.5;
+        const modo = susto > 0 ? "surpreso" : t < piscaFim ? "piscando" : perto ? "atento" : "normal";
+        const gx = Math.round(clamp(mx * 2.4, -2, 2)), gy = Math.round(clamp(my * 1.4, -1, 1));
+
+        // sombra
+        const rx = 0.36 * Hm * (1 - (salto / (H * 0.07)) * 0.35), ry = 0.03 * Hm, sy0 = H * 0.49 + 0.44 * Hm;
+        for (let j = Math.floor((sy0 - ry) / CH); j <= Math.ceil((sy0 + ry) / CH); j++)
+          for (let i = Math.floor((cx - 0.05 * Hm - rx) / CW); i <= Math.ceil((cx - 0.05 * Hm + rx) / CW); i++) {
+            const ex = (i * CW + CW / 2 - (cx - 0.05 * Hm)) / rx, ey = (j * CH + CH / 2 - sy0) / ry;
+            if (ex * ex + ey * ey < 1) s.put(i, j, ".", 0.2);
+          }
+
+        const i0 = Math.max(0, Math.floor((cx - 0.5 * Hm) / CW)), i1 = Math.min(cols - 1, Math.ceil((cx + 0.5 * Hm) / CW));
+        const j0 = Math.max(0, Math.floor((baseY - 1.02 * Hm) / CH)), j1 = Math.min(rows - 1, Math.ceil((baseY + 0.03 * Hm) / CH));
+        for (let j = j0; j <= j1; j++) {
+          const v = 0.43 + (j * CH + CH / 2 - baseY) / (Hm * sy);
+          for (let i = i0; i <= i1; i++) {
+            const u = (i * CW + CW / 2 - cx) / (Hm * sx) + (v - 0.43) * inclina;
+            const id = j * cols + i;
+            cls[id] = classe(u, v, lado); U[id] = u; V[id] = v;
+          }
+        }
+        const viz = (i, j) => (i < i0 || i > i1 || j < j0 || j > j1 ? 0 : cls[j * cols + i]);
+        for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+          const id = j * cols + i, c = cls[id];
+          if (!c) continue;
+          if (!viz(i - 1, j) || !viz(i + 1, j) || !viz(i, j - 1) || !viz(i, j + 1)) { s.put(i, j, "#", 0.7, 0.13); continue; }
+          if (c === 1) {
+            const n = ruido(i * 0.21 + t * 0.55, j * 0.21 - t * 0.25) * 0.65 + ruido(i * 0.53 - t * 0.8, j * 0.53 + t * 0.3) * 0.35;
+            const luz = 1 - clamp((U[id] + 0.36) / 0.62, 0, 1) * 0.6;
+            s.put(i, j, " .:+xX%"[1 + Math.min(5, Math.floor(n * 6))], (0.2 + 0.42 * n) * (perto ? 1.2 : 1), 0.05 + 0.08 * luz);
+          } else if (c === 2) {
+            if (viz(i - 1, j) === 1) s.put(i, j, "#", 0.85, 0.14);
+            else s.put(i, j, (i + j) % 2 ? " " : "/", 0.55, 0.02);
+          } else if (c === 3) {
+            if (viz(i, j + 1) === 1) s.put(i, j, "#", 0.85, 0.14);
+            else s.put(i, j, i % 2 ? "-" : "=", 0.38, 0.1);
+          } else if (c === 4) {
+            const dentro = viz(i - 1, j) === 5 || viz(i + 1, j) === 5 || viz(i, j - 1) === 5 || viz(i, j + 1) === 5;
+            s.put(i, j, dentro ? "+" : ".", dentro ? 0.75 : 0.22, dentro ? 0.2 : 0.17);
+          } else if (c === 5) {
+            const spx = Math.floor(((U[id] + 0.25) / 0.4) * 16), spy = Math.floor(((V[id] + 0.355) / 0.33) * 12);
+            if (acesa(spx, spy, gx, gy, modo)) s.put(i, j, " ", 0, 0.95);
+            else { const scan = spy === Math.floor(t * 7) % 12; s.put(i, j, scan ? "-" : (i + j) % 3 ? " " : ".", scan ? 0.25 : 0.1, 0); }
+          } else if (c === 6) s.put(i, j, "_", 0.9, 0);
+          else if (c === 7) s.put(i, j, "=", 0.4, 0.07);
+          else if (c === 8) s.put(i, j, "*", 1, 0.25, 1);
+        }
+      },
+    };
+  }
+
+  const CENAS = { giro: cenaGiro, passeio: cenaPasseio, mosaico: cenaMosaico };
+  document.querySelectorAll(".mesa").forEach((el) => criarMesa(el, CENAS[el.dataset.cena]()));
+  document.querySelectorAll(".proto").forEach((sec) => {
+    const mesa = sec.querySelector(".mesa"), ver = sec.querySelector(".ver");
+    ver.addEventListener("click", () => {
+      const on = mesa.classList.toggle("translucido");
+      ver.textContent = on ? "mostrar as janelas" : "ver o Mac inteiro";
+    });
+  });
+  document.querySelectorAll(".escolher").forEach((b) =>
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".escolher").forEach((o) => { o.classList.remove("sel"); o.textContent = "escolher este"; });
+      b.classList.add("sel"); b.textContent = "escolhido ✓";
+    }),
+  );
+})();
+</script>
+</body>
+</html>

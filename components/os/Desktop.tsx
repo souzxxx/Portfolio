@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { motion, useDragControls } from "framer-motion";
+import { motion, useDragControls, useMotionValue } from "framer-motion";
 import { Janela } from "./Janela";
 import { PixelIcon, type NomeIcone } from "./PixelIcon";
 import { Terminal } from "./Terminal";
@@ -38,11 +38,19 @@ import type { Lang } from "@/lib/i18n";
  * A entrada (`.janela-entra`) é CSS, num wrapper por fora do elemento que o
  * framer arrasta: animação de CSS em `transform` venceria o transform inline do
  * arraste e a janela voltaria para o lugar a cada frame.
+ *
+ * Atrás das janelas mora o Mac gigante em ASCII (MacAscii): um canvas no z
+ * negativo da section, que se ancora no layout das janelas para deixar o
+ * rosto à vista. Chega depois da hidratação, como a gravura.
  */
 const EngravedObject = dynamic(
   () => import("../hero/EngravedObject").then((m) => m.EngravedObject),
   { ssr: false, loading: () => null },
 );
+const MacAscii = dynamic(() => import("../mesa-ascii/MacAscii").then((m) => m.MacAscii), {
+  ssr: false,
+  loading: () => null,
+});
 
 type IdJanela = "leiame" | "render" | "terminal" | "agora" | "lixeira";
 
@@ -87,8 +95,33 @@ function JanelaMesa({
   children: ReactNode;
 }) {
   const controles = useDragControls();
+  // O deslocamento do arraste. Num resize do navegador o framer reescalona por
+  // conta própria a posição de tudo que arrasta com `dragConstraints` em ref
+  // (`scalePositionWithinConstraints`) — move até janela que ninguém tocou, e o
+  // LEIA-ME ia parar sob a MenuBar, o TERMINAL sobre o AGORA. A escadinha é a
+  // disposição que vale: depois do resize, todo arraste volta a zero. O rAF
+  // roda depois do handler síncrono do framer, qualquer que seja a ordem dos
+  // listeners; quem tinha arrastado uma janela perde a arrumação, e tudo bem.
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  useEffect(() => {
+    let quadro = 0;
+    const zerar = () => {
+      cancelAnimationFrame(quadro);
+      quadro = requestAnimationFrame(() => {
+        x.set(0);
+        y.set(0);
+      });
+    };
+    window.addEventListener("resize", zerar);
+    return () => {
+      window.removeEventListener("resize", zerar);
+      cancelAnimationFrame(quadro);
+    };
+  }, [x, y]);
   return (
     <div
+      data-janela={id}
       className={clsx("janela-entra relative", className)}
       style={{ "--ordem": ordem, zIndex: z } as CSSProperties}
     >
@@ -100,6 +133,7 @@ function JanelaMesa({
         dragElastic={0.06}
         dragConstraints={limites}
         onPointerDownCapture={() => aFrente(id)}
+        style={{ x, y }}
         className="h-full"
       >
         <Janela
@@ -179,6 +213,7 @@ export function Desktop({
   projetos: { slug: string; name: string; apelido: string }[];
 }) {
   const mesa = useRef<HTMLDivElement>(null);
+  const secao = useRef<HTMLElement>(null);
   const arrastavel = useArrastavel();
   const [pilha, setPilha] = useState<IdJanela[]>(["agora", "render", "terminal", "leiame"]);
   const [fechadas, setFechadas] = useState<Set<IdJanela>>(new Set(["lixeira"]));
@@ -211,14 +246,20 @@ export function Desktop({
   // `isolate`: o z das janelas (até 70) e da Lixeira (90) vale só dentro da
   // mesa. Abaixo de 760 px de altura a mesa não é sticky, não criava contexto
   // de empilhamento, e uma janela arrastada para o canto cobria o pet (z-60).
+  // É também o que põe o canvas do Mac (-z-10) acima do pontilhado da mesa.
+  // No sticky a linha da grade tem a altura da mesa (`minmax(0,1fr)`), não a
+  // do conteúdo: o LEIA-ME passa do fim em telas baixas, e uma linha `auto`
+  // cresceria com ele, esticando a coluna do meio e levando o AGORA para fora.
   return (
     <section
+      ref={secao}
       aria-labelledby="hero-nome"
       className="mesa relative isolate overflow-hidden pt-7 text-cream [@media(min-width:1024px)_and_(min-height:760px)]:sticky [@media(min-width:1024px)_and_(min-height:760px)]:top-0 [@media(min-width:1024px)_and_(min-height:760px)]:h-[100svh]"
     >
+      <MacAscii mesa={secao} />
       <div
         ref={mesa}
-        className="relative mx-auto grid h-full max-w-[110rem] gap-x-8 gap-y-6 px-[var(--gutter)] pb-16 pt-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] lg:pb-10 lg:pt-8"
+        className="relative mx-auto grid h-full max-w-[110rem] gap-x-8 gap-y-6 px-[var(--gutter)] pb-16 pt-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] lg:pb-10 lg:pt-8 [@media(min-width:1024px)_and_(min-height:760px)]:grid-rows-[minmax(0,1fr)]"
       >
         {/* ── LEIA-ME ─────────────────────────────────────────────── */}
         <JanelaMesa
@@ -306,7 +347,12 @@ export function Desktop({
         </JanelaMesa>
 
         {/* ── COLUNA DO MEIO: gravura, terminal, agora ─────────────── */}
-        <div className="flex min-w-0 flex-col gap-6 lg:gap-0">
+        {/* Escadinha: as três janelas alinham pela borda direita e nenhuma
+            cobre outra. A faixa `flex-1` entre o RENDER e o TERMINAL prende
+            o RENDER no topo e o AGORA no fim da coluna; em tela alta a altura
+            que sobra vira faixa, por onde o Mac aparece. Quando falta altura,
+            encolhem o RENDER e o TERMINAL (`.mesa-coluna`, globals.css). */}
+        <div className="mesa-coluna flex min-w-0 flex-col gap-6 lg:items-end lg:gap-0">
           {fechadas.has("render") ? null : (
             <JanelaMesa
               id="render"
@@ -318,7 +364,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("render")}
               rotuloFechar={os.janelas.fechar}
-              className="hidden w-[min(100%,19.5rem)] self-end lg:block lg:mr-6"
+              className="hidden w-[min(100%,var(--render))] lg:block"
               corpoClassName="relative aspect-square bg-carvao"
             >
               <EngravedObject />
@@ -328,6 +374,8 @@ export function Desktop({
               </p>
             </JanelaMesa>
           )}
+
+          <div aria-hidden className="hidden min-h-12 flex-1 lg:block" />
 
           {fechadas.has("terminal") ? null : (
             <JanelaMesa
@@ -340,7 +388,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("terminal")}
               rotuloFechar={os.janelas.fechar}
-              className="h-[15.5rem] w-full lg:-mt-16 lg:max-w-[30rem]"
+              className="h-[var(--terminal)] w-full lg:max-w-[30rem]"
               corpoClassName="h-[calc(100%-22px)]"
             >
               <Terminal lang={lang} d={os.terminal} projetos={projetos} />
@@ -358,7 +406,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("agora")}
               rotuloFechar={os.janelas.fechar}
-              className="w-full lg:ml-auto lg:mr-2 lg:mt-5 lg:w-[19rem]"
+              className="w-full lg:mt-2 lg:w-[19rem]"
               corpoClassName="bg-carvao text-cream"
             >
               <dl className="divide-y divide-dashed divide-cream/20 px-3 py-1">
@@ -402,7 +450,7 @@ export function Desktop({
 
         {/* ── LIXEIRA (easter egg) ─────────────────────────────────── */}
         {fechadas.has("lixeira") ? null : (
-          <div className="absolute inset-0 z-[90] grid place-items-center p-6">
+          <div data-janela="lixeira" className="absolute inset-0 z-[90] grid place-items-center p-6">
             <Janela
               titulo={os.janelas.lixeira}
               sombra="breu"

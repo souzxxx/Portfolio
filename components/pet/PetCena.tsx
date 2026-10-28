@@ -44,11 +44,14 @@
  * a tela troca de pixel (piscar, dormir, hover continuam).
  *
  * `frameloop="demand"` continua, mas com outro papel. Enquanto o movimento é
- * permitido, o useFrame pede o próximo quadro SEMPRE — respiração que para
- * não é respiração, e num canvas de 150 px o custo é pequeno (decisão
- * registrada no ledger do plano: o pedido mais recente do dono vence o
- * "parado, zero quadros" do spec). Com movimento reduzido nada anda, e aí o
- * demand faz o que fazia: só existe quadro quando um evento pede.
+ * permitido e o pet está em cena, o useFrame pede o próximo quadro a cada
+ * quadro — respiração que para não é respiração, e num canvas de 150 px o
+ * custo é pequeno (decisão registrada no ledger do plano: o pedido mais
+ * recente do dono vence o "parado, zero quadros" do spec). Fora de cena
+ * (`estado.oculto`: a home com a mesa à vista) ninguém vê o quadro, e nem o
+ * useFrame nem os sentidos pedem outro; quem traz o pet de volta chama
+ * `invalidar()` (Pet.tsx). Com movimento reduzido nada anda, e aí o demand
+ * faz o que fazia: só existe quadro quando um evento pede.
  */
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -391,7 +394,12 @@ function MacGravado({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => 
   }, []);
 
   useEffect(() => {
-    estado.invalidar = invalidate;
+    // Fora de cena, nem os sentidos pedem quadro: sem isto, mexer o mouse na
+    // mesa desenhava o pet escondido a cada `pointermove`. Quem o traz de
+    // volta chama `invalidar()` depois de `oculto` desligar (Pet.tsx).
+    estado.invalidar = () => {
+      if (!estado.oculto) invalidate();
+    };
     invalidate();
     return () => {
       estado.invalidar = () => {};
@@ -595,7 +603,8 @@ function MacGravado({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => 
     estado.rot.x = a.rxOlhar.x + a.rxRolagem.x;
     estado.rot.y = a.ryOlhar.x;
 
-    invalidate();
+    // Fora de cena (home com a mesa à vista) ninguém vê o quadro: para de pedir.
+    if (!estado.oculto) invalidate();
   });
 
   return (
@@ -674,7 +683,8 @@ export function PetCena({ estado, onPronto }: { estado: EstadoPet; onPronto?: ()
       // da entrada `.pet-entra` (0.6 → 1) no wrapper. Medido no meio dela, o
       // canvas ficava em 130 px dentro da caixa de 150 até a primeira
       // rolagem: o ResizeObserver não dispara quando só o transform muda.
-      // offsetWidth/offsetHeight ignoram transform.
+      // offsetWidth/offsetHeight ignoram transform. Vale igual para o
+      // teletransporte da home, que estica e afina o corpo por transform.
       resize={{ offsetSize: true }}
       // Mesmo raciocínio do hero: o shader faz o próprio AA por fwidth.
       gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}

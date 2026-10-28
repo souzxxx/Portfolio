@@ -43,10 +43,13 @@ export function Home({ lang }: { lang: Lang }) {
         {/* A mesa fica presa no topo (sticky, só em tela larga e alta) enquanto
             o wordmark de papel sobe por cima dela, como uma cortina. O wrapper
             limita o sticky: passado o wordmark, a mesa vai embora com o scroll
-            em vez de continuar renderizando atrás do site inteiro. */}
+            em vez de continuar renderizando atrás do site inteiro.
+            `data-cortina` é por onde o pet mede essa cortina: na home ele só
+            entra quando a borda de cima do SOUZXXX encosta na MenuBar
+            (components/pet/useTeleporte.ts). */}
         <div className="relative">
           <Desktop lang={lang} hero={d.hero} os={d.os} projetos={destaques} />
-          <div className="relative z-10">
+          <div className="relative z-10" data-cortina>
             <CutWordmark />
           </div>
         </div>

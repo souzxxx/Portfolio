@@ -27,6 +27,13 @@ export interface EstadoPet {
   rot: { x: number; y: number };
   /** Contador de pulinhos: cada incremento dispara um hop na PetCena. */
   pulo: number;
+  /**
+   * true enquanto o pet está fora de cena (na home, com a mesa à vista). A
+   * PetCena para de pedir quadro enquanto ele vale: a cena fica montada e
+   * pronta, para o primeiro teletransporte não esperar download nem shader,
+   * mas não gasta GPU desenhando o que ninguém vê.
+   */
+  oculto: boolean;
   invalidar: () => void;
 }
 
@@ -40,6 +47,7 @@ export function criarEstado(): EstadoPet {
     reduzido: false,
     rot: { x: 0, y: 0 },
     pulo: 0,
+    oculto: false,
     invalidar: () => {},
   };
 }
