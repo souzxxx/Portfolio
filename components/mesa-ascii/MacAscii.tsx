@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { LIMIAR_PX } from "../pet/teleporte";
 import { ancorarMac, olhosEmRepouso, type Ancora, type Ret } from "./ancora";
 import { criarMac, desenharMac, pertoDoMac, pularMac, redimensionarMac, type EntradaMac } from "./cena";
 import { CELULA_A, CELULA_L, COR_OURO, criarQuadro, limparQuadro, type Quadro } from "./grade";
@@ -34,7 +35,18 @@ import { MAX_ONDAS, ONDA_PASSO_PX, desenharOndas, type Onda } from "./ondas";
  * O RELÓGIO da cena começa em 0 e anda pelo `dt` de cada quadro (no máximo
  * 50 ms, como no protótipo), não pelo `performance.now()`: a primeira piscada
  * é marcada para 1.8 s e dispararia logo no primeiro quadro. Ele só anda com
- * o laço ligado, e o laço só liga com a mesa na tela e a aba visível.
+ * o laço ligado, e o laço só liga com a mesa na tela, a aba visível e o
+ * SOUZXXX ainda abaixo da MenuBar. Esse último é o que o IntersectionObserver
+ * não vê: no sticky a mesa continua cruzando a viewport por mais ~300–420 px
+ * de rolagem depois que o SOUZXXX (`[data-cortina]`, em Home.tsx) a cobriu
+ * inteira. Com a borda de cima dele na linha da MenuBar, a mesma em que o pet
+ * entra (`LIMIAR_PX`), o Mac já saiu de cena (spec §5.1) e não pinta nada.
+ *
+ * O CLIQUE na mesa vazia sai no `pointerdown` do mouse, sem esperar soltar.
+ * No toque e na caneta ele espera o `click`: o `pointerdown` deles chega antes
+ * de o navegador decidir se o dedo vai tocar ou rolar, e toda rolagem que
+ * começasse na mesa faria o Mac pular e se assustar. Rolar não é clicar na
+ * mesa (spec §3.2), e o `click` só sai de um toque que não virou rolagem.
  *
  * Sem movimento (`prefers-reduced-motion`), um quadro parado, redesenhado só
  * quando a medida muda; nada de laço nem de mouse. Abaixo de 1024 px nada
@@ -163,6 +175,8 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
     let antes = -1;
     let raf = 0;
     let naTela = false;
+    /** O SOUZXXX já cobriu a mesa: a borda de cima dele na linha da MenuBar. */
+    let coberta = false;
     let msTotal = 0;
 
     const w = window as JanelaDeTeste;
@@ -303,7 +317,7 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
     };
 
     const ligar = () => {
-      const deve = !reduzido && naTela && !document.hidden;
+      const deve = !reduzido && naTela && !coberta && !document.hidden;
       if (deve && !raf) {
         antes = -1;
         raf = requestAnimationFrame(laco);
@@ -337,7 +351,23 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
     io.observe(secao);
     document.addEventListener("visibilitychange", ligar);
 
-    const naMesa = (e: PointerEvent) => {
+    // A cortina: uma leitura por quadro, no máximo, no scroll e no resize.
+    let lendoCortina = 0;
+    const lerCortina = () => {
+      lendoCortina = 0;
+      const cortina = document.querySelector("[data-cortina]");
+      coberta = !!cortina && cortina.getBoundingClientRect().top <= LIMIAR_PX;
+      ligar();
+    };
+    const aoRolar = () => {
+      if (!lendoCortina) lendoCortina = requestAnimationFrame(lerCortina);
+    };
+    window.addEventListener("scroll", aoRolar, { passive: true });
+    window.addEventListener("resize", aoRolar);
+    // aberta já rolada (recarregar no meio da página): nasce parado
+    lerCortina();
+
+    const naMesa = (e: MouseEvent) => {
       const r = secao.getBoundingClientRect();
       return { x: e.clientX - r.left - secao.clientLeft, y: e.clientY - r.top - secao.clientTop };
     };
@@ -358,7 +388,8 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
     const aoSair = () => {
       mouse = null;
     };
-    const aoApertar = (e: PointerEvent) => {
+    /** Clique na mesa vazia: onda forte, pulo e, se foi perto, susto. */
+    const clicarNaMesa = (e: MouseEvent) => {
       if (e.button !== 0 || !ancora) return;
       if ((e.target as Element | null)?.closest?.(NAO_E_MESA)) return;
       const p = naMesa(e);
@@ -367,20 +398,36 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
       pularMac(mac, perto, t);
       if (teste) teste.pulos++;
     };
+    // Quem apertou por último decide quem atende o clique: o mouse já no
+    // aperto, o toque e a caneta só no `click` que vem depois (ver o topo).
+    // O `click` do mouse chega também, e é ignorado: o pulo já saiu.
+    let toque = false;
+    const aoApertar = (e: PointerEvent) => {
+      toque = e.pointerType === "touch" || e.pointerType === "pen";
+      if (!toque) clicarNaMesa(e);
+    };
+    const aoClicar = (e: MouseEvent) => {
+      if (toque) clicarNaMesa(e);
+    };
     secao.addEventListener("pointermove", aoMover);
     secao.addEventListener("pointerleave", aoSair);
     secao.addEventListener("pointerdown", aoApertar);
+    secao.addEventListener("click", aoClicar);
 
     return () => {
       cancelAnimationFrame(raf);
       raf = 0;
+      cancelAnimationFrame(lendoCortina);
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", ligar);
+      window.removeEventListener("scroll", aoRolar);
+      window.removeEventListener("resize", aoRolar);
       secao.removeEventListener("animationend", aoAcabarEntrada);
       secao.removeEventListener("pointermove", aoMover);
       secao.removeEventListener("pointerleave", aoSair);
       secao.removeEventListener("pointerdown", aoApertar);
+      secao.removeEventListener("click", aoClicar);
       if (teste && w.__sxMacAscii === teste) delete w.__sxMacAscii;
     };
   }, [cabe, reduzido, mesa]);

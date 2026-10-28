@@ -12,10 +12,20 @@
  * dos rótulos, o laço rodando, o clique na mesa
  * vazia fazendo ele pular sem roubar o clique das janelas, o custo por
  * quadro, o resize de 1512 para 1024 (e de volta a 1920, com as janelas
- * voltando à escadinha) e o modo sem movimento. Grava um vídeo de ~8 s (e um
+ * voltando à escadinha) e o modo sem movimento. O laço para quando o SOUZXXX
+ * cobre a mesa e volta quando ele desce; numa tela de toque, rolar a partir
+ * da mesa não faz o Mac pular, e um toque faz. Grava um vídeo de ~8 s (e um
  * GIF, se houver ffmpeg).
  *
- * Uso: `npm run dev` (ou `next start`) em outro terminal e
+ * A escadinha e o Mac em todos os tamanhos rodam em cada rota de MESA_PATHS
+ * (padrão `/,/en`): o AGORA em inglês quebra em outras linhas e muda a altura
+ * da coluna do meio. O resto roda em `/`.
+ *
+ * Todo erro de página (`pageerror`) e todo `console.error`, de qualquer
+ * contexto, reprova. Sem filtro: a verificação roda no `next start`, onde o
+ * aviso de `data-boot` do React de desenvolvimento não existe.
+ *
+ * Uso: `next start` (ou `npm run dev`) em outro terminal e
  *   MESA_BASE_URL=http://localhost:3000 npx tsx scripts/verify-mesa.ts
  *
  * Os prints vão para MESA_OUT (padrão /tmp/mesa). Sai com código 1 se algum
@@ -23,11 +33,14 @@
  */
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { execFileSync } from "node:child_process";
-import { mkdir, rename } from "node:fs/promises";
+import { mkdir, rename, stat } from "node:fs/promises";
 
 const BASE = process.env.MESA_BASE_URL ?? "http://localhost:3000";
 const OUT = process.env.MESA_OUT ?? "/tmp/mesa";
+const CAMINHOS = (process.env.MESA_PATHS ?? "/,/en").split(",").filter(Boolean);
 const GL = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"];
+/** A linha da MenuBar, a mesma do gatilho do pet (components/pet/teleporte.ts). */
+const LIMIAR_PX = 28;
 
 /** Do notebook pequeno ao monitor 2K; 1280×720 é o único abaixo do sticky. */
 const TAMANHOS = [
@@ -60,7 +73,20 @@ export function ok(cond: boolean, msg: string) {
   if (!cond) falhas++;
 }
 
+/** Os erros de todas as páginas de todos os contextos; o fim do main reprova se houver. */
+const erros: string[] = [];
+function colherErros(ctx: BrowserContext) {
+  ctx.on("page", (p) => {
+    p.on("pageerror", (e) => erros.push(`${p.url()} pageerror: ${e.message}`));
+    p.on("console", (m) => {
+      if (m.type() === "error") erros.push(`${p.url()} console.error: ${m.text()}`);
+    });
+  });
+}
+
+/** Todo contexto deste script passa por aqui, e é aqui que os erros são colhidos. */
 export async function modoTeste(ctx: BrowserContext) {
+  colherErros(ctx);
   await ctx.addInitScript(() => {
     (window as Window & { __sxMesaTeste?: boolean }).__sxMesaTeste = true;
     try {
@@ -72,8 +98,8 @@ export async function modoTeste(ctx: BrowserContext) {
 /** Abre a home e espera a entrada das janelas acabar: durante a
  *  `.janela-entra` o transform desloca e encolhe os retângulos. As fontes
  *  entram na espera porque a quebra de linha do AGORA muda a altura dele. */
-export async function assentarMesa(p: Page) {
-  await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+export async function assentarMesa(p: Page, caminho = "/") {
+  await p.goto(`${BASE}${caminho}`, { waitUntil: "networkidle" });
   await p.evaluate(async () => {
     await document.fonts.ready;
     const a = document.getAnimations().filter((x) => {
@@ -538,6 +564,116 @@ async function reduzido(browser: Browser) {
   await ctx.close();
 }
 
+/**
+ * Rola até a borda de cima do SOUZXXX (`[data-cortina]`) ficar em `topo` px
+ * da janela, sem a rolagem suave do site (a mesma conta do verify-pet).
+ */
+async function cortinaEm(p: Page, topo: number, espera = 400) {
+  await p.evaluate((t) => {
+    document.documentElement.style.scrollBehavior = "auto";
+    const r = document.querySelector("[data-cortina]")!.getBoundingClientRect();
+    window.scrollTo(0, window.scrollY + r.top - t);
+  }, topo);
+  if (espera) await p.waitForTimeout(espera);
+}
+
+/** Quantos quadros o laço pinta em `ms`. No headless, com o swiftshader e o
+ *  pet dividindo a CPU, são ~8 a 30 por segundo: "roda" é pelo menos 2 (um
+ *  quadro solto poderia ser uma remedida do ResizeObserver). */
+async function quadrosEm(p: Page, ms: number) {
+  const antes = (await lerMac(p))!.quadros;
+  await p.waitForTimeout(ms);
+  return (await lerMac(p))!.quadros - antes;
+}
+
+/**
+ * Com o SOUZXXX na MenuBar a mesa está coberta e o Mac fora de cena (spec
+ * §5.1): o laço para, mesmo com a section ainda cruzando a viewport (no
+ * sticky, por mais ~300–420 px; fora dele, pela faixa atrás da MenuBar), e
+ * volta quando o SOUZXXX desce de novo.
+ */
+async function coberta(browser: Browser, w: number, h: number) {
+  const rotulo = `${w}×${h}`;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, `${rotulo}: \`__sxMacAscii\` ausente`);
+    await ctx.close();
+    return;
+  }
+  await cortinaEm(p, 200);
+  const aVista = await quadrosEm(p, 500);
+  ok(aVista >= 2, `${rotulo}: com o SOUZXXX a 200 px a mesa aparece e o laço roda (${aVista} quadros em 0.5 s)`);
+
+  await cortinaEm(p, 20);
+  const mesa = (await retangulos(p)).mesa;
+  ok(mesa.bottom > 0, `${rotulo}: com o SOUZXXX a 20 px a section ainda cruza a viewport (fundo em ${px(mesa.bottom)} px) — o caso que o IntersectionObserver não pega`);
+  const cobertos = await quadrosEm(p, 600);
+  ok(cobertos === 0, `${rotulo}: com o SOUZXXX a 20 px (≤ ${LIMIAR_PX}) o laço para (${cobertos} quadros em 0.6 s)`);
+
+  await cortinaEm(p, LIMIAR_PX + 10);
+  const deVolta = await quadrosEm(p, 500);
+  ok(deVolta >= 2, `${rotulo}: com o SOUZXXX de volta abaixo da linha (${LIMIAR_PX + 10} px) o laço volta (${deVolta} quadros em 0.5 s)`);
+  await ctx.close();
+}
+
+/**
+ * Numa tela de toque ≥ 1024 px (o iPad deitado) rolar a página com o dedo
+ * na mesa não é clique na mesa vazia: o Mac não pula. Um toque, sim; um
+ * toque numa janela, não. A rolagem é um arraste de toque de verdade pelo
+ * CDP: o `pointerdown` sai no começo, como no aparelho, e o `click` não.
+ */
+async function toque(browser: Browser) {
+  const [w, h] = [1366, 1024];
+  const rotulo = `toque ${w}×${h}`;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: true });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, `${rotulo}: \`__sxMacAscii\` ausente`);
+    await ctx.close();
+    return;
+  }
+  const faixa = await meioDaFaixa(p);
+  const cdp = await ctx.newCDPSession(p);
+
+  // Rolar com o dedo começando na faixa livre (antes de qualquer toque: um
+  // pulo ainda no ar engoliria o aperto da rolagem e o teste passaria à toa).
+  const antes = await pulos(p);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: faixa.x, y: faixa.y }] });
+  for (let i = 1; i <= 10; i++) {
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: faixa.x, y: faixa.y - i * 24 }] });
+    await p.waitForTimeout(16);
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await p.waitForTimeout(700);
+  const rolou = await p.evaluate(() => window.scrollY);
+  const depois = await pulos(p);
+  ok(rolou > 0, `${rotulo}: o arraste do dedo rolou a página (${px(rolou)} px)`);
+  ok(depois === antes, `${rotulo}: rolar com o dedo a partir da mesa não faz o Mac pular (pulos ${antes} → ${depois})`);
+
+  await p.evaluate(() => {
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+  });
+  await p.waitForTimeout(300);
+  const t0 = await pulos(p);
+  await p.touchscreen.tap(faixa.x, faixa.y);
+  await p.waitForTimeout(700);
+  const t1 = await pulos(p);
+  ok(t1 === t0 + 1, `${rotulo}: um toque na faixa faz o Mac pular (pulos ${t0} → ${t1})`);
+
+  const nome = (await p.locator("#hero-nome").boundingBox())!;
+  await p.touchscreen.tap(nome.x + nome.width / 2, nome.y + nome.height / 2);
+  await p.waitForTimeout(300);
+  const t2 = await pulos(p);
+  ok(t2 === t1, `${rotulo}: um toque dentro do LEIA-ME não faz pular (pulos ${t1} → ${t2})`);
+  await ctx.close();
+}
+
 /** ~8 s de vídeo: o mouse passeia pela faixa, chega perto do Mac e clica
  *  duas vezes na mesa. Vira GIF se houver ffmpeg no PATH. */
 async function video(browser: Browser) {
@@ -608,27 +744,30 @@ async function video(browser: Browser) {
     ],
     { stdio: "inherit" },
   );
-  console.log(`  GIF em ${gif}`);
+  console.log(`  GIF em ${gif} (cortado em ${inicio.toFixed(2)} s, ${((await stat(gif)).size / 1e6).toFixed(1)} MB)`);
 }
 
 async function main() {
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch({ args: GL });
 
-  for (const [w, h] of TAMANHOS) {
+  for (const caminho of CAMINHOS) for (const [w, h] of TAMANHOS) {
+    // `/` fica com o rótulo de sempre; as outras rotas levam o nome junto
+    const rotulo = caminho === "/" ? `${w}×${h}` : `${caminho} ${w}×${h}`;
+    const sufixo = caminho === "/" ? "" : caminho.replace(/\//g, "-");
     const ctx = await browser.newContext({ viewport: { width: w, height: h } });
     await modoTeste(ctx);
     const p = await ctx.newPage();
-    await assentarMesa(p);
+    await assentarMesa(p, caminho);
     const { mesa, janelas } = await retangulos(p);
     const ids = Object.keys(janelas);
 
-    console.log(`\n${w}×${h} — mesa ${resumo(mesa)}`);
+    console.log(`\n${rotulo} — mesa ${resumo(mesa)}`);
     for (const id of ids) console.log(`  ${id.padEnd(8)} ${resumo(janelas[id])}`);
 
     // Sem isto, uma mesa sem `data-janela` passaria em tudo sem medir nada.
     const faltam = JANELAS_INICIAIS.filter((id) => !janelas[id]);
-    ok(faltam.length === 0, `${w}×${h}: as quatro janelas iniciais medidas${faltam.length ? " — faltam: " + faltam.join(", ") : ""}`);
+    ok(faltam.length === 0, `${rotulo}: as quatro janelas iniciais medidas${faltam.length ? " — faltam: " + faltam.join(", ") : ""}`);
 
     const cruzam: string[] = [];
     for (let i = 0; i < ids.length; i++) {
@@ -637,7 +776,7 @@ async function main() {
         if (area > 1) cruzam.push(`${ids[i]} × ${ids[j]} (${px(area)} px²)`);
       }
     }
-    ok(cruzam.length === 0, `${w}×${h}: nenhuma janela sobre outra${cruzam.length ? " — cruzam: " + cruzam.join(", ") : ""}`);
+    ok(cruzam.length === 0, `${rotulo}: nenhuma janela sobre outra${cruzam.length ? " — cruzam: " + cruzam.join(", ") : ""}`);
 
     if (w >= 1024 && h >= 760) {
       const vazam = COLUNA_DO_MEIO.filter((id) => janelas[id])
@@ -650,19 +789,19 @@ async function main() {
           return null;
         })
         .filter((x): x is string => x !== null);
-      ok(vazam.length === 0, `${w}×${h} (sticky): RENDER, TERMINAL e AGORA cabem na mesa${vazam.length ? " — " + vazam.join(", ") : ""}`);
+      ok(vazam.length === 0, `${rotulo} (sticky): RENDER, TERMINAL e AGORA cabem na mesa${vazam.length ? " — " + vazam.join(", ") : ""}`);
     }
 
     // O Mac: os olhos em repouso à vista e pintados onde o gancho diz.
     const mac = await esperarMac(p);
-    ok(!!mac, `${w}×${h}: \`__sxMacAscii\` ${mac ? "presente" : "ausente"}`);
+    ok(!!mac, `${rotulo}: \`__sxMacAscii\` ${mac ? "presente" : "ausente"}`);
     if (mac) {
-      await checarOlhos(p, `${w}×${h}`);
-      await checarTinta(p, `${w}×${h}`);
-      await checarIcones(p, `${w}×${h}`);
+      await checarOlhos(p, rotulo);
+      await checarTinta(p, rotulo);
+      await checarIcones(p, rotulo);
     }
 
-    await p.screenshot({ path: `${OUT}/escadinha-${w}x${h}.png` });
+    await p.screenshot({ path: `${OUT}/escadinha-${w}x${h}${sufixo}.png` });
     await ctx.close();
   }
 
@@ -672,10 +811,18 @@ async function main() {
   await resize(browser);
   console.log("\nprefers-reduced-motion");
   await reduzido(browser);
+  console.log("\no SOUZXXX cobre a mesa");
+  await coberta(browser, 1512, 982);
+  await coberta(browser, 1280, 720);
+  console.log("\ntela de toque");
+  await toque(browser);
   console.log("\nvídeo");
   await video(browser);
 
   await browser.close();
+
+  console.log("\nerros de página");
+  ok(erros.length === 0, `nenhum pageerror nem console.error em todos os contextos (${erros.length})${erros.length ? ":\n    " + erros.join("\n    ") : ""}`);
 
   if (falhas) {
     console.error(`\n${falhas} check(s) falharam`);

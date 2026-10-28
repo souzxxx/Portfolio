@@ -178,6 +178,42 @@ test("pularMac perto do Mac assusta: a cara fica surpreso no quadro seguinte", (
   assert.equal(modoDoRosto(m, 0.516, false), "surpreso");
 });
 
+test("clique com o Mac no ar não reinicia o pulo: ele não cai no chão no meio do voo", () => {
+  const q = criarQuadro(MESA.w, MESA.h);
+  const m = criarMac(q, () => 0.5);
+  pularMac(m, false, 0);
+  // 0.25 s: fase 0.45, perto do topo do salto
+  pularMac(m, false, 0.25);
+  assert.equal(m.pulo, 0, "o segundo clique recomeçou o pulo");
+  // e o quadro em 0.3 s é o do primeiro pulo, não o de um pulo que mal saiu do chão
+  const e = entrada({ reduzido: false, t: 0.3 });
+  const umPulo = topoDoOlhoEsq(desenhar(e, (n) => pularMac(n, false, 0)).q);
+  const doisCliques = topoDoOlhoEsq(
+    desenhar(e, (n) => {
+      pularMac(n, false, 0);
+      pularMac(n, false, 0.25);
+    }).q,
+  );
+  assert.equal(doisCliques, umPulo);
+});
+
+test("clique perto com o Mac no ar: não reinicia o pulo, mas o susto vale", () => {
+  const q = criarQuadro(MESA.w, MESA.h);
+  const m = criarMac(q, () => 0.5);
+  pularMac(m, false, 0);
+  pularMac(m, true, 0.25);
+  assert.equal(m.pulo, 0);
+  assert.equal(m.susto, 1);
+});
+
+test("depois do pouso (fase ≥ 1, 1/1.8 s) um clique novo pula de novo", () => {
+  const q = criarQuadro(MESA.w, MESA.h);
+  const m = criarMac(q, () => 0.5);
+  pularMac(m, false, 0);
+  pularMac(m, false, 0.6);
+  assert.equal(m.pulo, 0.6);
+});
+
 test("reduzido: o quadro não depende de t, do mouse nem de um pulo", () => {
   const parado = desenhar(entrada()).q;
   const mexido = desenhar(

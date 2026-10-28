@@ -149,9 +149,16 @@ export function pertoDoMac(e: EntradaMac): boolean {
   );
 }
 
-/** Um clique na mesa: o Mac pula, e se foi perto dele, leva um susto. */
+/**
+ * Um clique na mesa: o Mac pula, e se foi perto dele, leva um susto.
+ *
+ * Com ele ainda no ar (fase em [0, 1)), o clique não recomeça o pulo: a fase
+ * voltaria a 0 e o Mac cairia do meio do voo direto no chão, num quadro. O
+ * susto vale do mesmo jeito; a cara reage mesmo que o corpo já esteja no ar.
+ */
 export function pularMac(m: Mac, perto: boolean, t: number): void {
-  m.pulo = t;
+  const fase = (t - m.pulo) * PULO_VEL;
+  if (!(fase >= 0 && fase < 1)) m.pulo = t;
   if (perto) m.susto = 1;
 }
 
