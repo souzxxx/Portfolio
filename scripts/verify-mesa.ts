@@ -6,14 +6,22 @@
  * quando a mesa é sticky (≥ 1024 × 760), RENDER, TERMINAL e AGORA inteiros
  * dentro dela — a mesa tem `overflow-hidden`, o que passa do fim some.
  *
+ * Depois confere o Mac em ASCII atrás das janelas pelo `__sxMacAscii`, que o
+ * MacAscii só expõe com `__sxMesaTeste`: os olhos em repouso à vista em todo
+ * tamanho (e pintados de fato no canvas), o laço rodando, o clique na mesa
+ * vazia fazendo ele pular sem roubar o clique das janelas, o custo por
+ * quadro, o resize de 1512 para 1024 e o modo sem movimento. Grava um vídeo
+ * de ~8 s (e um GIF, se houver ffmpeg).
+ *
  * Uso: `npm run dev` (ou `next start`) em outro terminal e
  *   MESA_BASE_URL=http://localhost:3000 npx tsx scripts/verify-mesa.ts
  *
  * Os prints vão para MESA_OUT (padrão /tmp/mesa). Sai com código 1 se algum
  * check falhar.
  */
-import { chromium, type BrowserContext, type Page } from "playwright";
-import { mkdir } from "node:fs/promises";
+import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import { execFileSync } from "node:child_process";
+import { mkdir, rename } from "node:fs/promises";
 
 const BASE = process.env.MESA_BASE_URL ?? "http://localhost:3000";
 const OUT = process.env.MESA_OUT ?? "/tmp/mesa";
@@ -38,6 +46,11 @@ const COLUNA_DO_MEIO = ["render", "terminal", "agora"];
 
 /** DOMRect achatado: o DOMRect de verdade não atravessa o `evaluate`. */
 type Caixa = Pick<DOMRect, "x" | "y" | "width" | "height" | "top" | "right" | "bottom" | "left">;
+
+/** O gancho de teste do MacAscii. Os olhos vêm em coordenadas da viewport. */
+type Olho = { x: number; y: number; width: number; height: number };
+type MacTeste = { olhos: { esq: Olho; dir: Olho }; quadros: number; msMedio: number; pulos: number };
+type JanelaComMac = Window & { __sxMacAscii?: MacTeste };
 
 let falhas = 0;
 export function ok(cond: boolean, msg: string) {
@@ -93,6 +106,366 @@ function areaComum(a: Caixa, b: Caixa) {
 
 const px = (n: number) => Math.round(n);
 const resumo = (c: Caixa) => `${px(c.width)}×${px(c.height)} em (${px(c.left)}, ${px(c.top)})`;
+const caixaDoOlho = (o: Olho): Caixa => ({
+  x: o.x,
+  y: o.y,
+  width: o.width,
+  height: o.height,
+  left: o.x,
+  top: o.y,
+  right: o.x + o.width,
+  bottom: o.y + o.height,
+});
+
+/** Uma cópia do gancho, ou null se o MacAscii não montou. */
+async function lerMac(p: Page): Promise<MacTeste | null> {
+  return p.evaluate(() => {
+    const m = (window as JanelaComMac).__sxMacAscii;
+    if (!m) return null;
+    const { esq, dir } = m.olhos;
+    return {
+      olhos: {
+        esq: { x: esq.x, y: esq.y, width: esq.width, height: esq.height },
+        dir: { x: dir.x, y: dir.y, width: dir.width, height: dir.height },
+      },
+      quadros: m.quadros,
+      msMedio: m.msMedio,
+      pulos: m.pulos,
+    };
+  });
+}
+
+/** Espera o chunk do MacAscii chegar e pintar o primeiro quadro. */
+async function esperarMac(p: Page): Promise<MacTeste | null> {
+  try {
+    await p.waitForFunction(() => ((window as JanelaComMac).__sxMacAscii?.quadros ?? 0) > 0, null, {
+      timeout: 10_000,
+    });
+  } catch {
+    return null;
+  }
+  return lerMac(p);
+}
+
+/** O que pode cobrir os olhos: as janelas abertas (sem a lixeira, que é um
+ *  overlay do tamanho da mesa e começa fechada), os ícones e a MenuBar. */
+async function obstaculos(p: Page): Promise<Record<string, Caixa>> {
+  const { janelas } = await retangulos(p);
+  delete janelas.lixeira;
+  const outros = await p.evaluate(() => {
+    const r: Record<string, Caixa> = {};
+    const nav = document.querySelector("section.mesa nav");
+    if (nav) r.icones = nav.getBoundingClientRect().toJSON() as Caixa;
+    const barra = document.querySelector("header.fixed");
+    if (barra) r.menubar = barra.getBoundingClientRect().toJSON() as Caixa;
+    return r;
+  });
+  return { ...janelas, ...outros };
+}
+
+/** Os dois olhos em repouso dentro da mesa e sem nada por cima. */
+async function checarOlhos(p: Page, rotulo: string) {
+  const mac = await lerMac(p);
+  if (!mac) {
+    ok(false, `${rotulo}: \`__sxMacAscii\` ausente`);
+    return;
+  }
+  const { mesa } = await retangulos(p);
+  const obst = await obstaculos(p);
+  for (const lado of ["esq", "dir"] as const) {
+    const o = caixaDoOlho(mac.olhos[lado]);
+    const dentro = o.left >= mesa.left && o.right <= mesa.right && o.top >= mesa.top && o.bottom <= mesa.bottom;
+    const cruza = Object.entries(obst)
+      .filter(([, c]) => areaComum(o, c) > 0)
+      .map(([id]) => id);
+    ok(
+      dentro && cruza.length === 0,
+      `${rotulo}: olho ${lado} ${resumo(o)} à vista${dentro ? "" : " — fora da mesa"}${cruza.length ? " — atrás de: " + cruza.join(", ") : ""}`,
+    );
+  }
+}
+
+/**
+ * Fração de cada retângulo de olho com tinta forte no canvas do Mac. Garante
+ * que o gancho aponta para onde o rosto está desenhado de verdade (DPR,
+ * origem da mesa). Algumas tentativas: uma piscada de 0.13 s fecha os olhos.
+ */
+async function tintaNosOlhos(p: Page): Promise<number[]> {
+  let melhor = [0, 0];
+  for (let k = 0; k < 6; k++) {
+    const f = await p.evaluate(() => {
+      const cv = document.querySelector<HTMLCanvasElement>("canvas[data-mac-ascii]");
+      const m = (window as JanelaComMac).__sxMacAscii;
+      const g = cv?.getContext("2d");
+      if (!cv || !m || !g) return [0, 0];
+      const r = cv.getBoundingClientRect();
+      const kx = cv.width / r.width;
+      const ky = cv.height / r.height;
+      return [m.olhos.esq, m.olhos.dir].map((o) => {
+        const w = Math.max(1, Math.round(o.width * kx));
+        const h = Math.max(1, Math.round(o.height * ky));
+        const d = g.getImageData(Math.round((o.x - r.left) * kx), Math.round((o.y - r.top) * ky), w, h).data;
+        let fortes = 0;
+        for (let i = 3; i < d.length; i += 4) if (d[i] > 180) fortes++;
+        return fortes / (w * h);
+      });
+    });
+    melhor = melhor.map((v, i) => Math.max(v, f[i]));
+    if (melhor.every((v) => v > 0.25)) break;
+    await p.waitForTimeout(150);
+  }
+  return melhor;
+}
+
+async function checarTinta(p: Page, rotulo: string) {
+  const f = await tintaNosOlhos(p);
+  ok(
+    f.every((v) => v > 0.25),
+    `${rotulo}: os olhos estão pintados onde o gancho diz (${f.map((v) => `${Math.round(v * 100)}%`).join(" / ")} do retângulo aceso)`,
+  );
+}
+
+/** O meio da faixa livre entre o RENDER e o TERMINAL. */
+async function meioDaFaixa(p: Page) {
+  const { janelas } = await retangulos(p);
+  const r = janelas.render;
+  const t = janelas.terminal;
+  return {
+    x: (Math.min(r.left, t.left) + Math.max(r.right, t.right)) / 2,
+    y: (r.bottom + t.top) / 2,
+    altura: t.top - r.bottom,
+  };
+}
+
+async function pulos(p: Page) {
+  return (await lerMac(p))?.pulos ?? -1;
+}
+
+async function clicarEContar(p: Page, x: number, y: number) {
+  const antes = await pulos(p);
+  await p.mouse.click(x, y);
+  await p.waitForTimeout(120);
+  return { antes, depois: await pulos(p) };
+}
+
+/** 1512×982: laço, cliques, arraste, terminal e custo por quadro. */
+async function vivo(browser: Browser) {
+  const [w, h] = [1512, 982];
+  const rotulo = `${w}×${h}`;
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, `${rotulo}: \`__sxMacAscii\` ausente`);
+    await ctx.close();
+    return;
+  }
+
+  // (a) o laço roda
+  const q0 = (await lerMac(p))!.quadros;
+  await p.waitForTimeout(500);
+  const q1 = (await lerMac(p))!.quadros;
+  await p.waitForTimeout(500);
+  const q2 = (await lerMac(p))!.quadros;
+  ok(q0 < q1 && q1 < q2, `${rotulo}: o laço roda (quadros ${q0} → ${q1} → ${q2})`);
+
+  // (d) custo de um quadro inteiro (cena + pintura)
+  const ms = (await lerMac(p))!.msMedio;
+  console.log(`  msMedio ${ms.toFixed(2)} ms em ${q2} quadros`);
+  ok(ms < 10, `${rotulo}: msMedio < 10 ms (${ms.toFixed(2)} ms)`);
+
+  // (b) clique na mesa vazia pula; nas janelas e nos ícones, não
+  const faixa = await meioDaFaixa(p);
+  const alvoFaixa = await p.evaluate(
+    ({ x, y }) => !document.elementFromPoint(x, y)?.closest("[data-janela], nav"),
+    faixa,
+  );
+  ok(faixa.altura > 0 && alvoFaixa, `${rotulo}: há faixa livre entre RENDER e TERMINAL (${px(faixa.altura)} px)`);
+  const naFaixa = await clicarEContar(p, faixa.x, faixa.y);
+  ok(naFaixa.depois === naFaixa.antes + 1, `${rotulo}: clique na faixa faz o Mac pular (pulos ${naFaixa.antes} → ${naFaixa.depois})`);
+
+  const nome = (await p.locator("#hero-nome").boundingBox())!;
+  const noLeiame = await clicarEContar(p, nome.x + nome.width / 2, nome.y + nome.height / 2);
+  ok(noLeiame.depois === noLeiame.antes, `${rotulo}: clique dentro do LEIA-ME não faz pular (pulos ${noLeiame.antes} → ${noLeiame.depois})`);
+
+  const lixeira = (await p.locator("section.mesa nav button").boundingBox())!;
+  const naLixeira = await clicarEContar(p, lixeira.x + lixeira.width / 2, lixeira.y + lixeira.height / 2);
+  ok(naLixeira.depois === naLixeira.antes, `${rotulo}: clique no ícone da lixeira não faz pular (pulos ${naLixeira.antes} → ${naLixeira.depois})`);
+  const abriu = await p.locator('[data-janela="lixeira"] [role="dialog"]').isVisible();
+  ok(abriu, `${rotulo}: o ícone da lixeira ainda abre a lixeira`);
+  if (abriu) {
+    await p.locator('[data-janela="lixeira"] button').first().click();
+    await p.waitForTimeout(150);
+  }
+
+  // (c) arrastar o TERMINAL pela alça (a conta do verify-pet) e o terminal
+  // responder; o Mac não acompanha a janela nem pula com o arraste
+  const alca = p.locator('[data-janela="terminal"] .cursor-grab');
+  const antes = (await alca.boundingBox())!;
+  const olhosAntes = (await lerMac(p))!.olhos;
+  const pulosAntes = await pulos(p);
+  await p.mouse.move(antes.x + 30, antes.y + antes.height / 2);
+  await p.mouse.down();
+  for (let i = 1; i <= 20; i++) {
+    await p.mouse.move(
+      antes.x + 30 + ((w - 260 - antes.x) * i) / 20,
+      antes.y + antes.height / 2 + ((h - 120 - antes.y) * i) / 20,
+    );
+  }
+  await p.mouse.up();
+  await p.waitForTimeout(400);
+  const depois = (await alca.boundingBox())!;
+  ok(
+    Math.abs(depois.x - antes.x) > 50 && Math.abs(depois.y - antes.y) > 50,
+    `${rotulo}: arrastar o TERMINAL pela alça funciona (andou ${px(depois.x - antes.x)}, ${px(depois.y - antes.y)})`,
+  );
+  const macDepois = (await lerMac(p))!;
+  const parado = (["esq", "dir"] as const).every(
+    (k) =>
+      Math.abs(macDepois.olhos[k].x - olhosAntes[k].x) < 0.5 &&
+      Math.abs(macDepois.olhos[k].y - olhosAntes[k].y) < 0.5,
+  );
+  ok(parado && macDepois.pulos === pulosAntes, `${rotulo}: o Mac não segue a janela arrastada nem pula com o arraste`);
+
+  await p.locator("#sx-terminal").fill("help");
+  const textoDoTerminal = () =>
+    p.locator("#sx-terminal").evaluate((el) => (el.closest("form")!.parentElement!.textContent ?? "").length);
+  const antesTxt = await textoDoTerminal();
+  await p.locator("#sx-terminal").press("Enter");
+  await p.waitForTimeout(200);
+  const depoisTxt = await textoDoTerminal();
+  ok(depoisTxt > antesTxt + 20, `${rotulo}: o terminal da mesa responde a \`help\``);
+  await ctx.close();
+}
+
+/** Review Focus 1: a janela do navegador encolhe de 1512 para 1024 com o hero
+ *  na tela. O Mac reancora, a grade é recriada e os olhos seguem à vista. */
+async function resize(browser: Browser) {
+  const ctx = await browser.newContext({ viewport: { width: 1512, height: 982 } });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, "1512→1024: `__sxMacAscii` ausente");
+    await ctx.close();
+    return;
+  }
+  await p.setViewportSize({ width: 1024, height: 768 });
+  await p.waitForTimeout(600);
+  await checarOlhos(p, "1512→1024");
+  await checarTinta(p, "1512→1024");
+  const c = await p.evaluate(() => {
+    const cv = document.querySelector<HTMLCanvasElement>("canvas[data-mac-ascii]")!;
+    const s = document.querySelector<HTMLElement>("section.mesa")!;
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    return { bw: cv.width, bh: cv.height, ew: Math.round(s.clientWidth * dpr), eh: Math.round(s.clientHeight * dpr) };
+  });
+  ok(
+    Math.abs(c.bw - c.ew) <= 1 && Math.abs(c.bh - c.eh) <= 1,
+    `1512→1024: o canvas foi recriado no tamanho novo (${c.bw}×${c.bh}, esperado ${c.ew}×${c.eh})`,
+  );
+  await p.screenshot({ path: `${OUT}/mac-resize-1024x768.png` });
+  await ctx.close();
+}
+
+/** Sem movimento: um quadro parado, sem laço e sem ouvir o mouse. */
+async function reduzido(browser: Browser) {
+  const rotulo = "reduzido";
+  const ctx = await browser.newContext({ viewport: { width: 1512, height: 982 }, reducedMotion: "reduce" });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, `${rotulo}: \`__sxMacAscii\` ausente`);
+    await ctx.close();
+    return;
+  }
+  await checarOlhos(p, rotulo);
+  await checarTinta(p, rotulo);
+  const q0 = (await lerMac(p))!.quadros;
+  await p.waitForTimeout(1000);
+  const q1 = (await lerMac(p))!.quadros;
+  ok(q0 === q1, `${rotulo}: nenhum quadro novo em 1 s (quadros ${q0} → ${q1})`);
+  const faixa = await meioDaFaixa(p);
+  const clique = await clicarEContar(p, faixa.x, faixa.y);
+  ok(clique.depois === clique.antes, `${rotulo}: clique na faixa não faz pular (pulos ${clique.antes} → ${clique.depois})`);
+  await p.screenshot({ path: `${OUT}/mac-reduzido.png` });
+  await ctx.close();
+}
+
+/** ~8 s de vídeo: o mouse passeia pela faixa, chega perto do Mac e clica
+ *  duas vezes na mesa. Vira GIF se houver ffmpeg no PATH. */
+async function video(browser: Browser) {
+  const tamanho = { width: 1512, height: 982 };
+  const ctx = await browser.newContext({ viewport: tamanho, recordVideo: { dir: OUT, size: tamanho } });
+  await modoTeste(ctx);
+  const p = await ctx.newPage();
+  const t0 = Date.now();
+  await assentarMesa(p);
+  if (!(await esperarMac(p))) {
+    ok(false, "vídeo: `__sxMacAscii` ausente");
+    await ctx.close();
+    await p.video()?.delete();
+    return;
+  }
+  const inicio = (Date.now() - t0) / 1000;
+  const faixa = await meioDaFaixa(p);
+  const { janelas } = await retangulos(p);
+  const olhos = (await lerMac(p))!.olhos;
+  const rosto = { x: (olhos.esq.x + olhos.dir.x + olhos.dir.width) / 2, y: olhos.esq.y + olhos.esq.height / 2 };
+  // pela faixa, da borda do LEIA-ME até a direita da coluna e de volta; no
+  // headless cada `move` é uma ida e volta lenta, então poucos passos
+  const esq = janelas.leiame.right + 10;
+  const dir = Math.max(janelas.render.right, janelas.terminal.right) - 10;
+  await p.waitForTimeout(500);
+  await p.mouse.move(esq, faixa.y);
+  await p.mouse.move(dir, faixa.y, { steps: 24 });
+  await p.mouse.move(esq + 40, faixa.y - 12, { steps: 20 });
+  // chega perto do rosto: os olhos ficam atentos
+  await p.mouse.move(rosto.x, rosto.y + 30, { steps: 16 });
+  await p.waitForTimeout(800);
+  // dois cliques na mesa: um perto (susto e pulo) e outro na faixa
+  await p.mouse.click(rosto.x, rosto.y + 30);
+  await p.waitForTimeout(1000);
+  await p.mouse.move(faixa.x, faixa.y, { steps: 10 });
+  await p.mouse.click(faixa.x, faixa.y);
+  await p.waitForTimeout(1400);
+  console.log(`  roteiro de ${((Date.now() - t0) / 1000 - inicio).toFixed(1)} s`);
+  const gravado = await p.video()?.path();
+  await ctx.close();
+  if (!gravado) {
+    ok(false, "vídeo gravado");
+    return;
+  }
+  const webm = `${OUT}/mac-ascii.webm`;
+  await rename(gravado, webm);
+  console.log(`  vídeo em ${webm}`);
+  try {
+    execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
+  } catch {
+    console.log("  sem ffmpeg no PATH: fica só o .webm");
+    return;
+  }
+  const gif = `${OUT}/mac-ascii.gif`;
+  execFileSync(
+    "ffmpeg",
+    [
+      "-y",
+      "-loglevel",
+      "error",
+      "-ss",
+      inicio.toFixed(2),
+      "-i",
+      webm,
+      "-vf",
+      "fps=15,scale=900:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse",
+      gif,
+    ],
+    { stdio: "inherit" },
+  );
+  console.log(`  GIF em ${gif}`);
+}
 
 async function main() {
   await mkdir(OUT, { recursive: true });
@@ -136,9 +509,26 @@ async function main() {
       ok(vazam.length === 0, `${w}×${h} (sticky): RENDER, TERMINAL e AGORA cabem na mesa${vazam.length ? " — " + vazam.join(", ") : ""}`);
     }
 
+    // O Mac: os olhos em repouso à vista e pintados onde o gancho diz.
+    const mac = await esperarMac(p);
+    ok(!!mac, `${w}×${h}: \`__sxMacAscii\` ${mac ? "presente" : "ausente"}`);
+    if (mac) {
+      await checarOlhos(p, `${w}×${h}`);
+      await checarTinta(p, `${w}×${h}`);
+    }
+
     await p.screenshot({ path: `${OUT}/escadinha-${w}x${h}.png` });
     await ctx.close();
   }
+
+  console.log("\n1512×982 — o Mac vivo");
+  await vivo(browser);
+  console.log("\nresize 1512 → 1024");
+  await resize(browser);
+  console.log("\nprefers-reduced-motion");
+  await reduzido(browser);
+  console.log("\nvídeo");
+  await video(browser);
 
   await browser.close();
 

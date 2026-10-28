@@ -38,11 +38,19 @@ import type { Lang } from "@/lib/i18n";
  * A entrada (`.janela-entra`) é CSS, num wrapper por fora do elemento que o
  * framer arrasta: animação de CSS em `transform` venceria o transform inline do
  * arraste e a janela voltaria para o lugar a cada frame.
+ *
+ * Atrás das janelas mora o Mac gigante em ASCII (MacAscii): um canvas no z
+ * negativo da section, que se ancora no layout das janelas para deixar o
+ * rosto à vista. Chega depois da hidratação, como a gravura.
  */
 const EngravedObject = dynamic(
   () => import("../hero/EngravedObject").then((m) => m.EngravedObject),
   { ssr: false, loading: () => null },
 );
+const MacAscii = dynamic(() => import("../mesa-ascii/MacAscii").then((m) => m.MacAscii), {
+  ssr: false,
+  loading: () => null,
+});
 
 type IdJanela = "leiame" | "render" | "terminal" | "agora" | "lixeira";
 
@@ -180,6 +188,7 @@ export function Desktop({
   projetos: { slug: string; name: string; apelido: string }[];
 }) {
   const mesa = useRef<HTMLDivElement>(null);
+  const secao = useRef<HTMLElement>(null);
   const arrastavel = useArrastavel();
   const [pilha, setPilha] = useState<IdJanela[]>(["agora", "render", "terminal", "leiame"]);
   const [fechadas, setFechadas] = useState<Set<IdJanela>>(new Set(["lixeira"]));
@@ -212,14 +221,17 @@ export function Desktop({
   // `isolate`: o z das janelas (até 70) e da Lixeira (90) vale só dentro da
   // mesa. Abaixo de 760 px de altura a mesa não é sticky, não criava contexto
   // de empilhamento, e uma janela arrastada para o canto cobria o pet (z-60).
+  // É também o que põe o canvas do Mac (-z-10) acima do pontilhado da mesa.
   // No sticky a linha da grade tem a altura da mesa (`minmax(0,1fr)`), não a
   // do conteúdo: o LEIA-ME passa do fim em telas baixas, e uma linha `auto`
   // cresceria com ele, esticando a coluna do meio e levando o AGORA para fora.
   return (
     <section
+      ref={secao}
       aria-labelledby="hero-nome"
       className="mesa relative isolate overflow-hidden pt-7 text-cream [@media(min-width:1024px)_and_(min-height:760px)]:sticky [@media(min-width:1024px)_and_(min-height:760px)]:top-0 [@media(min-width:1024px)_and_(min-height:760px)]:h-[100svh]"
     >
+      <MacAscii mesa={secao} />
       <div
         ref={mesa}
         className="relative mx-auto grid h-full max-w-[110rem] gap-x-8 gap-y-6 px-[var(--gutter)] pb-16 pt-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] lg:pb-10 lg:pt-8 [@media(min-width:1024px)_and_(min-height:760px)]:grid-rows-[minmax(0,1fr)]"
