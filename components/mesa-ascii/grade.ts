@@ -84,9 +84,10 @@ export function pintar(
 
 /**
  * Escreve só glifo e alfa, e só se ganha da célula: ela está vazia (nunca
- * pintada ou espaço) ou tem um glifo mais fraco. É como as ondas passam por
- * cima do Mac sem apagar o contorno `#`, e o fundo e a cor da célula ficam,
- * então a onda atravessa um pixel aceso da tela sem apagá-lo.
+ * pintada ou espaço) ou tem um glifo mais fraco. É o que deixa as ondas
+ * passarem pela textura do Mac sem apagar o que é mais forte que elas. O
+ * fundo e a cor da célula ficam: a onda desenha sobre um pixel aceso da tela
+ * (um espaço de alfa 0), mas ele continua aceso.
  */
 export function pintarSeMaisForte(
   q: Quadro,

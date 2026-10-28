@@ -8,8 +8,11 @@ import { CELULA_A, CELULA_L, pintarSeMaisForte, type Quadro } from "./grade";
  * caractere de cada célula do anel é a TANGENTE do anel naquele ponto
  * (`- \ | /`), o que dá o desenho de um círculo com quatro glifos só.
  *
- * Elas pintam com `pintarSeMaisForte`: passam por cima da textura do Mac, mas
- * não apagam o contorno nem a tela, que são mais fortes que uma onda velha.
+ * Elas pintam com `pintarSeMaisForte`, que só troca glifo e alfa: passam por
+ * cima da textura do Mac e desenham sobre os pixels acesos da tela, que
+ * continuam acesos (o fundo creme fica). Não apagam o fundo da tela nem o
+ * contorno `#`, exceto no primeiro instante de um clique forte, quando o anel
+ * (alfa 0.75) ainda é mais forte que o contorno (0.7).
  */
 export interface Onda {
   /** Centro, em px da mesa. */
