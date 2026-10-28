@@ -1,6 +1,16 @@
 import type { Expressao } from "../pet/maquina";
 import { desenharGrade } from "../pet/tela";
-import { INCLINA_MAC, RESPIRA_MAC, SALTO_MAC, type Ancora } from "./ancora";
+import {
+  ALARGA_POUSO,
+  INCLINA_MAC,
+  INCLINA_MOUSE,
+  LADO,
+  LADO_MOUSE,
+  RESPIRA_LARGURA,
+  RESPIRA_MAC,
+  SALTO_MAC,
+  type Ancora,
+} from "./ancora";
 import { CELULA_A, CELULA_L, COR_OURO, pintar, type Quadro } from "./grade";
 import { REGIAO, pixelDaTela, regiaoEm } from "./silhueta";
 
@@ -15,7 +25,8 @@ import { REGIAO, pixelDaTela, regiaoEm } from "./silhueta";
  *
  * Três diferenças de propósito:
  *   - o lugar e o tamanho vêm da âncora (que tira os olhos de trás das
- *     janelas), e o pulo, o balanço e a respiração usam as constantes que a
+ *     janelas e o Mac de trás dos rótulos dos ícones), e o pulo, o balanço, a
+ *     respiração, a lateral e a inclinação do mouse usam as constantes que a
  *     âncora reservou: o Mac nunca mexe mais do que ela deixou espaço;
  *   - o rosto é a grade do pet (`desenharGrade`): o Mac da mesa e o pet do
  *     canto são o mesmo personagem e fazem as mesmas caras;
@@ -59,20 +70,12 @@ export interface Mac {
 
 /** O v onde o pé encosta na mesa. */
 const V_BASE = 0.43;
-/** A lateral em repouso, e quanto ela estreita com o mouse todo à direita. */
-const LADO = 0.1;
-const LADO_MOUSE = 0.05;
 /** O pulo anda 1.8 fases por segundo (dura 0.56 s); amassa a partir de 0.86. */
 const PULO_VEL = 1.8;
 const POUSO = 0.86;
-/** No voo o Mac estica 3%; no pouso amassa 6% e alarga 4.5%. */
+/** No voo o Mac estica 3%; no pouso amassa 6% (e alarga ALARGA_POUSO). */
 const ESTICA_VOO = 0.03;
 const AMASSA_POUSO = 0.06;
-const ALARGA_POUSO = 0.045;
-/** Ao respirar ele afina um pouco enquanto estica: o volume parece o mesmo. */
-const RESPIRA_LARGURA = 0.01;
-/** Inclinação extra na direção do mouse, que não conta em repouso. */
-const INCLINA_MOUSE = 0.03;
 /** A primeira piscada é fixa; as seguintes, a cada 2.2 a 5.2 s. */
 const PRIMEIRA_PISCA = 1.8;
 const PISCA_MIN = 2.2;

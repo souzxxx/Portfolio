@@ -8,7 +8,8 @@
  *
  * Depois confere o Mac em ASCII atrás das janelas pelo `__sxMacAscii`, que o
  * MacAscii só expõe com `__sxMesaTeste`: os olhos em repouso à vista em todo
- * tamanho (e pintados de fato no canvas), o laço rodando, o clique na mesa
+ * tamanho (e pintados de fato no canvas), o Mac fora da coluna de ícones e
+ * dos rótulos, o laço rodando, o clique na mesa
  * vazia fazendo ele pular sem roubar o clique das janelas, o custo por
  * quadro, o resize de 1512 para 1024 e o modo sem movimento. Grava um vídeo
  * de ~8 s (e um GIF, se houver ffmpeg).
@@ -49,7 +50,7 @@ type Caixa = Pick<DOMRect, "x" | "y" | "width" | "height" | "top" | "right" | "b
 
 /** O gancho de teste do MacAscii. Os olhos vêm em coordenadas da viewport. */
 type Olho = { x: number; y: number; width: number; height: number };
-type MacTeste = { olhos: { esq: Olho; dir: Olho }; quadros: number; msMedio: number; pulos: number };
+type MacTeste = { olhos: { esq: Olho; dir: Olho }; mac: Olho; quadros: number; msMedio: number; pulos: number };
 type JanelaComMac = Window & { __sxMacAscii?: MacTeste };
 
 let falhas = 0;
@@ -123,11 +124,13 @@ async function lerMac(p: Page): Promise<MacTeste | null> {
     const m = (window as JanelaComMac).__sxMacAscii;
     if (!m) return null;
     const { esq, dir } = m.olhos;
+    const mac = m.mac;
     return {
       olhos: {
         esq: { x: esq.x, y: esq.y, width: esq.width, height: esq.height },
         dir: { x: dir.x, y: dir.y, width: dir.width, height: dir.height },
       },
+      mac: { x: mac.x, y: mac.y, width: mac.width, height: mac.height },
       quadros: m.quadros,
       msMedio: m.msMedio,
       pulos: m.pulos,
@@ -147,20 +150,43 @@ async function esperarMac(p: Page): Promise<MacTeste | null> {
   return lerMac(p);
 }
 
-/** O que pode cobrir os olhos: as janelas abertas (sem a lixeira, que é um
- *  overlay do tamanho da mesa e começa fechada), os ícones e a MenuBar. */
+/**
+ * A coluna de ícones como ela aparece: o nav com tudo dentro, porque o rótulo
+ * mais largo (CURRÍCULO.PDF) passa ~8 px de cada lado da caixa do nav.
+ */
+async function icones(p: Page): Promise<Caixa> {
+  return p.evaluate(() => {
+    const nav = document.querySelector("section.mesa nav")!;
+    const r = nav.getBoundingClientRect();
+    let [x0, y0, x1, y1] = [r.left, r.top, r.right, r.bottom];
+    for (const el of nav.querySelectorAll("*")) {
+      const q = el.getBoundingClientRect();
+      if (!q.width || !q.height) continue;
+      [x0, y0, x1, y1] = [Math.min(x0, q.left), Math.min(y0, q.top), Math.max(x1, q.right), Math.max(y1, q.bottom)];
+    }
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0, left: x0, top: y0, right: x1, bottom: y1 };
+  });
+}
+
+/**
+ * O que pode cobrir os olhos: as janelas abertas, os ícones e a MenuBar. A
+ * janela medida é o filho do `[data-janela]`, o `motion.div` que o framer
+ * move (no arraste e quando a tela muda de tamanho); o wrapper fica no lugar
+ * de layout. A lixeira fica de fora: é um overlay do tamanho da mesa e
+ * começa fechada.
+ */
 async function obstaculos(p: Page): Promise<Record<string, Caixa>> {
-  const { janelas } = await retangulos(p);
-  delete janelas.lixeira;
-  const outros = await p.evaluate(() => {
+  const janelas = await p.evaluate(() => {
     const r: Record<string, Caixa> = {};
-    const nav = document.querySelector("section.mesa nav");
-    if (nav) r.icones = nav.getBoundingClientRect().toJSON() as Caixa;
+    for (const el of document.querySelectorAll<HTMLElement>("[data-janela]:not([data-janela=lixeira]) > *")) {
+      const c = el.getBoundingClientRect().toJSON() as Caixa;
+      if (c.width > 0 && c.height > 0) r[el.parentElement!.dataset.janela!] = c;
+    }
     const barra = document.querySelector("header.fixed");
     if (barra) r.menubar = barra.getBoundingClientRect().toJSON() as Caixa;
     return r;
   });
-  return { ...janelas, ...outros };
+  return { ...janelas, icones: await icones(p) };
 }
 
 /** Os dois olhos em repouso dentro da mesa e sem nada por cima. */
@@ -215,6 +241,28 @@ async function tintaNosOlhos(p: Page): Promise<number[]> {
     await p.waitForTimeout(150);
   }
   return melhor;
+}
+
+/**
+ * As células acesas do Mac não cruzam a coluna de ícones com os rótulos.
+ * Três leituras ao longo de ~0.5 s: o balanço e a respiração mexem a borda.
+ */
+async function checarIcones(p: Page, rotulo: string) {
+  const nav = await icones(p);
+  let pior = Infinity;
+  let cruzou = false;
+  for (let k = 0; k < 3; k++) {
+    const mac = (await lerMac(p))?.mac;
+    if (!mac || mac.width === undefined) {
+      ok(false, `${rotulo}: caixa do Mac ausente no gancho`);
+      return;
+    }
+    const c = caixaDoOlho(mac);
+    pior = Math.min(pior, nav.left - c.right);
+    if (areaComum(c, nav) > 0) cruzou = true;
+    if (k < 2) await p.waitForTimeout(250);
+  }
+  ok(!cruzou, `${rotulo}: o Mac fica fora da coluna de ícones e dos rótulos (menor folga ${px(pior)} px)`);
 }
 
 async function checarTinta(p: Page, rotulo: string) {
@@ -353,8 +401,14 @@ async function resize(browser: Browser) {
   }
   await p.setViewportSize({ width: 1024, height: 768 });
   await p.waitForTimeout(600);
+  const { janelas } = await retangulos(p);
+  const andaram = await obstaculos(p);
+  for (const id of ["leiame", "render", "terminal", "agora"]) {
+    if (janelas[id] && andaram[id]) console.log(`  ${id.padEnd(8)} layout ${resumo(janelas[id])} · na tela ${resumo(andaram[id])}`);
+  }
   await checarOlhos(p, "1512→1024");
   await checarTinta(p, "1512→1024");
+  await checarIcones(p, "1512→1024");
   const c = await p.evaluate(() => {
     const cv = document.querySelector<HTMLCanvasElement>("canvas[data-mac-ascii]")!;
     const s = document.querySelector<HTMLElement>("section.mesa")!;
@@ -515,6 +569,7 @@ async function main() {
     if (mac) {
       await checarOlhos(p, `${w}×${h}`);
       await checarTinta(p, `${w}×${h}`);
+      await checarIcones(p, `${w}×${h}`);
     }
 
     await p.screenshot({ path: `${OUT}/escadinha-${w}x${h}.png` });

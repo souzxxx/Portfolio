@@ -28,7 +28,8 @@ import { MAX_ONDAS, ONDA_PASSO_PX, desenharOndas, type Onda } from "./ondas";
  * arrastada. A soma de `offsetLeft/Top` até a section ignora o transform e dá
  * o lugar de layout. Mede no ResizeObserver (a section e as janelas, que
  * mudam de altura quando as fontes chegam) e de novo no fim de cada
- * `.janela-entra`; a última fecha a conta.
+ * `.janela-entra`; a última fecha a conta. A coluna de ícones entra na conta
+ * com os rótulos, que passam da caixa do `nav`: o Mac não pinta embaixo deles.
  *
  * O RELÓGIO da cena começa em 0 e anda pelo `dt` de cada quadro (no máximo
  * 50 ms, como no protótipo), não pelo `performance.now()`: a primeira piscada
@@ -40,8 +41,9 @@ import { MAX_ONDAS, ONDA_PASSO_PX, desenharOndas, type Onda } from "./ondas";
  * monta, nem o canvas.
  *
  * Com `window.__sxMesaTeste`, expõe `window.__sxMacAscii` para o
- * scripts/verify-mesa.ts: os olhos em repouso na viewport, os quadros
- * pintados, o custo médio de um quadro e os pulos.
+ * scripts/verify-mesa.ts: os olhos em repouso e a caixa das células acesas
+ * do último quadro, na viewport; os quadros pintados, o custo médio de um
+ * quadro e os pulos.
  */
 const CREME = "#F5F3EE";
 const OURO = "#D4A017";
@@ -63,6 +65,8 @@ type IdAncora = (typeof JANELAS_DA_ANCORA)[number];
 
 type MacAsciiTeste = {
   olhos: { esq: DOMRectInit; dir: DOMRectInit };
+  /** As células acesas do último quadro: o Mac, a sombra e as ondas que houver. */
+  mac: DOMRectInit;
   quadros: number;
   msMedio: number;
   pulos: number;
@@ -80,6 +84,13 @@ function useMidia(consulta: string) {
     return () => q.removeEventListener("change", sync);
   }, [consulta]);
   return bate;
+}
+
+/** O que o canvas pinta: preenchimento visível ou um glifo que não é espaço. */
+function celulaAcesa(q: Quadro, id: number): boolean {
+  if (q.fundo[id] > 0.004) return true;
+  const c = q.glifo[id];
+  return q.alfa[id] > 0.01 && c !== 32 && c !== 0;
 }
 
 /** O retângulo de layout de `el` na section: offsets até ela, sem transform. */
@@ -102,6 +113,29 @@ function retNaSecao(el: HTMLElement, secao: HTMLElement): Ret | null {
   return { x, y, w: el.offsetWidth, h: el.offsetHeight };
 }
 
+/**
+ * O retângulo de `el` com tudo o que ele tem dentro. Os rótulos dos ícones
+ * (até 6.5rem) passam ~8 px de cada lado do nav (5.5rem), e o texto vence.
+ */
+function retComFilhos(el: HTMLElement, secao: HTMLElement): Ret | null {
+  const r = retNaSecao(el, secao);
+  if (!r) return null;
+  let x0 = r.x;
+  let y0 = r.y;
+  let x1 = r.x + r.w;
+  let y1 = r.y + r.h;
+  for (const f of el.querySelectorAll("*")) {
+    // o SVG do ícone não tem offset*; a caixa dele é a do span em volta
+    const q = f instanceof HTMLElement ? retNaSecao(f, secao) : null;
+    if (!q) continue;
+    x0 = Math.min(x0, q.x);
+    y0 = Math.min(y0, q.y);
+    x1 = Math.max(x1, q.x + q.w);
+    y1 = Math.max(y1, q.y + q.h);
+  }
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}
+
 export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
   const cabe = useMidia("(min-width: 1024px)");
   const reduzido = useMidia("(prefers-reduced-motion: reduce)");
@@ -121,6 +155,7 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
     let ancora: Ancora | null = null;
     /** A última medida boa de cada janela: uma janela fechada não some com o Mac. */
     const rets: Partial<Record<IdAncora, Ret>> = {};
+    let icones: Ret | null = null;
     let ondas: Onda[] = [];
     let mouse: { x: number; y: number } | null = null;
     let rastro: { x: number; y: number; t: number } | null = null;
@@ -146,6 +181,28 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
               const { esq, dir } = olhosEmRepouso(ancora);
               return { esq: naViewport(esq), dir: naViewport(dir) };
             },
+            get mac() {
+              let i0 = Infinity;
+              let j0 = Infinity;
+              let i1 = -1;
+              let j1 = -1;
+              for (let j = 0; j < q.linhas; j++)
+                for (let i = 0; i < q.cols; i++)
+                  if (celulaAcesa(q, j * q.cols + i)) {
+                    i0 = Math.min(i0, i);
+                    i1 = Math.max(i1, i);
+                    j0 = Math.min(j0, j);
+                    j1 = Math.max(j1, j);
+                  }
+              if (i1 < 0) return {};
+              const r = secao.getBoundingClientRect();
+              return {
+                x: r.left + secao.clientLeft + i0 * CELULA_L,
+                y: r.top + secao.clientTop + j0 * CELULA_A,
+                width: (i1 - i0 + 1) * CELULA_L,
+                height: (j1 - j0 + 1) * CELULA_A,
+              };
+            },
             quadros: 0,
             msMedio: 0,
             pulos: 0,
@@ -166,11 +223,10 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
         const y = j * CELULA_A;
         for (let i = 0; i < cols; i++) {
           const id = j * cols + i;
+          if (!celulaAcesa(q, id)) continue;
           const f = fundo[id];
           const a = alfa[id];
           const c = glifo[id];
-          const temGlifo = a > 0.01 && c !== 32 && c !== 0;
-          if (f <= 0.004 && !temGlifo) continue;
           const x = i * CELULA_L;
           if (cor[id] !== corAtual) {
             corAtual = cor[id];
@@ -181,7 +237,7 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
             ctx.globalAlpha = f;
             ctx.fillRect(x + 0.5, y + 0.5, CELULA_L - 1, CELULA_A - 1);
           }
-          if (temGlifo) {
+          if (a > 0.01 && c !== 32 && c !== 0) {
             // alfa acima de 1 o canvas ignora, e ficaria o da célula anterior
             ctx.globalAlpha = a < 1 ? a : 1;
             ctx.fillText(String.fromCharCode(c), x + CELULA_L / 2, y + CELULA_A / 2 + 0.5);
@@ -229,8 +285,13 @@ export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
         const r = el && retNaSecao(el, secao);
         if (r) rets[id] = r;
       }
+      const nav = secao.querySelector<HTMLElement>("nav");
+      icones = (nav && retComFilhos(nav, secao)) ?? icones;
+      // sem ícones medidos, a borda direita da mesa faz o papel deles
+      const navOuBorda = icones ?? { x: W, y: 0, w: 0, h: H };
       const { leiame, render, terminal } = rets;
-      if (leiame && render && terminal) ancora = ancorarMac({ w: W, h: H }, { leiame, render, terminal });
+      if (leiame && render && terminal)
+        ancora = ancorarMac({ w: W, h: H }, { leiame, render, terminal, nav: navOuBorda });
       quadro(0);
     };
 

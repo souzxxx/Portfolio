@@ -26,6 +26,13 @@ export const REGIAO = {
 export type Regiao = (typeof REGIAO)[keyof typeof REGIAO];
 
 /**
+ * A borda direita da frente, em u. Daqui para a direita só há a lateral (e o
+ * tampo, que sobe na mesma diagonal): a âncora mede por ela até onde o Mac
+ * chega, para não passar por baixo dos ícones.
+ */
+export const U_FRENTE_DIR = 0.26;
+
+/**
  * A região do Mac no ponto (u, v). `lado` é a largura da lateral direita em
  * alturas (0.1 em repouso): ela estreita e alarga com o mouse, e o tampo
  * acompanha, porque as duas faces sobem juntas na mesma diagonal de fuga.
@@ -36,20 +43,20 @@ export type Regiao = (typeof REGIAO)[keyof typeof REGIAO];
 export function regiaoEm(u: number, v: number, lado: number): Regiao {
   // quanto a lateral e o tampo sobem no fundo (a diagonal da perspectiva)
   const dv = lado * 0.6;
-  if (u >= -0.36 && u <= 0.26 && v >= -0.46 && v <= 0.36) {
+  if (u >= -0.36 && u <= U_FRENTE_DIR && v >= -0.46 && v <= 0.36) {
     if (u >= -0.25 && u <= 0.15 && v >= -0.355 && v <= -0.025) return REGIAO.tela;
     if (u >= -0.29 && u <= 0.19 && v >= -0.395 && v <= 0.015) return REGIAO.moldura;
     if (u >= -0.01 && u <= 0.18 && v >= 0.13 && v <= 0.16) return REGIAO.fenda;
     if (u >= -0.315 && u <= -0.28 && v >= 0.25 && v <= 0.28) return REGIAO.selo;
     return REGIAO.frente;
   }
-  if (u > 0.26 && u <= 0.26 + lado) {
-    const k = (u - 0.26) / lado;
+  if (u > U_FRENTE_DIR && u <= U_FRENTE_DIR + lado) {
+    const k = (u - U_FRENTE_DIR) / lado;
     if (v >= -0.46 - dv * k && v <= 0.36 - dv * k) return REGIAO.lado;
   }
   if (v < -0.46 && v >= -0.46 - dv) {
     const k = (-0.46 - v) / dv;
-    if (u >= -0.36 + lado * k && u <= 0.26 + lado * k) return REGIAO.tampo;
+    if (u >= -0.36 + lado * k && u <= U_FRENTE_DIR + lado * k) return REGIAO.tampo;
   }
   if (u >= -0.29 && u <= 0.19 && v > 0.36 && v <= 0.43) return REGIAO.pe;
   return REGIAO.vazio;

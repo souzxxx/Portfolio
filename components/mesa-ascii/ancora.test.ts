@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   ALTURA_MAC,
   ALTURA_MIN,
+  DIREITA_MAC,
   FOLGA_OLHOS,
   INCLINA_MAC,
   MARGEM_TOPO,
@@ -40,6 +41,14 @@ const EPS = 1e-6;
 
 const LEIAME_1024 = { x: 41, y: 60, w: 474, h: 871 };
 const RENDER_1024 = { x: 607, y: 60, w: 236, h: 260 };
+/**
+ * A coluna de ícones medida no navegador. O `nav` começa em x = 895 (1024) e
+ * 1376 (1512), mas o rótulo mais largo (CURRÍCULO.PDF) passa ~8 px para cada
+ * lado da caixa dele, e o texto vence sempre: o obstáculo é o nav com os
+ * filhos.
+ */
+const NAV_1024 = { x: 887, y: 60, w: 104, h: 668 };
+const NAV_1512 = { x: 1368, y: 60, w: 104, h: 882 };
 
 /**
  * `cabe`: o rosto cabe no vão ou na faixa com a FOLGA_OLHOS e o balanço.
@@ -53,6 +62,7 @@ const FIXTURES = {
       leiame: { x: 48, y: 60, w: 758, h: 739 },
       render: { x: 1006, y: 60, w: 312, h: 336 },
       terminal: { x: 838, y: 526, w: 480, h: 248 },
+      nav: NAV_1512,
     },
   },
   "1024×768, vão estreito e rosto na faixa": {
@@ -62,6 +72,7 @@ const FIXTURES = {
       leiame: LEIAME_1024,
       render: RENDER_1024,
       terminal: { x: 527, y: 384, w: 316, h: 176 },
+      nav: NAV_1024,
     },
   },
   "faixa de 42 px, que força o encolhimento": {
@@ -71,6 +82,7 @@ const FIXTURES = {
       leiame: LEIAME_1024,
       render: RENDER_1024,
       terminal: { x: 527, y: 362, w: 316, h: 176 },
+      nav: NAV_1024,
     },
   },
 };
@@ -82,6 +94,7 @@ const IMPOSSIVEL = {
     leiame: { x: 41, y: 60, w: 554, h: 871 },
     render: RENDER_1024,
     terminal: { x: 600, y: 340, w: 243, h: 176 },
+    nav: NAV_1024,
   },
 };
 
@@ -90,6 +103,12 @@ function macInteiroNaMesa(mesa: { w: number; h: number }, a: ReturnType<typeof a
   const sombra = a.baseY + 0.04 * a.altura;
   assert.ok(topo >= MARGEM_TOPO - EPS, `topo no auge do pulo em ${topo}`);
   assert.ok(sombra <= mesa.h + EPS, `sombra até ${sombra}, mesa ${mesa.h}`);
+}
+
+/** O ponto mais à direita que o Mac pode pintar fica a FOLGA_OLHOS dos ícones. */
+function macAntesDosIcones(a: ReturnType<typeof ancorarMac>, nav: Ret) {
+  const direita = a.cx + DIREITA_MAC * a.altura;
+  assert.ok(direita + FOLGA_OLHOS <= nav.x + EPS, `Mac até x = ${direita}, ícones em ${nav.x}`);
 }
 
 function olhosLivres(
@@ -135,6 +154,10 @@ for (const [nome, { cabe, mesa, janelas }] of Object.entries(FIXTURES)) {
 
   test(`${nome}: o Mac inteiro cabe na mesa, do topo no auge do pulo até a sombra`, () => {
     macInteiroNaMesa(mesa, ancorarMac(mesa, janelas));
+  });
+
+  test(`${nome}: no máximo da lateral, da inclinação e do pouso, o Mac fica à esquerda dos ícones`, () => {
+    macAntesDosIcones(ancorarMac(mesa, janelas), janelas.nav);
   });
 
   test(`${nome}: com o balanço e a respiração, os olhos continuam livres`, () => {
@@ -187,6 +210,41 @@ test("impossível (vão de 12 px, faixa de 20 px): ALTURA_MIN exata e o Mac inte
   const a = ancorarMac(mesa, janelas);
   assert.equal(a.altura, ALTURA_MIN * mesa.h);
   macInteiroNaMesa(mesa, a);
+});
+
+test("impossível: mesmo no melhor esforço, o Mac fica à esquerda dos ícones", () => {
+  const { mesa, janelas } = IMPOSSIVEL;
+  macAntesDosIcones(ancorarMac(mesa, janelas), janelas.nav);
+});
+
+test("1024×768: para sair de trás dos ícones, o rosto anda para a esquerda e só encolhe o necessário", () => {
+  const { mesa, janelas } = FIXTURES["1024×768, vão estreito e rosto na faixa"];
+  const a = ancorarMac(mesa, janelas);
+  const semIcones = ancorarMac(mesa, { ...janelas, nav: { x: mesa.w, y: 0, w: 0, h: mesa.h } });
+  assert.ok(a.cx < semIcones.cx, `cx ${a.cx} não andou para a esquerda de ${semIcones.cx}`);
+  assert.ok(a.altura <= semIcones.altura);
+  // o centro dos olhos no x mais à direita que os ícones deixam, e os olhos
+  // (com folga e balanço) ainda à direita do LEIA-ME: nesse tamanho cabe, e
+  // um passo maior (÷ 0.95) já não cabia
+  const U_OLHOS = (OLHOS_UV.esq.u0 + OLHOS_UV.dir.u1) / 2;
+  const OLHOS_L = OLHOS_UV.dir.u1 - OLHOS_UV.esq.u0;
+  const cabeAEsquerda = (altura: number) =>
+    janelas.nav.x - FOLGA_OLHOS - (DIREITA_MAC - U_OLHOS) * altura -
+      ((OLHOS_L * altura) / 2 + FOLGA_OLHOS + balanco(altura).x) >=
+    janelas.leiame.x + janelas.leiame.w - EPS;
+  assert.ok(cabeAEsquerda(a.altura), `${a.altura}`);
+  assert.ok(!cabeAEsquerda(a.altura / 0.95), `${a.altura / 0.95} também cabia`);
+  for (const o of Object.values(olhosEmRepouso(a))) {
+    assert.ok(o.y >= janelas.render.y + janelas.render.h);
+    assert.ok(o.y + o.h <= janelas.terminal.y);
+  }
+});
+
+test("1512×982: os ícones estão longe e o rosto continua no meio do vão", () => {
+  const { mesa, janelas } = FIXTURES["1512×982, rosto no vão"];
+  const a = ancorarMac(mesa, janelas);
+  const semIcones = ancorarMac(mesa, { ...janelas, nav: { x: mesa.w, y: 0, w: 0, h: mesa.h } });
+  assert.deepEqual(a, semIcones);
 });
 
 test("olhosEmRepouso: o centro dos dois olhos cai no ponto da âncora que mira o rosto", () => {

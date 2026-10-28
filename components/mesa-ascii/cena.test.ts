@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SALTO_MAC, olhosEmRepouso } from "./ancora";
+import { DIREITA_MAC, LADO, LADO_MOUSE, SALTO_MAC, olhosEmRepouso } from "./ancora";
 import {
   criarMac,
   desenharMac,
@@ -185,4 +185,28 @@ test("reduzido: o quadro não depende de t, do mouse nem de um pulo", () => {
     (m) => pularMac(m, true, 3.5),
   ).q;
   assert.deepEqual(mexido, parado);
+});
+
+test("DIREITA_MAC é um teto de verdade: nada pintado passa de cx + DIREITA_MAC·altura, nem no pior caso", () => {
+  // a lateral no máximo (mouse todo à esquerda) junto com a inclinação do
+  // mouse todo à direita e o pouso do pulo: uma combinação que nem acontece,
+  // varrendo o balanço e a respiração por um ciclo inteiro
+  const limite = ANCORA.cx + DIREITA_MAC * ANCORA.altura;
+  let maisDireita = -Infinity;
+  for (let t = 0; t < 8; t += 0.05) {
+    const e = entrada({ t, dt: 0.001, reduzido: false, mouse: { x: MESA.w, y: 300 } });
+    const { q } = desenhar(e, (m) => {
+      m.lado = LADO + LADO_MOUSE;
+      m.pulo = t - 0.5; // fase 0.9: amassado e alargado no pouso
+    });
+    for (let j = 0; j < q.linhas; j++)
+      for (let i = 0; i < q.cols; i++) {
+        const id = j * q.cols + i;
+        const pintada = q.fundo[id] > 0.004 || (q.alfa[id] > 0.01 && q.glifo[id] !== 32 && q.glifo[id] !== 0);
+        if (pintada) maisDireita = Math.max(maisDireita, centroX(i));
+      }
+  }
+  assert.ok(maisDireita <= limite, `célula com centro em x = ${maisDireita}, teto ${limite}`);
+  // e o teto não é folgado à toa: o pior caso chega a 4% dele
+  assert.ok(maisDireita >= limite - 0.04 * ANCORA.altura, `pior caso em ${maisDireita}, teto ${limite}`);
 });
