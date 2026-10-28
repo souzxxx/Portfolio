@@ -378,6 +378,53 @@ async function teletransporte(browser: Browser) {
     await c.close();
   }
 
+  // Voltar do navegador (history.back, client-side) de um case para a home.
+  // O Chrome pinta a home em y = 0 e só ~10 ms depois devolve a rolagem dela:
+  // medido nessa hora, o pet via a mesa e começava a sair, para voltar quando
+  // a rolagem chegava (dentro → saindo → entrando → dentro). Agora ele
+  // assenta direto: home devolvida depois da linha, fica; home no topo, sai
+  // uma vez só. O MutationObserver do `gravarFases` não perde troca nenhuma,
+  // por mais curta; a sequência é zerada logo antes do voltar.
+  for (const rolada of [true, false]) {
+    const c = await browser.newContext({ viewport: { width: w, height: h } });
+    await modoTeste(c);
+    await gravarFases(c);
+    const p = await c.newPage();
+    await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+    await esperarCena(p);
+    if (rolada) {
+      await cortinaEm(p, 20);
+      await p.locator('[data-pet][data-teleporte="dentro"] button').waitFor({ timeout: 5000 });
+    }
+    await p.waitForTimeout(300);
+    const yHome = await p.evaluate(() => window.scrollY);
+    await p.evaluate(() => (window as unknown as { next: { router: { push(h: string): void } } }).next.router.push("/projetos/tecna-site"));
+    await p.waitForURL(/\/projetos\//);
+    await p.locator("[data-pet] button").waitFor({ timeout: 5000 });
+    await p.waitForTimeout(800);
+    await p.evaluate(() => {
+      (window as JanelaDeTeste).__sxFasesAntes = [];
+      history.back();
+    });
+    await p.waitForURL((u) => new URL(u).pathname === "/");
+    await p.waitForTimeout(1000);
+    const seq = await fases(p);
+    const y = await p.evaluate(() => window.scrollY);
+    const vaiEVolta = seq.some((f, i) => f === "saindo" && seq.slice(i + 1).includes("entrando"));
+    if (rolada) {
+      ok(
+        Math.abs(y - yHome) < 2 && !vaiEVolta && seq.join() === "dentro",
+        `voltar (client-side) do case para a home rolada: o pet fica, sem começar a sair — rolagem ${Math.round(y)} (era ${Math.round(yHome)}); ${seq.join(" → ")}`,
+      );
+    } else {
+      ok(
+        y === 0 && !vaiEVolta && seq.join() === "dentro,saindo,fora",
+        `voltar (client-side) do case para a home no topo: o pet sai uma vez só — rolagem ${Math.round(y)}; ${seq.join(" → ")}`,
+      );
+    }
+    await c.close();
+  }
+
   // Página aberta já rolada: entra COM teletransporte assim que a cena fica pronta.
   {
     const c = await browser.newContext({ viewport: { width: w, height: h } });

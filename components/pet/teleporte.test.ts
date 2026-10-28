@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { QUADROS, querDentro, type ParteTeleporte } from "./teleporte";
+import { QUADROS, TELEPORTE_ENTRA_MS, jaChegou, querDentro, type ParteTeleporte } from "./teleporte";
 
 const PARTES: ParteTeleporte[] = [
   "corpo",
@@ -20,6 +20,21 @@ test("entra quando o topo do SOUZXXX chega à MenuBar (28 px) ou passa dela", ()
 test("histerese: dentro, só sai 32 px abaixo do limiar", () => {
   assert.equal(querDentro(60, true), true);
   assert.equal(querDentro(61, true), false);
+});
+
+test("jaChegou: sair com a animação no 0, ou entrar com ela no fim, é chegar sem tocar", () => {
+  // o play() rebobina nesses dois pontos: tocar daria a volta inteira
+  assert.equal(jaChegou(false, 0), true);
+  assert.equal(jaChegou(false, -1), true);
+  assert.equal(jaChegou(true, TELEPORTE_ENTRA_MS), true);
+  assert.equal(jaChegou(true, TELEPORTE_ENTRA_MS + 1), true);
+});
+
+test("jaChegou: no meio do caminho, ou na ponta oposta, ainda tem o que tocar", () => {
+  assert.equal(jaChegou(false, 1), false);
+  assert.equal(jaChegou(false, TELEPORTE_ENTRA_MS), false);
+  assert.equal(jaChegou(true, TELEPORTE_ENTRA_MS - 1), false);
+  assert.equal(jaChegou(true, 0), false);
 });
 
 test("o roteiro tem exatamente as seis partes", () => {

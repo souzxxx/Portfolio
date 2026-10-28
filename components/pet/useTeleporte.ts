@@ -5,10 +5,16 @@ import {
   QUADROS,
   TELEPORTE_ENTRA_MS,
   TELEPORTE_SAI_MS,
+  jaChegou,
   querDentro,
   type FaseTeleporte,
   type ParteTeleporte,
 } from "./teleporte";
+
+/** Um popstate até este tanto antes de a sessão começar foi o que a trouxe. */
+const JANELA_VOLTA_MS = 1000;
+/** Quanto a primeira medida espera, depois de um voltar, a rolagem que não veio. */
+const ESPERA_ROLAGEM_MS = 150;
 
 /**
  * Liga o teletransporte puro (teleporte.ts) ao DOM: mede o SOUZXXX, toca os
@@ -25,7 +31,12 @@ import {
  * do tempo atual. Recomeçar do zero faria o tremido (rolar para cima e para
  * baixo em volta do limiar) piscar o pet inteiro a cada troca. A saída é a
  * mesma tabela tocada ao contrário, mais rápida (ENTRA/SAI). O `fill: "both"`
- * é o que deixa o corpo em opacidade 0 depois da saída terminar.
+ * é o que deixa o corpo em opacidade 0 depois da saída terminar. Só que o
+ * `play()` rebobina nas pontas: ao contrário com o tempo em 0, ou para a
+ * frente com ele no fim, salta para a outra ponta e toca tudo. Por isso,
+ * antes de tocar, `jaChegou` pergunta se a animação já está onde o rumo novo
+ * termina (uma inversão no quadro em que a entrada nem andou); se está, só
+ * pausa ali e assenta a fase.
  *
  * FASE: `entrando`/`saindo` assim que o rumo troca; `dentro`/`fora` quando a
  * animação do corpo termina. Um contador descarta o `finished` de um rumo que
@@ -41,6 +52,15 @@ import {
  * pet das outras rotas é o de sempre. Voltar de lá para a home recomeça do
  * fim (ele estava visível) e, se a home estiver no topo, ele sai pelo
  * teletransporte em vez de sumir.
+ *
+ * VOLTAR DO NAVEGADOR (popstate, client-side): o React pinta a home em y = 0
+ * e só ~10 ms depois o navegador devolve a rolagem dela. Medida na hora, a
+ * cortina estaria lá embaixo, a mesa à vista, e o pet começava a sair para
+ * voltar logo que a rolagem chegasse (saindo → entrando). Então a sessão que
+ * nasce de um voltar não mede na hora: a rolagem devolvida chega como um
+ * `scroll` e mede por ele; se não vier (a home estava no topo, não há o que
+ * rolar), mede depois de ESPERA_ROLAGEM_MS. Até lá o pet fica como estava, e
+ * assenta direto no certo: fica, ou sai uma vez só.
  *
  * Com `reduzido` não existe animação nenhuma: a fase vai direto para `dentro`
  * ou `fora`.
@@ -65,6 +85,17 @@ export function useTeleporte(
   useEffect(() => {
     if (!ativo) mudar(pronto ? "dentro" : "fora");
   }, [ativo, pronto, mudar]);
+
+  // Quando foi o último voltar/avançar do navegador. Ouvido sempre, não só
+  // na home: o popstate chega ainda no case, antes de a sessão começar.
+  const volta = useRef(-Infinity);
+  useEffect(() => {
+    const marcar = () => {
+      volta.current = performance.now();
+    };
+    window.addEventListener("popstate", marcar);
+    return () => window.removeEventListener("popstate", marcar);
+  }, []);
 
   useEffect(() => {
     if (!ativo) return;
@@ -100,7 +131,16 @@ export function useTeleporte(
       }
       if (!corpo || alvo === rumo) return;
       rumo = alvo;
+      // o `finished` do rumo anterior, se ainda vier, não vale mais
       const minha = ++vez;
+      if (jaChegou(alvo, Number(corpo.currentTime ?? 0))) {
+        for (const a of animacoes) {
+          a.pause();
+          a.currentTime = alvo ? TELEPORTE_ENTRA_MS : 0;
+        }
+        mudar(alvo ? "dentro" : "fora");
+        return;
+      }
       const taxa = alvo ? 1 : -TELEPORTE_ENTRA_MS / TELEPORTE_SAI_MS;
       for (const a of animacoes) {
         a.updatePlaybackRate(taxa);
@@ -118,8 +158,11 @@ export function useTeleporte(
     // gatilho é guardada à parte, para a histerese seguir a rolagem.
     let quer = rumo;
     let quadro = 0;
+    let espera = 0;
     const medir = () => {
       quadro = 0;
+      // a primeira medida depois de um voltar já veio pelo scroll
+      window.clearTimeout(espera);
       const cortina = document.querySelector("[data-cortina]");
       if (!cortina) return;
       quer = querDentro(cortina.getBoundingClientRect().top, quer);
@@ -129,11 +172,19 @@ export function useTeleporte(
       if (!quadro) quadro = requestAnimationFrame(medir);
     };
 
-    medir();
+    // Vindo de um voltar, espera a rolagem devolvida (ver o topo). A espera
+    // termina num quadro, como o scroll: se a rolagem e o fim dela caírem
+    // juntos, o quadro já vê a posição devolvida.
+    if (performance.now() - volta.current < JANELA_VOLTA_MS) {
+      espera = window.setTimeout(agendar, ESPERA_ROLAGEM_MS);
+    } else {
+      medir();
+    }
     window.addEventListener("scroll", agendar, { passive: true });
     window.addEventListener("resize", agendar);
     return () => {
       vivo = false;
+      window.clearTimeout(espera);
       cancelAnimationFrame(quadro);
       window.removeEventListener("scroll", agendar);
       window.removeEventListener("resize", agendar);

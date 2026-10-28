@@ -53,6 +53,20 @@ export function querDentro(
   return dentroAgora;
 }
 
+/**
+ * A animação já está onde o rumo pedido termina? `tempoMs` é o currentTime
+ * das animações (0 = fora, TELEPORTE_ENTRA_MS = dentro).
+ *
+ * É a pergunta que vem ANTES do `play()`, porque ele rebobina sozinho: tocar
+ * ao contrário com o tempo em 0, ou para a frente com o tempo no fim, salta
+ * para a ponta oposta e toca o roteiro inteiro. Uma inversão no quadro em que
+ * a entrada ainda nem andou mostraria a saída completa de um pet que nunca
+ * apareceu. Quando isto dá true, quem toca só assenta a fase.
+ */
+export function jaChegou(dentro: boolean, tempoMs: number, duracao = TELEPORTE_ENTRA_MS): boolean {
+  return dentro ? tempoMs >= duracao : tempoMs <= 0;
+}
+
 const DEGRAU = "steps(1, end)";
 
 /**
