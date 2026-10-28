@@ -14,7 +14,8 @@
  * topo confere que ele NÃO está lá.
  */
 import { chromium, devices, type Browser, type BrowserContext, type Page } from "playwright";
-import { mkdir } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdir, rename, stat } from "node:fs/promises";
 
 const BASE = process.env.PET_BASE_URL ?? "http://localhost:3000";
 const OUT = process.env.PET_OUT ?? "/tmp/pet";
@@ -347,8 +348,14 @@ async function teletransporte(browser: Browser) {
     );
 
     // Case → home no topo: ele estava visível, então sai pelo teletransporte.
+    // O Chrome restaura a rolagem da home (onde o pet estava dentro) uns
+    // 40 ms DEPOIS do popstate, quando o React já pintou a home. Subir antes
+    // disso é corrida: no `next start` a restauração chegou depois do
+    // scrollTo e deixou o pet dentro. Então espera a rolagem voltar e só
+    // depois sobe ao topo.
     await p.goBack();
     await p.waitForURL((u) => new URL(u).pathname === "/");
+    await p.waitForFunction(() => window.scrollY > 0, null, { timeout: 2000 }).catch(() => undefined);
     await p.evaluate(() => {
       document.documentElement.style.scrollBehavior = "auto";
       window.scrollTo(0, 0);
@@ -626,6 +633,103 @@ async function correcoesFinais(browser: Browser) {
  */
 const RUIDO_DEV = (texto: string) => texto.includes("data-boot");
 
+/**
+ * O vídeo do teletransporte, para mostrar: 1 s no topo da home, a rodinha
+ * descendo (120 px a cada 50 ms) até o SOUZXXX passar da MenuBar, 1,5 s
+ * parado e a rodinha de volta ao topo. Sem `modoTeste`: o sono de 1,5 s
+ * faria o pet cochilar na pausa. Vira GIF se houver ffmpeg no PATH.
+ */
+async function videoTeleporte(browser: Browser) {
+  const tamanho = { width: 1512, height: 982 };
+  const ctx = await browser.newContext({ viewport: tamanho, recordVideo: { dir: OUT, size: tamanho } });
+  await ctx.addInitScript(() => {
+    try {
+      sessionStorage.setItem("sx-boot", "1");
+    } catch {}
+  });
+  await gravarFases(ctx);
+  const p = await ctx.newPage();
+  const t0 = Date.now();
+  await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await esperarCena(p);
+  // A entrada das janelas da mesa acaba antes do vídeo começar a valer.
+  await p.evaluate(async () => {
+    await document.fonts.ready;
+    const a = document.getAnimations().filter((x) => {
+      const alvo = (x.effect as KeyframeEffect | null)?.target;
+      return alvo instanceof Element && alvo.classList.contains("janela-entra");
+    });
+    await Promise.all(a.map((x) => x.finished.catch(() => undefined)));
+  });
+  const inicio = (Date.now() - t0) / 1000;
+  const topoCortina = () => p.evaluate(() => document.querySelector("[data-cortina]")!.getBoundingClientRect().top);
+  // A rodinha vale para o que está debaixo do mouse: aqui ele fica sobre o
+  // LEIA-ME, que não rola por dentro, então a página inteira rola.
+  await p.mouse.move(tamanho.width * 0.42, tamanho.height * 0.5);
+  await p.waitForTimeout(1000);
+
+  let passos = 0;
+  while ((await topoCortina()) > 0 && passos < 200) {
+    await p.mouse.wheel(0, 120);
+    await p.waitForTimeout(50);
+    passos++;
+  }
+  const passou = (await topoCortina()) <= 0;
+  ok(passou, `vídeo: a rodinha passa o SOUZXXX da MenuBar (${passos} passos)`);
+  await p.waitForTimeout(1500);
+  const dentro = await fase(p);
+
+  let volta = 0;
+  while ((await p.evaluate(() => window.scrollY)) > 0 && volta < 200) {
+    await p.mouse.wheel(0, -120);
+    await p.waitForTimeout(50);
+    volta++;
+  }
+  await p.waitForTimeout(1200);
+  const seq = await fases(p);
+  ok(
+    dentro === "dentro" && seq.join() === "fora,entrando,dentro,saindo,fora",
+    `vídeo: o pet entra e sai com o teletransporte — parado ${dentro}; ${seq.join(" → ")}`,
+  );
+  console.log(`  roteiro de ${((Date.now() - t0) / 1000 - inicio).toFixed(1)} s (${passos} passos para baixo, ${volta} para cima)`);
+
+  const gravado = await p.video()?.path();
+  await ctx.close();
+  if (!gravado) {
+    ok(false, "vídeo do teletransporte gravado");
+    return;
+  }
+  const webm = `${OUT}/teleporte.webm`;
+  await rename(gravado, webm);
+  console.log(`  vídeo em ${webm}`);
+  try {
+    execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
+  } catch {
+    console.log("  sem ffmpeg no PATH: fica só o .webm");
+    return;
+  }
+  // O site é quase 1-bit: 32 cores sem pontilhado e só o retângulo que muda
+  // a cada quadro deixam o GIF em ~4 MB em vez de ~9 MB, sem perda visível.
+  const gif = `${OUT}/teleporte.gif`;
+  execFileSync(
+    "ffmpeg",
+    [
+      "-y",
+      "-loglevel",
+      "error",
+      "-ss",
+      inicio.toFixed(2),
+      "-i",
+      webm,
+      "-vf",
+      "fps=20,scale=900:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=32:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle",
+      gif,
+    ],
+    { stdio: "inherit" },
+  );
+  console.log(`  GIF em ${gif} (${((await stat(gif)).size / 1e6).toFixed(1)} MB)`);
+}
+
 async function main() {
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch({ args: GL });
@@ -635,9 +739,12 @@ async function main() {
   await modoTeste(ctx);
   const page = await ctx.newPage();
   const erros: string[] = [];
+  let ruidoDev = 0;
   page.on("pageerror", (e) => erros.push(String(e)));
   page.on("console", (m) => {
-    if (m.type() === "error" && !RUIDO_DEV(m.text())) erros.push(m.text());
+    if (m.type() !== "error") return;
+    if (RUIDO_DEV(m.text())) ruidoDev++;
+    else erros.push(m.text());
   });
   await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
   const pet = page.locator("[data-pet]");
@@ -706,6 +813,7 @@ async function main() {
   await page.locator("[data-pet] button").click();
   ok(((await page.locator("[data-pet-balao]").textContent()) ?? "").includes("próximo projeto"), "no case, a dica é do case");
   ok(erros.length === 0, `sem erros no console${erros.length ? ": " + erros.join(" | ") : ""}`);
+  console.log(`  ruído \`data-boot\` do next dev ignorado: ${ruidoDev} mensagem(ns)`);
 
   // /cv sem pet
   await page.goto(`${BASE}/cv`, { waitUntil: "networkidle" });
@@ -752,6 +860,8 @@ async function main() {
 
   await teletransporte(browser);
   await correcoesFinais(browser);
+  console.log("\nvídeo do teletransporte");
+  await videoTeleporte(browser);
   await browser.close();
 
   // Review Focus 4: sem WebGL
