@@ -89,6 +89,7 @@ function JanelaMesa({
   const controles = useDragControls();
   return (
     <div
+      data-janela={id}
       className={clsx("janela-entra relative", className)}
       style={{ "--ordem": ordem, zIndex: z } as CSSProperties}
     >
@@ -211,6 +212,9 @@ export function Desktop({
   // `isolate`: o z das janelas (até 70) e da Lixeira (90) vale só dentro da
   // mesa. Abaixo de 760 px de altura a mesa não é sticky, não criava contexto
   // de empilhamento, e uma janela arrastada para o canto cobria o pet (z-60).
+  // No sticky a linha da grade tem a altura da mesa (`minmax(0,1fr)`), não a
+  // do conteúdo: o LEIA-ME passa do fim em telas baixas, e uma linha `auto`
+  // cresceria com ele, esticando a coluna do meio e levando o AGORA para fora.
   return (
     <section
       aria-labelledby="hero-nome"
@@ -218,7 +222,7 @@ export function Desktop({
     >
       <div
         ref={mesa}
-        className="relative mx-auto grid h-full max-w-[110rem] gap-x-8 gap-y-6 px-[var(--gutter)] pb-16 pt-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] lg:pb-10 lg:pt-8"
+        className="relative mx-auto grid h-full max-w-[110rem] gap-x-8 gap-y-6 px-[var(--gutter)] pb-16 pt-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_auto] lg:pb-10 lg:pt-8 [@media(min-width:1024px)_and_(min-height:760px)]:grid-rows-[minmax(0,1fr)]"
       >
         {/* ── LEIA-ME ─────────────────────────────────────────────── */}
         <JanelaMesa
@@ -306,7 +310,12 @@ export function Desktop({
         </JanelaMesa>
 
         {/* ── COLUNA DO MEIO: gravura, terminal, agora ─────────────── */}
-        <div className="flex min-w-0 flex-col gap-6 lg:gap-0">
+        {/* Escadinha: as três janelas alinham pela borda direita e nenhuma
+            cobre outra. A faixa `flex-1` entre o RENDER e o TERMINAL prende
+            o RENDER no topo e o AGORA no fim da coluna; em tela alta a altura
+            que sobra vira faixa, por onde o Mac aparece. Quando falta altura,
+            encolhem o RENDER e o TERMINAL (`.mesa-coluna`, globals.css). */}
+        <div className="mesa-coluna flex min-w-0 flex-col gap-6 lg:items-end lg:gap-0">
           {fechadas.has("render") ? null : (
             <JanelaMesa
               id="render"
@@ -318,7 +327,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("render")}
               rotuloFechar={os.janelas.fechar}
-              className="hidden w-[min(100%,19.5rem)] self-end lg:block lg:mr-6"
+              className="hidden w-[min(100%,var(--render))] lg:block"
               corpoClassName="relative aspect-square bg-carvao"
             >
               <EngravedObject />
@@ -328,6 +337,8 @@ export function Desktop({
               </p>
             </JanelaMesa>
           )}
+
+          <div aria-hidden className="hidden min-h-12 flex-1 lg:block" />
 
           {fechadas.has("terminal") ? null : (
             <JanelaMesa
@@ -340,7 +351,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("terminal")}
               rotuloFechar={os.janelas.fechar}
-              className="h-[15.5rem] w-full lg:-mt-16 lg:max-w-[30rem]"
+              className="h-[var(--terminal)] w-full lg:max-w-[30rem]"
               corpoClassName="h-[calc(100%-22px)]"
             >
               <Terminal lang={lang} d={os.terminal} projetos={projetos} />
@@ -358,7 +369,7 @@ export function Desktop({
               aFrente={aFrente}
               onFechar={fechar("agora")}
               rotuloFechar={os.janelas.fechar}
-              className="w-full lg:ml-auto lg:mr-2 lg:mt-5 lg:w-[19rem]"
+              className="w-full lg:mt-2 lg:w-[19rem]"
               corpoClassName="bg-carvao text-cream"
             >
               <dl className="divide-y divide-dashed divide-cream/20 px-3 py-1">
@@ -402,7 +413,7 @@ export function Desktop({
 
         {/* ── LIXEIRA (easter egg) ─────────────────────────────────── */}
         {fechadas.has("lixeira") ? null : (
-          <div className="absolute inset-0 z-[90] grid place-items-center p-6">
+          <div data-janela="lixeira" className="absolute inset-0 z-[90] grid place-items-center p-6">
             <Janela
               titulo={os.janelas.lixeira}
               sombra="breu"

@@ -234,6 +234,25 @@
   }
 }
 
+/* Coluna do meio da mesa, em escadinha: o lado do RENDER (quadrado) e a
+   altura do TERMINAL. Fora do modo sticky são os tamanhos de sempre. No
+   sticky a mesa tem 100svh e `overflow-hidden`, e a conta é a da coluna:
+   100svh − 100 px de respiros da mesa, menos a barra de título do RENDER, a
+   faixa mínima, o vão e o AGORA (~240 px), deixa RENDER + TERMINAL ≤ 100svh −
+   340 px. Cada um cresce meio pixel por pixel de altura da tela (as duas
+   metades somam 100svh − 356 px) e sobram ~16 px de folga; acima de ~920 px
+   de altura os dois param no tamanho de sempre e a sobra vai para a faixa. */
+.mesa-coluna {
+  --render: 19.5rem;
+  --terminal: 15.5rem;
+}
+@media (min-width: 1024px) and (min-height: 760px) {
+  .mesa-coluna {
+    --render: clamp(14rem, calc(50svh - 148px), 19.5rem);
+    --terminal: clamp(10rem, calc(50svh - 208px), 15.5rem);
+  }
+}
+
 @keyframes piscar {
   50% {
     opacity: 0;
