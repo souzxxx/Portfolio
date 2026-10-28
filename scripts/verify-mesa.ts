@@ -11,8 +11,9 @@
  * tamanho (e pintados de fato no canvas), o Mac fora da coluna de ícones e
  * dos rótulos, o laço rodando, o clique na mesa
  * vazia fazendo ele pular sem roubar o clique das janelas, o custo por
- * quadro, o resize de 1512 para 1024 e o modo sem movimento. Grava um vídeo
- * de ~8 s (e um GIF, se houver ffmpeg).
+ * quadro, o resize de 1512 para 1024 (e de volta a 1920, com as janelas
+ * voltando à escadinha) e o modo sem movimento. Grava um vídeo de ~8 s (e um
+ * GIF, se houver ffmpeg).
  *
  * Uso: `npm run dev` (ou `next start`) em outro terminal e
  *   MESA_BASE_URL=http://localhost:3000 npx tsx scripts/verify-mesa.ts
@@ -169,24 +170,91 @@ async function icones(p: Page): Promise<Caixa> {
 }
 
 /**
- * O que pode cobrir os olhos: as janelas abertas, os ícones e a MenuBar. A
- * janela medida é o filho do `[data-janela]`, o `motion.div` que o framer
- * move (no arraste e quando a tela muda de tamanho); o wrapper fica no lugar
- * de layout. A lixeira fica de fora: é um overlay do tamanho da mesa e
- * começa fechada.
+ * As janelas como estão na tela: o filho do `[data-janela]`, o `motion.div`
+ * que o framer move (no arraste e quando a tela muda de tamanho), com o
+ * transform computado dele; o wrapper fica no lugar de layout. A lixeira fica
+ * de fora: é um overlay do tamanho da mesa e começa fechada.
  */
-async function obstaculos(p: Page): Promise<Record<string, Caixa>> {
-  const janelas = await p.evaluate(() => {
-    const r: Record<string, Caixa> = {};
+async function janelasNaTela(p: Page): Promise<Record<string, { caixa: Caixa; transform: string }>> {
+  return p.evaluate(() => {
+    const r: Record<string, { caixa: Caixa; transform: string }> = {};
     for (const el of document.querySelectorAll<HTMLElement>("[data-janela]:not([data-janela=lixeira]) > *")) {
       const c = el.getBoundingClientRect().toJSON() as Caixa;
-      if (c.width > 0 && c.height > 0) r[el.parentElement!.dataset.janela!] = c;
+      if (c.width > 0 && c.height > 0) r[el.parentElement!.dataset.janela!] = { caixa: c, transform: getComputedStyle(el).transform };
     }
-    const barra = document.querySelector("header.fixed");
-    if (barra) r.menubar = barra.getBoundingClientRect().toJSON() as Caixa;
     return r;
   });
-  return { ...janelas, icones: await icones(p) };
+}
+
+/** O que pode cobrir os olhos: as janelas abertas na tela, os ícones e a MenuBar. */
+async function obstaculos(p: Page): Promise<Record<string, Caixa>> {
+  const r: Record<string, Caixa> = {};
+  for (const [id, j] of Object.entries(await janelasNaTela(p))) r[id] = j.caixa;
+  const barra = await p.evaluate(() => document.querySelector("header.fixed")?.getBoundingClientRect().toJSON() as Caixa | undefined);
+  if (barra) r.menubar = barra;
+  return { ...r, icones: await icones(p) };
+}
+
+/** `none` ou uma matriz 2D sem escala, giro nem deslocamento: o arraste zerado. */
+function semDeslocamento(t: string) {
+  if (t === "none") return true;
+  const m = /^matrix\(([^)]+)\)$/.exec(t);
+  if (!m) return false;
+  const [a, b, c, d, e, f] = m[1].split(",").map(Number);
+  const zero = (v: number, tol = 1e-6) => Math.abs(v) < tol;
+  return zero(a - 1) && zero(b) && zero(c) && zero(d - 1) && zero(e, 0.5) && zero(f, 0.5);
+}
+
+/**
+ * Depois de um resize do navegador as janelas voltam à escadinha: o framer
+ * reescalona por conta própria a posição de tudo que arrasta dentro dos
+ * `dragConstraints`, até de janela que ninguém tocou. Mede o que o framer move
+ * — nenhuma janela sobre outra, a coluna do meio inteira na mesa sticky, o
+ * LEIA-ME abaixo da MenuBar e o transform de cada uma zerado.
+ */
+async function checarEscadinhaNaTela(p: Page, rotulo: string) {
+  const { mesa } = await retangulos(p);
+  const [w, h] = await p.evaluate(() => [innerWidth, innerHeight]);
+  const janelas = await janelasNaTela(p);
+  const ids = Object.keys(janelas);
+  for (const id of ids) console.log(`  ${id.padEnd(8)} na tela ${resumo(janelas[id].caixa)} · transform ${janelas[id].transform}`);
+
+  const faltam = JANELAS_INICIAIS.filter((id) => !janelas[id]);
+  ok(faltam.length === 0, `${rotulo}: as quatro janelas medidas na tela${faltam.length ? " — faltam: " + faltam.join(", ") : ""}`);
+
+  const cruzam: string[] = [];
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      const area = areaComum(janelas[ids[i]].caixa, janelas[ids[j]].caixa);
+      if (area > 1) cruzam.push(`${ids[i]} × ${ids[j]} (${px(area)} px²)`);
+    }
+  }
+  ok(cruzam.length === 0, `${rotulo}: nenhuma janela sobre outra na tela${cruzam.length ? " — cruzam: " + cruzam.join(", ") : ""}`);
+
+  if (w >= 1024 && h >= 760) {
+    const vazam = COLUNA_DO_MEIO.filter((id) => janelas[id])
+      .map((id) => {
+        const c = janelas[id].caixa;
+        const fora = [
+          mesa.top - c.top > 0.5 && `sobe ${px(mesa.top - c.top)} px`,
+          c.bottom - mesa.bottom > 0.5 && `passa ${px(c.bottom - mesa.bottom)} px do fim`,
+          mesa.left - c.left > 0.5 && `sai ${px(mesa.left - c.left)} px à esquerda`,
+          c.right - mesa.right > 0.5 && `sai ${px(c.right - mesa.right)} px à direita`,
+        ].filter(Boolean);
+        return fora.length ? `${id} ${fora.join(", ")}` : null;
+      })
+      .filter((x): x is string => x !== null);
+    ok(vazam.length === 0, `${rotulo} (sticky): RENDER, TERMINAL e AGORA na tela dentro da mesa${vazam.length ? " — " + vazam.join("; ") : ""}`);
+  }
+
+  const leiame = janelas.leiame?.caixa;
+  ok(!!leiame && leiame.top >= 28, `${rotulo}: o LEIA-ME fica abaixo da MenuBar (topo ${leiame ? px(leiame.top) : "?"} px, mínimo 28)`);
+
+  const deslocadas = ids.filter((id) => !semDeslocamento(janelas[id].transform));
+  ok(
+    deslocadas.length === 0,
+    `${rotulo}: o arraste de toda janela volta a zero${deslocadas.length ? " — deslocadas: " + deslocadas.map((id) => `${id} (${janelas[id].transform})`).join(", ") : ""}`,
+  );
 }
 
 /** Os dois olhos em repouso dentro da mesa e sem nada por cima. */
@@ -388,7 +456,9 @@ async function vivo(browser: Browser) {
 }
 
 /** Review Focus 1: a janela do navegador encolhe de 1512 para 1024 com o hero
- *  na tela. O Mac reancora, a grade é recriada e os olhos seguem à vista. */
+ *  na tela. As janelas voltam à escadinha, o Mac reancora, a grade é recriada
+ *  e os olhos seguem à vista. Depois, com o TERMINAL arrastado, a janela cresce
+ *  para 1920 e a escadinha volta de novo. */
 async function resize(browser: Browser) {
   const ctx = await browser.newContext({ viewport: { width: 1512, height: 982 } });
   await modoTeste(ctx);
@@ -400,7 +470,8 @@ async function resize(browser: Browser) {
     return;
   }
   await p.setViewportSize({ width: 1024, height: 768 });
-  await p.waitForTimeout(600);
+  await p.waitForTimeout(800);
+  await checarEscadinhaNaTela(p, "1512→1024");
   const { janelas } = await retangulos(p);
   const andaram = await obstaculos(p);
   for (const id of ["leiame", "render", "terminal", "agora"]) {
@@ -420,6 +491,25 @@ async function resize(browser: Browser) {
     `1512→1024: o canvas foi recriado no tamanho novo (${c.bw}×${c.bh}, esperado ${c.ew}×${c.eh})`,
   );
   await p.screenshot({ path: `${OUT}/mac-resize-1024x768.png` });
+
+  // Quem arrastou perde a arrumação no resize: o TERMINAL sai do lugar pela
+  // alça e, quando a janela cresce, volta para a escadinha com as outras.
+  const alca = p.locator('[data-janela="terminal"] .cursor-grab');
+  const antes = (await alca.boundingBox())!;
+  await p.mouse.move(antes.x + 30, antes.y + antes.height / 2);
+  await p.mouse.down();
+  for (let i = 1; i <= 20; i++) await p.mouse.move(antes.x + 30 - (220 * i) / 20, antes.y + antes.height / 2 - (140 * i) / 20);
+  await p.mouse.up();
+  await p.waitForTimeout(300);
+  const depois = (await alca.boundingBox())!;
+  ok(
+    Math.abs(depois.x - antes.x) > 50 && Math.abs(depois.y - antes.y) > 50,
+    `1024×768: arrastar o TERMINAL pela alça funciona antes do resize (andou ${px(depois.x - antes.x)}, ${px(depois.y - antes.y)})`,
+  );
+  await p.setViewportSize({ width: 1920, height: 1080 });
+  await p.waitForTimeout(800);
+  await checarEscadinhaNaTela(p, "1024→1920");
+  await p.screenshot({ path: `${OUT}/mac-resize-1920x1080.png` });
   await ctx.close();
 }
 

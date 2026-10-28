@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { motion, useDragControls } from "framer-motion";
+import { motion, useDragControls, useMotionValue } from "framer-motion";
 import { Janela } from "./Janela";
 import { PixelIcon, type NomeIcone } from "./PixelIcon";
 import { Terminal } from "./Terminal";
@@ -95,6 +95,30 @@ function JanelaMesa({
   children: ReactNode;
 }) {
   const controles = useDragControls();
+  // O deslocamento do arraste. Num resize do navegador o framer reescalona por
+  // conta própria a posição de tudo que arrasta com `dragConstraints` em ref
+  // (`scalePositionWithinConstraints`) — move até janela que ninguém tocou, e o
+  // LEIA-ME ia parar sob a MenuBar, o TERMINAL sobre o AGORA. A escadinha é a
+  // disposição que vale: depois do resize, todo arraste volta a zero. O rAF
+  // roda depois do handler síncrono do framer, qualquer que seja a ordem dos
+  // listeners; quem tinha arrastado uma janela perde a arrumação, e tudo bem.
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  useEffect(() => {
+    let quadro = 0;
+    const zerar = () => {
+      cancelAnimationFrame(quadro);
+      quadro = requestAnimationFrame(() => {
+        x.set(0);
+        y.set(0);
+      });
+    };
+    window.addEventListener("resize", zerar);
+    return () => {
+      window.removeEventListener("resize", zerar);
+      cancelAnimationFrame(quadro);
+    };
+  }, [x, y]);
   return (
     <div
       data-janela={id}
@@ -109,6 +133,7 @@ function JanelaMesa({
         dragElastic={0.06}
         dragConstraints={limites}
         onPointerDownCapture={() => aFrente(id)}
+        style={{ x, y }}
         className="h-full"
       >
         <Janela
