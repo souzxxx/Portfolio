@@ -10,6 +10,7 @@ import { criarEstado } from "./estado";
 import { rotaDoPet, useSecaoAtual } from "./secao";
 import { useDesvio } from "./useDesvio";
 import { usePetEventos } from "./usePetEventos";
+import type { FaseTeleporte } from "./teleporte";
 import { useTeleporte } from "./useTeleporte";
 
 /**
@@ -40,7 +41,8 @@ import { useTeleporte } from "./useTeleporte";
  * `visibility: hidden`, `inert`, sem botão e sem pedir quadro
  * (`estado.oculto`). O botão, o balão e o desvio só existem com ele
  * `dentro`; se o balão estava aberto quando ele saiu, fecha. Nas outras
- * rotas a fase é sempre `dentro` e a entrada é a `.pet-entra` de antes.
+ * rotas a fase é sempre `dentro` e a entrada é a `.pet-entra` de antes, que
+ * só toca quando ele chega invisível (ver `ultimaNaHome`).
  *
  * O EFEITO é DOM em volta do canvas, sem tocar no shader: o corpo (o canvas)
  * estica e pisca, e ao lado dele um risco, quatro linhas de velocidade e
@@ -95,6 +97,18 @@ export function Pet({ textos }: { textos: DictPet }) {
   const chave = useSecaoAtual(pathname, mostrar);
   const desvio = useDesvio(raiz, mostrar && cenaPronta && dentro);
   const aoFicarPronta = useCallback(() => setCenaPronta(true), []);
+
+  // Fora da home, a `.pet-entra` só toca para quem CHEGA invisível: carga
+  // direta do case (ou do 404), ou vindo da home com o pet fora de cena. O Pet
+  // mora no layout e não desmonta numa troca de rota client-side; com ele
+  // visível na home, pôr a classe de novo reiniciaria a animação do zero
+  // (opacidade 0) e o pet piscaria. A última fase da home é guardada no
+  // render, e não num efeito, para o primeiro render fora dela já sair com a
+  // classe certa.
+  const ultimaNaHome = useRef<FaseTeleporte>("fora");
+  if (!mostrar) ultimaNaHome.current = "fora";
+  else if (naHome) ultimaNaHome.current = fase;
+  const entra = cenaPronta && !naHome && ultimaNaHome.current === "fora";
 
   // Sem pet, sem cena: a próxima montagem (voltar do /cv, por exemplo) é um
   // canvas novo e espera o primeiro quadro DELE.
@@ -181,7 +195,7 @@ export function Pet({ textos }: { textos: DictPet }) {
       data-pet=""
       data-expressao="normal"
       data-teleporte={fase}
-      className={`${cenaPronta && !naHome ? "pet-entra " : ""}pet-desvio pointer-events-none fixed bottom-6 right-6 z-[60] h-[150px] w-[150px]`}
+      className={`${entra ? "pet-entra " : ""}pet-desvio pointer-events-none fixed bottom-6 right-6 z-[60] h-[150px] w-[150px]`}
       style={{
         opacity: cenaPronta ? undefined : 0,
         visibility: fase === "fora" ? "hidden" : undefined,

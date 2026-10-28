@@ -30,6 +30,8 @@ type JanelaDeTeste = Window & {
   __sxPetSonoMs?: number;
   __sxFasesAntes?: string[];
   __sxExpressoes?: string[];
+  __sxPetEntra?: number;
+  __sxVigia?: { minOp: number; escondido: boolean; petEntra: boolean; quadros: number };
 };
 
 async function modoTeste(ctx: BrowserContext) {
@@ -46,11 +48,18 @@ async function modoTeste(ctx: BrowserContext) {
  * guarda o valor ANTIGO de cada troca (o novo é o atual), então nenhuma fase
  * se perde mesmo quando duas trocas caem no mesmo lote. `fases(p)` devolve a
  * sequência completa, sem repetições seguidas.
+ *
+ * Conta também cada vez que a `.pet-entra` (a entrada CSS de fora da home)
+ * começa no wrapper: `entradasCss(p)`.
  */
 async function gravarFases(ctx: BrowserContext) {
   await ctx.addInitScript(() => {
-    const w = window as Window & { __sxFasesAntes?: string[] };
+    const w = window as Window & { __sxFasesAntes?: string[]; __sxPetEntra?: number };
     w.__sxFasesAntes = [];
+    w.__sxPetEntra = 0;
+    document.addEventListener("animationstart", (e) => {
+      if (e.animationName === "pet-entra" && (e.target as Element).matches?.("[data-pet]")) w.__sxPetEntra!++;
+    });
     new MutationObserver((registros) => {
       for (const r of registros) {
         if (r.type === "attributes" && (r.target as Element).matches("[data-pet]")) {
@@ -76,6 +85,42 @@ async function fases(p: Page): Promise<string[]> {
 }
 
 const fase = (p: Page) => p.locator("[data-pet]").getAttribute("data-teleporte");
+
+const entradasCss = (p: Page) => p.evaluate(() => (window as JanelaDeTeste).__sxPetEntra ?? 0);
+const zerarEntradasCss = (p: Page) => p.evaluate(() => ((window as JanelaDeTeste).__sxPetEntra = 0));
+
+/**
+ * Vigia o pet a cada quadro por `ms`: a menor opacidade EFETIVA (wrapper ×
+ * corpo, que não herdam), se ele ficou `hidden` e se a `.pet-entra` chegou a
+ * rodar. Um print depois da navegação não pega uma piscada de 300 ms; isto pega.
+ */
+async function vigiar(p: Page, ms: number) {
+  await p.evaluate((dur) => {
+    const w = window as JanelaDeTeste;
+    const v = { minOp: 1, escondido: false, petEntra: false, quadros: 0 };
+    w.__sxVigia = v;
+    const t0 = performance.now();
+    // Laço anônimo e sem await de propósito: o evaluate volta na hora e a
+    // vigia segue sozinha. Função com nome aqui dentro quebra no tsx (__name).
+    void (async () => {
+      while (performance.now() - t0 < dur) {
+        const pet = document.querySelector("[data-pet]");
+        const corpo = pet?.querySelector('[data-teleporte-parte="corpo"]');
+        if (pet && corpo) {
+          const op = parseFloat(getComputedStyle(pet).opacity) * parseFloat(getComputedStyle(corpo).opacity);
+          v.minOp = Math.min(v.minOp, op);
+          if (getComputedStyle(pet).visibility === "hidden") v.escondido = true;
+          if (pet.getAnimations().some((a) => (a as CSSAnimation).animationName === "pet-entra" && a.playState === "running")) {
+            v.petEntra = true;
+          }
+        }
+        v.quadros++;
+        await new Promise(requestAnimationFrame);
+      }
+    })();
+  }, ms);
+}
+const vigia = (p: Page) => p.evaluate(() => (window as JanelaDeTeste).__sxVigia!);
 
 /**
  * Rola até a borda de cima do SOUZXXX (`[data-cortina]`) ficar em `topo` px
@@ -212,8 +257,11 @@ async function teletransporte(browser: Browser) {
       `tremido (20→70→15→90→10): termina dentro e com botão — ${await fase(p)}, ${botaoTremido} botão`,
     );
 
-    // Navegação: home rolada → case. O link é o da vitrine, que já está na
-    // tela: um link da mesa faria o Playwright rolar de volta ao topo antes.
+    // Navegação: home rolada → case pelo link da vitrine, que já está na
+    // tela (um link da mesa faria o Playwright rolar de volta ao topo antes).
+    // Hoje esse link é um <a> comum, então é carga de página inteira: o pet
+    // remonta no case e entra como sempre. A troca client-side, em que o Pet
+    // NÃO desmonta, tem o bloco próprio logo abaixo.
     await p.evaluate(() => document.getElementById("projects")?.scrollIntoView({ behavior: "instant" }));
     await p.waitForTimeout(700);
     await p.locator('#projects a[href^="/projetos/"]').first().click();
@@ -253,6 +301,76 @@ async function teletransporte(browser: Browser) {
     await c.close();
   }
 
+  // Troca de rota CLIENT-SIDE entre a home e um case: o Pet mora no layout e
+  // NÃO desmonta, então quem decide a entrada é ele. É o que acontece no
+  // voltar/avançar dentro do mesmo documento (o Link "/" do 404, por exemplo)
+  // e em qualquer `next/link` futuro. Os links da home para os cases são <a>
+  // comuns hoje, então o teste empurra a rota pelo roteador do Next
+  // (`window.next.router`, que o Next expõe para depuração).
+  {
+    const c = await browser.newContext({ viewport: { width: w, height: h } });
+    await modoTeste(c);
+    await gravarFases(c);
+    const p = await c.newPage();
+    const empurrar = (rota: string) =>
+      p.evaluate((r) => (window as unknown as { next: { router: { push(h: string): void } } }).next.router.push(r), rota);
+    await p.goto(`${BASE}/`, { waitUntil: "networkidle" });
+    await esperarCena(p);
+    await cortinaEm(p, 20);
+    await p.locator('[data-pet][data-teleporte="dentro"] button').waitFor({ timeout: 5000 });
+    await p.waitForTimeout(300);
+
+    // Visível na home → case: nada de `.pet-entra`, que começa em opacidade 0.
+    await zerarEntradasCss(p);
+    await vigiar(p, 1500);
+    await empurrar("/projetos/tecna-site");
+    await p.waitForURL(/\/projetos\//);
+    const logo = await p.evaluate(() => {
+      const pet = document.querySelector("[data-pet]");
+      if (!pet) return { op: "sem pet", petEntra: false };
+      return {
+        op: getComputedStyle(pet).opacity,
+        petEntra: pet.getAnimations().some((a) => (a as CSSAnimation).animationName === "pet-entra" && a.playState === "running"),
+      };
+    });
+    await p.locator("[data-pet] button").waitFor({ timeout: 5000 });
+    await p.waitForTimeout(1000);
+    const v = await vigia(p);
+    const nEntra = await entradasCss(p);
+    ok(
+      logo.op === "1" && !logo.petEntra,
+      `client-side: logo depois do waitForURL o pet já está inteiro, sem .pet-entra — opacidade ${logo.op}, pet-entra ${logo.petEntra}`,
+    );
+    ok(
+      v.minOp === 1 && !v.escondido && !v.petEntra && nEntra === 0,
+      `client-side: home rolada (pet dentro) → case, o pet não pisca (${v.quadros} quadros vigiados) — opacidade mínima ${v.minOp}, hidden ${v.escondido}, pet-entra rodando ${v.petEntra}, ${nEntra} início(s)`,
+    );
+
+    // Case → home no topo: ele estava visível, então sai pelo teletransporte.
+    await p.goBack();
+    await p.waitForURL((u) => new URL(u).pathname === "/");
+    await p.evaluate(() => {
+      document.documentElement.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+    });
+    await p.waitForTimeout(1000);
+    const seq = await fases(p);
+    ok(
+      seq.slice(-2).join() === "saindo,fora" && (await p.locator("[data-pet] button").count()) === 0,
+      `client-side: case → home no topo, o pet sai pelo teletransporte — ${seq.join(" → ")}`,
+    );
+
+    // Fora de cena na home → case: chega invisível e entra como sempre entrou.
+    await zerarEntradasCss(p);
+    await empurrar("/projetos/tecna-site");
+    await p.waitForURL(/\/projetos\//);
+    await p.locator("[data-pet] button").waitFor({ timeout: 5000 });
+    await p.waitForTimeout(500);
+    const nForaCase = await entradasCss(p);
+    ok(nForaCase === 1, `client-side: home no topo (pet fora) → case, a .pet-entra toca uma vez — ${nForaCase}`);
+    await c.close();
+  }
+
   // Página aberta já rolada: entra COM teletransporte assim que a cena fica pronta.
   {
     const c = await browser.newContext({ viewport: { width: w, height: h } });
@@ -287,6 +405,8 @@ async function teletransporte(browser: Browser) {
     await p.waitForTimeout(1000);
     const seq = await fases(p);
     ok(seq.join() === "dentro", `/projetos/tecna-site direto: o pet só tem a fase dentro — ${seq.join(" → ")}`);
+    const nDireto = await entradasCss(p);
+    ok(nDireto === 1, `/projetos/tecna-site direto: a .pet-entra toca uma vez, como antes — ${nDireto}`);
     await c.close();
   }
 }
