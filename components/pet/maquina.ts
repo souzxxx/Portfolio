@@ -15,7 +15,8 @@ export type EventoPet =
   | { tipo: "hover"; ativo: boolean }
   | { tipo: "piscar" }
   | { tipo: "fimPiscar" }
-  | { tipo: "fimSurpresa" };
+  | { tipo: "fimSurpresa" }
+  | { tipo: "teleporte" };
 
 export const SONO_MS = 20_000;
 export const PISCADA_MS = 120;
@@ -37,6 +38,11 @@ export function transicao(atual: Expressao, ev: EventoPet): Expressao {
       return atual === "normal" ? "piscando" : atual;
     case "fimPiscar":
       return atual === "piscando" ? "normal" : atual;
+    case "teleporte":
+      // Acabou de chegar: a cara de susto vale para qualquer expressão, até
+      // para quem dormia fora de cena. Já em `surpreso`, devolve a mesma e o
+      // fim da surpresa armado antes segue valendo.
+      return "surpreso";
   }
 }
 

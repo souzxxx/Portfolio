@@ -43,6 +43,12 @@ test("piscar só a partir de normal, e volta a normal", () => {
   assert.equal(transicao("atento", { tipo: "fimPiscar" }), "atento");
 });
 
+test("teletransporte assusta qualquer expressão, até quem dorme", () => {
+  for (const e of ["normal", "piscando", "atento", "dormindo", "surpreso"] as Expressao[]) {
+    assert.equal(transicao(e, { tipo: "teleporte" }), "surpreso", e);
+  }
+});
+
 test("intervalo da piscada fica entre 3 e 7 segundos", () => {
   assert.equal(intervaloPiscada(0), 3000);
   assert.equal(intervaloPiscada(0.5), 5000);
