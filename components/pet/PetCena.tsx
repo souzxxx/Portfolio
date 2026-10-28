@@ -44,11 +44,14 @@
  * a tela troca de pixel (piscar, dormir, hover continuam).
  *
  * `frameloop="demand"` continua, mas com outro papel. Enquanto o movimento é
- * permitido, o useFrame pede o próximo quadro SEMPRE — respiração que para
- * não é respiração, e num canvas de 150 px o custo é pequeno (decisão
- * registrada no ledger do plano: o pedido mais recente do dono vence o
- * "parado, zero quadros" do spec). Com movimento reduzido nada anda, e aí o
- * demand faz o que fazia: só existe quadro quando um evento pede.
+ * permitido e o pet está em cena, o useFrame pede o próximo quadro a cada
+ * quadro — respiração que para não é respiração, e num canvas de 150 px o
+ * custo é pequeno (decisão registrada no ledger do plano: o pedido mais
+ * recente do dono vence o "parado, zero quadros" do spec). Fora de cena
+ * (`estado.oculto`: a home com a mesa à vista) ninguém vê o quadro, e nem o
+ * useFrame nem os sentidos pedem outro; quem traz o pet de volta chama
+ * `invalidar()` (Pet.tsx). Com movimento reduzido nada anda, e aí o demand
+ * faz o que fazia: só existe quadro quando um evento pede.
  */
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";

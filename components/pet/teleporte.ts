@@ -100,7 +100,8 @@ function linha(lado: -1 | 1): Keyframe[] {
 /**
  * As imagens residuais: silhuetas chapadas do Mac que aparecem quando o corpo
  * passa do ponto (0.45), a meia opacidade e 8 px para o lado, e se afastam
- * apagando. Antes disso estão invisíveis em cima do corpo.
+ * apagando. Antes disso estão invisíveis, paradas atrás do corpo (no DOM
+ * elas vêm antes dele, ver Pet.tsx): deslocadas, só a borda delas aparece.
  */
 function residuo(lado: -1 | 1): Keyframe[] {
   return [
