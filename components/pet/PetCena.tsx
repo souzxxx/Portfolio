@@ -391,7 +391,12 @@ function MacGravado({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => 
   }, []);
 
   useEffect(() => {
-    estado.invalidar = invalidate;
+    // Fora de cena, nem os sentidos pedem quadro: sem isto, mexer o mouse na
+    // mesa desenhava o pet escondido a cada `pointermove`. Quem o traz de
+    // volta chama `invalidar()` depois de `oculto` desligar (Pet.tsx).
+    estado.invalidar = () => {
+      if (!estado.oculto) invalidate();
+    };
     invalidate();
     return () => {
       estado.invalidar = () => {};
@@ -595,7 +600,8 @@ function MacGravado({ estado, onPronto }: { estado: EstadoPet; onPronto?: () => 
     estado.rot.x = a.rxOlhar.x + a.rxRolagem.x;
     estado.rot.y = a.ryOlhar.x;
 
-    invalidate();
+    // Fora de cena (home com a mesa à vista) ninguém vê o quadro: para de pedir.
+    if (!estado.oculto) invalidate();
   });
 
   return (
@@ -674,7 +680,8 @@ export function PetCena({ estado, onPronto }: { estado: EstadoPet; onPronto?: ()
       // da entrada `.pet-entra` (0.6 → 1) no wrapper. Medido no meio dela, o
       // canvas ficava em 130 px dentro da caixa de 150 até a primeira
       // rolagem: o ResizeObserver não dispara quando só o transform muda.
-      // offsetWidth/offsetHeight ignoram transform.
+      // offsetWidth/offsetHeight ignoram transform. Vale igual para o
+      // teletransporte da home, que estica e afina o corpo por transform.
       resize={{ offsetSize: true }}
       // Mesmo raciocínio do hero: o shader faz o próprio AA por fwidth.
       gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
