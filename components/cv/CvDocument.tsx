@@ -394,7 +394,7 @@ html, body {
 }
 `;
 
-const SITE = "portfolio-souzxxxs-projects.vercel.app";
+const SITE = "www.leosouza.dev.br";
 
 export function CvDocument({ lang }: { lang: Lang }) {
   return (

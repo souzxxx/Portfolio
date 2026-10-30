@@ -1,7 +1,7 @@
 # Portfólio — Leonardo Souza
 
 Site pessoal em Next.js 16 (App Router) + TypeScript, com os projetos, a formação e o currículo de uma página.
-Produção: **https://portfolio-souzxxxs-projects.vercel.app**
+Produção: **https://www.leosouza.dev.br**
 
 ![Hero do portfólio: nome, cargo, resumo e os quatro números do topo da página](docs/hero.png)
 

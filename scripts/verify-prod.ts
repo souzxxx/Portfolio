@@ -8,7 +8,7 @@ async function main() {
     colorScheme: "dark",
   });
   const page = await ctx.newPage();
-  const URL = "https://portfolio-souzxxxs-projects.vercel.app/";
+  const URL = "https://www.leosouza.dev.br/";
   console.log("Navigating to", URL);
   await page.goto(URL, { waitUntil: "networkidle", timeout: 60000 });
   await page.waitForTimeout(4000);
