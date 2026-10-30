@@ -2,8 +2,6 @@ import { dict } from "@/lib/dict";
 
 import { OG_CONTENT_TYPE, OG_SIZE, quadroOg } from "../../og";
 
-export const runtime = "edge";
-
 /**
  * A imagem de Open Graph do INGLÊS — vale para "/en" e para "/en/cv".
  *

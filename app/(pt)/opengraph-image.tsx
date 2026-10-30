@@ -2,8 +2,6 @@ import { dict } from "@/lib/dict";
 
 import { OG_CONTENT_TYPE, OG_SIZE, quadroOg } from "../og";
 
-export const runtime = "edge";
-
 /**
  * A imagem de Open Graph do PORTUGUÊS — vale para "/" e para tudo abaixo dela
  * no grupo `(pt)`, que hoje é só "/cv".

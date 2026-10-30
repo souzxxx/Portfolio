@@ -20,6 +20,9 @@ const config = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    // app/global-not-found.tsx: a 404 de endereço inexistente sai estática do
+    // build em vez de passar por uma rota pega-tudo dinâmica. Ver o arquivo.
+    globalNotFound: true,
   },
 };
 
