@@ -115,7 +115,7 @@ export const LANG_LABEL: Record<Lang, string> = {
   en: "EN",
 };
 
-export const SITE_URL = "https://portfolio-souzxxxs-projects.vercel.app";
+export const SITE_URL = "https://www.leosouza.dev.br";
 
 /**
  * Endereço da página de case de um projeto. pt mora em `/projetos/<slug>`, en em

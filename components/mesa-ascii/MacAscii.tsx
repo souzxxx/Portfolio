@@ -148,7 +148,7 @@ function retComFilhos(el: HTMLElement, secao: HTMLElement): Ret | null {
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
 
-export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement> }) {
+export function MacAscii({ mesa }: { mesa: RefObject<HTMLElement | null> }) {
   const cabe = useMidia("(min-width: 1024px)");
   const reduzido = useMidia("(prefers-reduced-motion: reduce)");
   const tela = useRef<HTMLCanvasElement>(null);

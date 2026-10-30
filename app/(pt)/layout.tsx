@@ -47,8 +47,16 @@ export default function PtRootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // suppressHydrationWarning: o script do <Boot> marca `data-boot` no <html>
+  // antes da hidratação quando a sessão já viu a abertura, e o React 19 avisa
+  // dessa diferença de atributo. Vale só para os atributos do próprio <html>.
   return (
-    <html lang={HTML_LANG.pt} className={fontVariables}>
+    <html
+      lang={HTML_LANG.pt}
+      className={fontVariables}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <body>
         <script
           type="application/ld+json"

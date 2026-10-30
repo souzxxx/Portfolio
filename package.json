@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "capture": "tsx scripts/capture.ts",
     "check:assets": "tsx scripts/check-assets.ts",
     "check:links": "tsx scripts/check-links.ts",
@@ -14,29 +14,28 @@
     "prebuild": "tsx scripts/check-assets.ts"
   },
   "dependencies": {
-    "next": "14.2.18",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "framer-motion": "^11.11.17",
-    "three": "0.169.0",
-    "@react-three/fiber": "8.17.10",
-    "@react-three/drei": "9.117.3",
-    "lucide-react": "^0.460.0",
+    "@react-three/fiber": "9.8.2",
     "clsx": "^2.1.1",
-    "geist": "^1.3.1"
+    "framer-motion": "^11.11.17",
+    "geist": "^1.3.1",
+    "lucide-react": "^0.460.0",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "three": "0.169.0"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
-    "@types/react": "18.3.12",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@types/three": "0.169.0",
-    "typescript": "^5.6.3",
-    "tailwindcss": "^3.4.14",
-    "postcss": "^8.4.49",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.3",
     "playwright": "^1.49.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.14",
     "tsx": "^4.19.2",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.18"
+    "typescript": "^5.6.3"
   }
 }

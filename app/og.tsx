@@ -1,7 +1,10 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
 
 import { dict } from "@/lib/dict";
-import { SITE_URL, type Lang } from "@/lib/i18n";
+import { type Lang } from "@/lib/i18n";
 import { pixelPaths, type NomeIcone } from "@/components/os/PixelIcon";
 
 /**
@@ -20,14 +23,15 @@ import { pixelPaths, type NomeIcone } from "@/components/os/PixelIcon";
  * emite erro, entao um `fontSize` que ficou 6px maior so numa das linguas sai
  * como uma linha CORTADA no preview — e ninguem olha o preview em ingles.
  *
- * O QUE CADA ROTA AINDA DECLARA SOZINHA: `runtime`, `size`, `contentType` e o
- * `alt`. O `alt` porque o contrato do Next exige uma CONSTANTE estatica por
+ * O QUE CADA ROTA AINDA DECLARA SOZINHA: `size`, `contentType` e o `alt`. O `alt` porque o contrato do Next exige uma CONSTANTE estatica por
  * arquivo — nao aceita funcao —, entao cada rota exporta o alt do SEU idioma,
  * que vem de dict[lang].meta.ogAlt.
  *
- * A fonte vem de public/fonts/ por rede porque satori so aceita buffer de
- * fonte, nunca uma familia CSS. Se o fetch falhar (rede fora, deploy novo,
- * cold start em regiao sem saida), o MESMO JSX e renderizado sem o array
+ * As rotas rodam no runtime Node (o Edge ficou deprecated no Next 16) e por
+ * isso saem ESTATICAS: a arte e gerada uma vez no build e servida pela CDN,
+ * em vez de virar uma funcao a cada crawler que abre o preview. A fonte e
+ * lida de public/fonts/ no disco — satori so aceita buffer de fonte, nunca
+ * uma familia CSS. Se a leitura falhar, o MESMO JSX e renderizado sem o array
  * `fonts` e satori cai na fonte embutida: a rota NUNCA quebra, e a identidade
  * continua legivel por cor + caixa alta + tracking + filete, so perdendo a
  * serifa.
@@ -43,7 +47,7 @@ const CREME = "#F5F3EE"; // 15.66:1 sobre o carvao
 
 type Fonte = {
   name: string;
-  data: ArrayBuffer;
+  data: Buffer;
   weight: 400;
   style: "normal";
 };
@@ -53,11 +57,9 @@ export async function quadroOg(lang: Lang): Promise<ImageResponse> {
 
   let fonts: Fonte[] | undefined;
   try {
-    const res = await fetch(
-      new URL("/fonts/InstrumentSerif-Regular.ttf", SITE_URL),
+    const data = await readFile(
+      join(process.cwd(), "public/fonts/InstrumentSerif-Regular.ttf"),
     );
-    if (!res.ok) throw new Error(`fonte indisponivel: HTTP ${res.status}`);
-    const data = await res.arrayBuffer();
     fonts = [{ name: "Instrument Serif", data, weight: 400, style: "normal" }];
   } catch {
     fonts = undefined;

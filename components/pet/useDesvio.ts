@@ -53,7 +53,7 @@ function repouso(raiz: HTMLElement): Retangulo | null {
   return { left: cx - meiaL, top: cy - meiaA, right: cx + meiaL, bottom: cy + meiaA };
 }
 
-export function useDesvio(raiz: RefObject<HTMLElement>, ativo: boolean): Desvio {
+export function useDesvio(raiz: RefObject<HTMLElement | null>, ativo: boolean): Desvio {
   const [desvio, setDesvio] = useState<Desvio>(PARADO);
   const ultimo = useRef<Desvio>(PARADO);
 

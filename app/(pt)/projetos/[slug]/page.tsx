@@ -15,14 +15,20 @@ export function generateStaticParams() {
   return slugsDosCasos();
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
-}): Metadata {
-  return metadataDoCaso("pt", params.slug);
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  return metadataDoCaso("pt", slug);
 }
 
-export default function CasoPt({ params }: { params: { slug: string } }) {
-  return <CasePage lang="pt" slug={params.slug} />;
+export default async function CasoPt({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return <CasePage lang="pt" slug={slug} />;
 }

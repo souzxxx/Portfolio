@@ -1,9 +1,14 @@
 import { dict } from "@/lib/dict";
 
 import { OG_CONTENT_TYPE, OG_SIZE, quadroOg } from "../../../../og";
+import { slugsDosCasos } from "@/components/case/metadata";
 
 /** Gêmea de app/(pt)/projetos/[slug]/opengraph-image.tsx — leia lá o porquê. */
-export const runtime = "edge";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return slugsDosCasos();
+}
 
 export const alt = dict.en.meta.ogAlt;
 export const size = OG_SIZE;
