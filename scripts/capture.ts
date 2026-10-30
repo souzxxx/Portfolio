@@ -11,7 +11,6 @@ interface Target {
 const targets: Target[] = [
   { slug: "sentinel", url: "https://sentinel-mu-navy.vercel.app", wait: 4000 },
   { slug: "financehub", url: "https://financehub-web-ecru.vercel.app", wait: 3000 },
-  { slug: "universe-project", url: "https://universe-project-navy.vercel.app", wait: 2500 },
   { slug: "usp-fono", url: "https://usp-fono.vercel.app", wait: 2500 },
   { slug: "projeto-software", url: "https://projeto-sofware-2026-1-front-lyart.vercel.app", wait: 2500 },
 ];
