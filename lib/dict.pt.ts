@@ -285,7 +285,7 @@ export const pt: Dict = {
   rodape: {
     email: "Email",
     tecnica: [
-      "Next.js 14 (App Router)",
+      "Next.js 16 (App Router)",
       "conteúdo tipado em lib/",
       "deploy na Vercel",
       "São Paulo",

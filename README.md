@@ -1,13 +1,13 @@
 # Portfólio — Leonardo Souza
 
-Site pessoal em Next.js 14 (App Router) + TypeScript, com os projetos, a formação e o currículo de uma página.
+Site pessoal em Next.js 16 (App Router) + TypeScript, com os projetos, a formação e o currículo de uma página.
 Produção: **https://portfolio-souzxxxs-projects.vercel.app**
 
 ![Hero do portfólio: nome, cargo, resumo e os quatro números do topo da página](docs/hero.png)
 
 ## Stack e rotas
 
-Next.js 14.2 (App Router), React 18, TypeScript, Tailwind, Framer Motion e React Three Fiber (só no fundo do hero).
+Next.js 16 (App Router), React 19, TypeScript, Tailwind, Framer Motion e React Three Fiber (só no fundo do hero).
 Todo o conteúdo é dado tipado em `lib/`: `projects.ts`, `stack.ts`, `academic.ts`.
 
 | Rota | O que é |
@@ -66,7 +66,7 @@ npm run build          # dispara prebuild (check:assets) antes do next build
 npm run check:assets   # confere em disco os assets declarados em lib/projects.ts
 npm run cv             # gera public/leonardo-souza-cv.pdf a partir de /cv
 npm start              # serve o build de produção
-npm run lint           # next lint (config em .eslintrc.json: next/core-web-vitals)
+npm run lint           # eslint . (flat config em eslint.config.mjs: core-web-vitals)
 ```
 
 `npm run cv` e os scripts de screenshot usam Playwright: rode `npx playwright install chromium` uma vez.

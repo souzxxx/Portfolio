@@ -37,7 +37,7 @@ type JanelaDeTeste = Window & { __sxPetSonoMs?: number };
 
 export function usePetEventos(
   estado: EstadoPet,
-  raiz: RefObject<HTMLElement>,
+  raiz: RefObject<HTMLElement | null>,
   ativo: boolean,
 ): (ev: EventoPet) => void {
   const despacharRef = useRef<(ev: EventoPet) => void>(() => {});

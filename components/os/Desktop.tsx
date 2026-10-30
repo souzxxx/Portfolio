@@ -86,7 +86,7 @@ function JanelaMesa({
   ordem: number;
   z: number;
   arrastavel: boolean;
-  limites: RefObject<HTMLDivElement>;
+  limites: RefObject<HTMLDivElement | null>;
   aFrente: (id: IdJanela) => void;
   onFechar?: () => void;
   rotuloFechar: string;

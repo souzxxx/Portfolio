@@ -66,7 +66,7 @@ const ESPERA_ROLAGEM_MS = 150;
  * ou `fora`.
  */
 export function useTeleporte(
-  raiz: RefObject<HTMLElement>,
+  raiz: RefObject<HTMLElement | null>,
   { ativo, pronto, reduzido }: { ativo: boolean; pronto: boolean; reduzido: boolean },
 ): FaseTeleporte {
   const [fase, setFase] = useState<FaseTeleporte>("fora");
