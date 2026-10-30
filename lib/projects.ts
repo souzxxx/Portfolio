@@ -219,31 +219,31 @@ export const projects: Project[] = [
       "Vercel",
     ],
     demo: "https://financehub-web-ecru.vercel.app",
-    cover: "/projects/financehub/dashboard.png",
+    cover: "/projects/financehub/dashboard.webp",
     gallery: [
       {
-        src: "/projects/financehub/dashboard.png",
+        src: "/projects/financehub/dashboard.webp",
         label: {
           pt: "Dashboard — saldo, projeção e resumo da semana",
           en: "Dashboard — balance, projection and the week's summary",
         },
       },
       {
-        src: "/projects/financehub/luna-ai.png",
+        src: "/projects/financehub/luna-ai.webp",
         label: {
           pt: "Luna — assistente IA financeira conversacional",
           en: "Luna — conversational AI finance assistant",
         },
       },
       {
-        src: "/projects/financehub/investments.png",
+        src: "/projects/financehub/investments.webp",
         label: {
           pt: "Investimentos — patrimônio total e metas",
           en: "Investments — total net worth and goals",
         },
       },
       {
-        src: "/projects/financehub/mobile.png",
+        src: "/projects/financehub/mobile.webp",
         label: {
           pt: "Layout responsivo no celular",
           en: "Responsive layout on mobile",
@@ -332,31 +332,31 @@ export const projects: Project[] = [
       "GitHub Actions",
       "AWS EC2",
     ],
-    cover: "/projects/quintoandar-precificacao/cover.png",
+    cover: "/projects/quintoandar-precificacao/cover.webp",
     gallery: [
       {
-        src: "/projects/quintoandar-precificacao/cover.png",
+        src: "/projects/quintoandar-precificacao/cover.webp",
         label: {
           pt: "Calculadora pública — 8 campos e preço estimado pela API",
           en: "Public calculator — 8 fields and the price the API estimates",
         },
       },
       {
-        src: "/projects/quintoandar-precificacao/comparativo-mae.png",
+        src: "/projects/quintoandar-precificacao/comparativo-mae.webp",
         label: {
           pt: "MAE dos 5 modelos no holdout cronológico de 2009",
           en: "MAE of the 5 models on the 2009 chronological holdout",
         },
       },
       {
-        src: "/projects/quintoandar-precificacao/previsto-vs-real.png",
+        src: "/projects/quintoandar-precificacao/previsto-vs-real.webp",
         label: {
           pt: "Previsto vs. real do Gradient Boosting",
           en: "Predicted vs. actual for the Gradient Boosting model",
         },
       },
       {
-        src: "/projects/quintoandar-precificacao/latencia.png",
+        src: "/projects/quintoandar-precificacao/latencia.webp",
         label: {
           pt: "Latência por chamada em produção (p95 11,7 ms)",
           en: "Latency per call in production (p95 11.7 ms)",
@@ -727,7 +727,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/souzxxx/sentinel",
     demo: "https://sentinel-mu-navy.vercel.app",
-    cover: "/projects/sentinel/cover.png",
+    cover: "/projects/sentinel/cover.webp",
     highlights: [
       {
         pt: "Streaming de métricas por WebSocket com reconexão automática e limite de tentativas",
@@ -878,7 +878,7 @@ export const projects: Project[] = [
       "Sportmonks API",
     ],
     github: "https://github.com/souzxxx/ml-copa",
-    cover: "/projects/ml-copa/feature_importance.png",
+    cover: "/projects/ml-copa/feature_importance.webp",
     highlights: [
       {
         pt: "49.071 partidas internacionais (1872–2024)",
@@ -1056,7 +1056,7 @@ export const projects: Project[] = [
     isPrivate: true,
     stack: ["JavaScript", "React", "Vite", "Vercel"],
     demo: "https://usp-fono.vercel.app",
-    cover: "/projects/usp-fono/cover.png",
+    cover: "/projects/usp-fono/cover.webp",
     highlights: [
       {
         pt: "Parceria interuniversitária Insper × USP",

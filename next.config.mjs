@@ -7,6 +7,16 @@ const config = {
     // (o menor default do Next era 640, que entregava imagem grande demais em
     // 3G móvel); os demais degraus acompanham os breakpoints do layout.
     deviceSizes: [390, 640, 828, 1080, 1280, 1920],
+    // Cota do plano free: cada combinação url × largura × qualidade × formato
+    // que o /_next/image aceita é uma otimização nova. Uma qualidade só (a
+    // padrão do <Image>, nenhum componente passa `quality`) — outro `q` dá 400
+    // —, e só as capturas de public/projects/, sem query string.
+    qualities: [75],
+    localPatterns: [{ pathname: "/projects/**", search: "" }],
+    // As capturas não mudam entre deploys; 31 dias em vez das 4 h padrão
+    // evita refazer a mesma otimização várias vezes por dia. Trocar uma
+    // imagem = trocar o nome do arquivo, como já é o costume aqui.
+    minimumCacheTTL: 2678400,
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
