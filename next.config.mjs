@@ -1,6 +1,52 @@
+const dev = process.env.NODE_ENV === "development";
+
+/**
+ * Content-Security-Policy. Tudo que o site carrega vem da própria origem: as
+ * fontes são do next/font (servidas daqui), as imagens passam pelo /_next/image
+ * e os links externos (GitHub, LinkedIn) são só navegação.
+ *
+ * `script-src 'unsafe-inline'` é o preço de as páginas serem ESTÁTICAS: o Next
+ * escreve scripts inline (o payload RSC, o script do boot) e um nonce exigiria
+ * renderizar cada página por request. `style-src 'unsafe-inline'` cobre os
+ * atributos `style` que o React escreve no HTML. `data:` em img-src é o cursor
+ * de seta e as texturas de padrão, que são SVG em data URI. Em dev, o React usa
+ * eval para as pilhas de erro e o HMR fala por websocket.
+ */
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src 'self'${dev ? " ws: wss:" : ""}`,
+  "media-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     // Larguras que o portfólio realmente serve. 390 cobre o viewport de celular
